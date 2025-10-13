@@ -1,1 +1,1 @@
-This repository includes all code written for image analysis etc. as part of our MPhys Project 'Squeezing Through Tight Spaces' in the Physics of Fluids and Soft Matter Group at the University of Manchester. 
+This repository includes all code written (for image analysis etc.) as part of our MPhys Project 'Squeezing Through Tight Spaces' in the Physics of Fluids and Soft Matter Group at the University of Manchester. 
