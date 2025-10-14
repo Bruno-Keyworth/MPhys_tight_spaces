@@ -16,6 +16,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import socket
 
 def show_image(img, title):
     plt.imshow(img, cmap='gray')
@@ -43,9 +44,12 @@ ROI_bot = 2056 #2*max_radius
 ROI_left = tube_left
 ROI_right = tube_right
 
-
-folder = Path(r"C:\Users\User\OneDrive - The University of Manchester\DM UNI\YEAR 4\MPHYS SEM 1\test_codes\test_images_ball_in_tube")
-
+if socket.gethostname() == "Brunos-MacBook-Air-2":
+    MASTER_FOLDER = r"/Volumes/Transcend/"
+else:
+    MASTER_FOLDER = "D:\\"
+    
+folder = MASTER_FOLDER + "2025-26 MPhys Project/100mbar_ball3_lowcamera"
 
 images = {}
 position_arr = np.empty((0,2))
