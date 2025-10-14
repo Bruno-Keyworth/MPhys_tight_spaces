@@ -49,7 +49,7 @@ if socket.gethostname() == "Brunos-MacBook-Air-2":
 else:
     MASTER_FOLDER = "D:\\"
     
-folder = MASTER_FOLDER + "2025-26 MPhys Project/100mbar_ball3_lowcamera"
+folder = Path(MASTER_FOLDER + "2025-26 MPhys Project/100mbar_ball3_lowcamera")
 
 images = {}
 position_arr = np.empty((0,2))
