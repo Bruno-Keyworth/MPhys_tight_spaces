@@ -35,7 +35,7 @@ ROI_right = tube_right
 
  
 # Define the folder path correctly
-folder = Path(r"C:\Users\User\OneDrive - The University of Manchester\DM UNI\YEAR 4\MPHYS SEM 1\test_codes\test_images_ball_in_tube")
+folder = Path(r"../data/test_images_ball_in_tube")
 
 # Dictionary to store images as NumPy arrays
 images = {}

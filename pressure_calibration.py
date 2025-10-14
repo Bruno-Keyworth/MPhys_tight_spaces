@@ -29,6 +29,8 @@ errors = np.sqrt(get_error(voltage_data[:, 0])**2 + get_error(voltage_data[:, 1]
 
 parameters, cov = np.polyfit(pressures, delta_V, w=1/errors, cov=True, deg=1)
 
+print(parameters)
+
 x = np.linspace(0, 2000, 100)
 y= np.polyval(parameters, x)
 
@@ -70,3 +72,5 @@ for i, voltages in enumerate([voltage_data[:, 0], voltage_data[:, 1]]):
 plt.legend()
     
 plt.savefig("../plots/voltage_pressure.png")
+
+plt.close('all')

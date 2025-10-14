@@ -17,6 +17,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import socket
+import os
 
 def show_image(img, title):
     plt.imshow(img, cmap='gray')
@@ -44,12 +45,16 @@ ROI_bot = 2056 #2*max_radius
 ROI_left = tube_left
 ROI_right = tube_right
 
-if socket.gethostname() == "Brunos-MacBook-Air-2":
-    MASTER_FOLDER = r"/Volumes/Transcend/"
+if socket.gethostname() == "Brunos-MacBook-Air-2.local":
+    if os.path.exists("/Volumes/Transcend/"):
+        MASTER_FOLDER = r"/Volumes/Transcend/"
+    else:
+        MASTER_FOLDER = r"/Users/brunokeyworth/Desktop/MPhys/"
 else:
     MASTER_FOLDER = "D:\\"
     
-folder = Path(MASTER_FOLDER + "2025-26 MPhys Project/100mbar_ball3_lowcamera")
+folder = Path(MASTER_FOLDER + "2025-26_MPhys_Project/100mbar_ball3_lowcamera")
+print(MASTER_FOLDER)
 
 images = {}
 position_arr = np.empty((0,2))
@@ -139,6 +144,8 @@ for img_path in folder.glob("*.tiff"):
                 ax.add_patch(rect)
                 plt.title("Rectangle Found")
                 plt.show() 
+                
+print(position_arr)
 
 #==========centre==correction==================================================
 height = np.max(position_arr[:,1])
