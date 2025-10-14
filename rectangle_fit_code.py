@@ -25,6 +25,8 @@ def show_image(img, title):
     plt.title(title)
     plt.axis('off')
     plt.show()
+    
+
 
 #constants
 iterator = 0
@@ -32,10 +34,9 @@ tube_left = 295
 tube_right = 516
 min_radius = 100
 max_radius = 1000
-circularity_threshold = 0.5
-
-start = -20
-end = -6
+circularity_threshold = 0.8
+ruler_len = 9.7 #cm
+pix_2_dist = ruler_len / 2056 # cm per pixel
 
 ROI_top = 0 
 ROI_bot = 2056 #2*max_radius
@@ -60,8 +61,6 @@ for img_path in folder.glob("*.tiff"):
     
     if img is not None:
         images[img_path.name] = img
-        
-            
         #show_image(img, 'original image')
         
         # Convert to grayscale
@@ -69,23 +68,22 @@ for img_path in folder.glob("*.tiff"):
         
         # Reduce noise
         gray_blur = cv2.medianBlur(gray_image, 9)
-        
         #show_image(gray_blur, 'gray blur image')
 
+        #convert to binary using threshold intensity
         _, binary_inv = cv2.threshold(
             gray_image, 80, 255, cv2.THRESH_BINARY_INV)
         #show_image(binary_inv, 'Binary Threshold Inverted ')
         
-        
-        
+        # creates copy of original image
         image_copy = img.copy()
         
+        # only searches this region for rectangles
         ROI = binary_inv[ROI_top:ROI_bot, ROI_left:ROI_right]
         
         # Find contours
         contours, _ = cv2.findContours(ROI, cv2.RETR_EXTERNAL, 
                                        cv2.CHAIN_APPROX_SIMPLE)
-        output = cv2.cvtColor(binary_inv, cv2.COLOR_GRAY2BGR)
         
         for c in contours:
             # Shift contour coordinates to global frame
@@ -93,11 +91,15 @@ for img_path in folder.glob("*.tiff"):
             c[:, :, 1] += ROI_top 
     
             '''
-            (x, y), radius = cv2.minEnclosingCircle(c)
+
             if radius < min_radius or radius > max_radius:
                 continue
             '''
             col,row,w,h = cv2.boundingRect(c)
+            if w < min_radius and w > max_radius:
+                continue
+            if  h > max_radius:
+                continue
             area = cv2.contourArea(c)
             x=col
             y= 2056 - row
@@ -105,17 +107,10 @@ for img_path in folder.glob("*.tiff"):
             
             rect_area = w*h
             rectangularity = area / rect_area if rect_area > 0 else 0 
-            '''
-            circle_area = np.pi * radius**2
-            circularity = area / circle_area if circle_area > 0 else 0
-            '''
            
             
-    
+            # checks how rectangular the object is
             if rectangularity >= circularity_threshold:
-                
-                # adjust ROI to reduce search area
-                #ROI_bot = np.abs(int(radius) + int(y))
                 
                 # add circle centres to array
                 position_arr = np.vstack([position_arr, [y, h]])
@@ -124,25 +119,24 @@ for img_path in folder.glob("*.tiff"):
                 
                 
                 front_edge = y + h
-                #radius = int(radius)
                 print(f"Image: {img_path.name}")
                 print(f"Centre = {centre}, height = {h:.2f}, Rectangularity = {rectangularity:.2f}")
-                print(f"front edge = {front_edge:.2f}")
+                print(f"front edge = {front_edge:.2f} \n")
                 
                 
                 #plots image with circle on it
                 fig, ax = plt.subplots()
-                ax.imshow(output, cmap='gray')
-                #ax.imshow(image_copy)
+                ax.imshow(image_copy, cmap='gray')
                 ax.axvline(tube_left)
                 ax.axvline(tube_right)
                 #ax.axis('off')
                 rect = plt.Rectangle((col,row), w,h, color='red', fill=False, 
                                     linewidth=2)
                 ax.add_patch(rect)
-                plt.title("Circle Found")
+                plt.title("Rectangle Found")
                 plt.show() 
 
+#==========centre==correction==================================================
 height = np.max(position_arr[:,1])
 
 for i, row in enumerate(position_arr):
@@ -150,11 +144,22 @@ for i, row in enumerate(position_arr):
         centre = row[0] - height +row[1]
         position_arr[i,0] = centre
         
-
+dec_array = dec_array-np.min(dec_array)
 pos_time_arr = np.dstack((position_arr[:,0], dec_array))
-print(pos_time_arr)
+
+#=====Fitting straight line====================================================
+
+coef = np.polyfit(dec_array, position_arr[:,0], 1) #w=weights
+
+print("Coefficients:", coef)
+
+x_fit = np.linspace(0,np.max(dec_array), 5)
+y_fit = coef[0] * x_fit + coef[1]
+
+#===straight line plot ========================================================
 
 plt.scatter(dec_array, position_arr[:,0])
+plt.plot(x_fit, y_fit)
 plt.show()
                 
                 
