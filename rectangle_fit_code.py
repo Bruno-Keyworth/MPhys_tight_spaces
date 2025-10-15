@@ -143,8 +143,6 @@ for img_path in folder.glob("*.tiff"):
                 plt.title("Rectangle Found")
                 plt.show() 
                 
-print(position_arr[:, 0])
-print(dec_array)
 
 #==========centre==correction==================================================
 height = np.max(position_arr[:,1])
@@ -157,6 +155,11 @@ for i, row in enumerate(position_arr):
 dec_array = dec_array-np.min(dec_array)
 pos_time_arr = np.dstack((position_arr[:,0], dec_array))
 
+#=====UNIT=CONVERSION==========================================================
+position_arr *= pix_2_dist
+dec_array = dec_array-np.min(dec_array)
+dec_array*= (1/1000)
+
 #=====Fitting straight line====================================================
 
 coef = np.polyfit(dec_array, position_arr[:,0], 1) #w=weights
@@ -168,8 +171,13 @@ y_fit = coef[0] * x_fit + coef[1]
 
 #===straight line plot ========================================================
 
-plt.scatter(dec_array, position_arr[:,0])
-plt.plot(x_fit, y_fit)
+fig, ax1 = plt.subplots()
+ax1.scatter(dec_array, position_arr[:,0])
+ax1.plot(x_fit, y_fit, label = f"y = {coef[0]:.2f}x + {coef[1]:.2f}")
+ax1.set_ylabel("distance (cm)")
+ax1.set_xlabel("time (s)")
+ax1.legend()
+ax1.grid()
 plt.show()
                 
                 
