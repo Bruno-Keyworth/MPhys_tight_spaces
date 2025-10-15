@@ -151,9 +151,6 @@ for i, row in enumerate(position_arr):
     if row[1] < height - 1:
         centre = row[0] - height +row[1]
         position_arr[i,0] = centre
-        
-dec_array = dec_array-np.min(dec_array)
-pos_time_arr = np.dstack((position_arr[:,0], dec_array))
 
 #=====UNIT=CONVERSION==========================================================
 position_arr *= pix_2_dist
