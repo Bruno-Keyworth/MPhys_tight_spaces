@@ -31,6 +31,8 @@ def plot_ball_data(ball):
     
     fig, ax = plt.subplots()
     ax.scatter(data[:, 0], data[:, 1])
+    ax.set_xlabel('Pressure (mbar)')
+    ax.set_ylabel('Speed (cm/s)')
     
     plt.savefig(MASTER_FOLDER / ball / 'speed_pressure.png', dpi=300)
     
