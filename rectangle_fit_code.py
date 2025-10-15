@@ -26,8 +26,7 @@ def show_image(img, title):
     plt.axhline(ROI_bot)
     plt.title(title)
     plt.axis('off')
-    plt.show()
-    
+    plt.show()    
 
 
 #constants
@@ -53,7 +52,7 @@ if socket.gethostname() == "Brunos-MacBook-Air-2.local":
 else:
     MASTER_FOLDER = "D:\\"
     
-folder = Path(MASTER_FOLDER + "2025-26_MPhys_Project/100mbar_ball3_lowcamera")
+folder = Path(MASTER_FOLDER + "2025-26_MPhys_Project/ball3/600mbar")
 print(MASTER_FOLDER)
 
 images = {}
@@ -63,10 +62,6 @@ dec_array = np.empty(0)
 
 for img_path in folder.glob("*.tiff"):  
     img = cv2.imread(str(img_path))  # read as BGR NumPy array
-    
-    file_name = img_path.name
-    hex_num = file_name.split("_")[1].split(".")[0]
-    dec_array = np.append(dec_array, [int(hex_num, 16)])
     
     if img is not None:
         images[img_path.name] = img
@@ -124,6 +119,10 @@ for img_path in folder.glob("*.tiff"):
                 # add circle centres to array
                 position_arr = np.vstack([position_arr, [y, h]])
                 
+                file_name = img_path.name
+                hex_num = file_name.split("_")[1].split(".")[0]
+                dec_array = np.append(dec_array, [int(hex_num, 16)])
+                
                 centre = (int(x), int(y))
                 
                 
@@ -145,7 +144,8 @@ for img_path in folder.glob("*.tiff"):
                 plt.title("Rectangle Found")
                 plt.show() 
                 
-print(position_arr)
+print(position_arr[:, 0])
+print(dec_array)
 
 #==========centre==correction==================================================
 height = np.max(position_arr[:,1])
