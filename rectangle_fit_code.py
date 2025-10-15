@@ -32,7 +32,7 @@ def show_image(img, title):
 #constants
 iterator = 0
 tube_left = 295
-tube_right = 516
+tube_right = 480
 min_radius = 100
 max_radius = 1000
 circularity_threshold = 0.8
@@ -49,11 +49,10 @@ if socket.gethostname() == "Brunos-MacBook-Air-2.local":
         MASTER_FOLDER = r"/Volumes/Transcend/"
     else:
         MASTER_FOLDER = r"/Users/brunokeyworth/Desktop/MPhys/"
+    folder = Path(MASTER_FOLDER + "2025-26_MPhys_Project/ball3/600mbar")
 else:
-    MASTER_FOLDER = "D:\\"
-    
-folder = Path(MASTER_FOLDER + "2025-26_MPhys_Project/ball3/600mbar")
-print(MASTER_FOLDER)
+    folder = Path(r"D:\\2025-26 MPhys Project\ball3\100mbar")
+
 
 images = {}
 position_arr = np.empty((0,2))
