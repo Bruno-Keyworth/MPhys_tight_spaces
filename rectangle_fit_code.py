@@ -18,13 +18,15 @@ import matplotlib.pyplot as plt
 from get_tube_ROI import calc_tube_left_right
 
 #constants
+TIME_ERROR = 0.01 #s
 # tube_left = 295
 # tube_right = 450
 min_radius = 100
 max_radius = 1000
 circularity_threshold = 0.7
-ruler_len = 9.7 #cm
+ruler_len = 12.8 #cm
 pix_2_dist = ruler_len / 2056 # cm per pixel
+CONVERSION_ERROR = 0.3 /2056 #cm
 
 ROI_top = 0 
 ROI_bot = 2056 #2*max_radius
@@ -60,7 +62,7 @@ def map_ball_path(folder, disp=False):
 
             #convert to binary using threshold intensity
             _, binary_inv = cv2.threshold(
-                img, 40, 255, cv2.THRESH_BINARY_INV)
+                img, 65, 255, cv2.THRESH_BINARY_INV)
             #show_image(binary_inv, 'Binary Threshold Inverted ')
             
             # creates copy of original image
@@ -145,5 +147,8 @@ def map_ball_path(folder, disp=False):
     position_arr *= pix_2_dist
     dec_array = dec_array-np.min(dec_array)
     dec_array*= (1/1000)
-    return (dec_array, position_arr[:, 0])
+    
+    t_err = np.linspace(TIME_ERROR, TIME_ERROR, len(dec_array))
+    p_err = np.sqrt((CONVERSION_ERROR * np.absolute(position_arr[:, 0]))**2 + 0.5**2)
+    return (dec_array, position_arr[:, 0], t_err, p_err)
 

@@ -12,11 +12,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 
+PRESSURE_ERROR = np.sqrt(0.2**2 +0.3**2)
+
 ball = 'ball4_retake'      
 
 def get_ball_data(ball):
     
-    data = np.empty((0, 2))
+    data = np.empty((0, 3))
     folders = get_folderpaths(ball)
     
     file_path = MASTER_FOLDER / ball / 'speed_pressure.txt'
@@ -25,8 +27,9 @@ def get_ball_data(ball):
     else:
         for folder, pressure in folders:
             
-            speed = find_ball_speed(folder)
-            data = np.vstack((data, np.array([pressure, speed])))
+            speed, error = find_ball_speed(folder, True)
+            
+            data = np.vstack((data, np.array([pressure, speed, error])))
         
         np.savetxt(file_path, data)
         
@@ -36,13 +39,14 @@ def redo_pressure(ball, pressure):
     
     folder = get_folder(ball, pressure)
     
-    speed = find_ball_speed(folder, True)
+    speed, error = find_ball_speed(folder, True)
     
     file_path = MASTER_FOLDER / ball / 'speed_pressure.txt'
     
     data = np.genfromtxt(file_path)
     
     data[data[:, 0]==pressure, 1] = speed
+    data[data[:, 0]==pressure, 2] = error
     
     np.savetxt(file_path, data)
 
@@ -55,7 +59,7 @@ def plot_ball_data(ball):
     x = 2.2*y**0.5
     
     fig, ax = plt.subplots()
-    ax.scatter(data[:, 1], data[:, 0])
+    ax.errorbar(data[:, 1], data[:, 0], xerr=data[:, 2], yerr=PRESSURE_ERROR, ls='', marker='.')
     ax.set_yscale('log')
     ax.set_xscale('log')
     ax.set_ylabel('Pressure (mbar)')
