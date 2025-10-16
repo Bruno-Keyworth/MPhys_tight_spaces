@@ -33,5 +33,5 @@ def find_ball_speed(folder, disp=False, savefig=False):
             plt.savefig(folder / 'position_time.png' , dpi=300)
         plt.show()
         
-    return coef[0]
+    return np.absolute(coef[0])
         

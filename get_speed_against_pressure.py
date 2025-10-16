@@ -11,7 +11,7 @@ from find_ball_speed import find_ball_speed
 import numpy as np
 import matplotlib.pyplot as plt
 
-ball = 'ball4'      
+ball = 'ball4_retake'      
 
 def get_ball_data(ball):
     
@@ -49,10 +49,15 @@ def plot_ball_data(ball):
     
     data = get_ball_data(ball)
     
+    x = np.linspace(200, 1000, 100)
+    
+    y = 2.2*x**0.5
+    
     fig, ax = plt.subplots()
     ax.scatter(data[:, 0], data[:, 1])
     ax.set_xlabel('Pressure (mbar)')
     ax.set_ylabel('Speed (cm/s)')
+    ax.plot(x, y)
     plt.savefig(MASTER_FOLDER / ball / 'speed_pressure.png', dpi=300)
     plt.show()
     
