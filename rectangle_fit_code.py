@@ -15,10 +15,11 @@ Created on Sun Oct 12 15:49:42 2025
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+from get_tube_ROI import calc_tube_left_right
 
 #constants
-tube_left = 295
-tube_right = 450
+# tube_left = 295
+# tube_right = 450
 min_radius = 100
 max_radius = 1000
 circularity_threshold = 0.7
@@ -27,13 +28,12 @@ pix_2_dist = ruler_len / 2056 # cm per pixel
 
 ROI_top = 0 
 ROI_bot = 2056 #2*max_radius
-ROI_left = tube_left
-ROI_right = tube_right
 
-def show_image(img, title):
+
+def show_image(img, title, left, right):
     plt.imshow(img, cmap='gray')
-    plt.axvline(tube_left)
-    plt.axvline(tube_right)
+    plt.axvline(left)
+    plt.axvline(right)
     plt.axhline(ROI_bot)
     plt.title(title)
     plt.axis('off')
@@ -50,6 +50,8 @@ def map_ball_path(folder, disp=False):
         
         if img is not None:
             images[img_path.name] = img
+            
+            
             #show_image(img, 'original image')
             
             # Reduce noise
@@ -63,9 +65,10 @@ def map_ball_path(folder, disp=False):
             
             # creates copy of original image
             image_copy = img.copy()
+            tube_left, tube_right = calc_tube_left_right(image_copy)
             
             # only searches this region for rectangles
-            ROI = binary_inv[ROI_top:ROI_bot, ROI_left:ROI_right]
+            ROI = binary_inv[ROI_top:ROI_bot, tube_left:tube_right]
             
             # Find contours
             contours, _ = cv2.findContours(ROI, cv2.RETR_EXTERNAL, 
@@ -73,7 +76,7 @@ def map_ball_path(folder, disp=False):
             
             for c in contours:
                 # Shift contour coordinates to global frame
-                c[:, :, 0] += ROI_left
+                c[:, :, 0] += tube_left
                 c[:, :, 1] += ROI_top 
         
                 '''
