@@ -10,6 +10,7 @@ from get_folderpaths import get_folderpaths, MASTER_FOLDER, get_folder
 from find_ball_speed import find_ball_speed
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 ball = 'ball4_retake'      
 
@@ -31,7 +32,7 @@ def get_ball_data(ball):
         
     return data
 
-def get_pressure_data(ball, pressure):
+def redo_pressure(ball, pressure):
     
     folder = get_folder(ball, pressure)
     
@@ -49,17 +50,26 @@ def plot_ball_data(ball):
     
     data = get_ball_data(ball)
     
-    x = np.linspace(200, 1000, 100)
+    y = np.linspace(200, 1000, 100)
     
-    y = 2.2*x**0.5
+    x = 2.2*y**0.5
     
     fig, ax = plt.subplots()
-    ax.scatter(data[:, 0], data[:, 1])
-    ax.set_xlabel('Pressure (mbar)')
-    ax.set_ylabel('Speed (cm/s)')
+    ax.scatter(data[:, 1], data[:, 0])
+    ax.set_yscale('log')
+    ax.set_xscale('log')
+    ax.set_ylabel('Pressure (mbar)')
+    ax.set_xlabel('Speed (cm/s)')
     ax.plot(x, y)
     plt.savefig(MASTER_FOLDER / ball / 'speed_pressure.png', dpi=300)
     plt.show()
+    
+def redo_all(ball):
+    file_path = MASTER_FOLDER / ball / 'speed_pressure.txt'
+    if os.path.exists(file_path):
+        os.remove(file_path)
+    
+    plot_ball_data(ball)
     
 if __name__ == '__main__':
     plot_ball_data(ball)

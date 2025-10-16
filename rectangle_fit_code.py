@@ -58,7 +58,7 @@ def map_ball_path(folder, disp=False):
 
             #convert to binary using threshold intensity
             _, binary_inv = cv2.threshold(
-                img, 80, 255, cv2.THRESH_BINARY_INV)
+                img, 40, 255, cv2.THRESH_BINARY_INV)
             #show_image(binary_inv, 'Binary Threshold Inverted ')
             
             # creates copy of original image
