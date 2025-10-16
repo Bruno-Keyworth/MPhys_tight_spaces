@@ -17,6 +17,9 @@ if socket.gethostname() == "Brunos-MacBook-Air-2.local":
         MASTER_FOLDER = Path("/Users/brunokeyworth/Desktop/MPhys/2025-26 MPhys Project")
 else:
     MASTER_FOLDER = Path(r"D:\2025-26 MPhys Project")
+    
+def get_folder(ball, pressure):
+    return MASTER_FOLDER / ball / f'{pressure}mbar'
 
 def get_folderpaths(ball):
     # Determine master folder

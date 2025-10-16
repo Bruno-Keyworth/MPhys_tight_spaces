@@ -21,7 +21,7 @@ tube_left = 295
 tube_right = 450
 min_radius = 100
 max_radius = 1000
-circularity_threshold = 0.8
+circularity_threshold = 0.7
 ruler_len = 9.7 #cm
 pix_2_dist = ruler_len / 2056 # cm per pixel
 
@@ -131,8 +131,12 @@ def map_ball_path(folder, disp=False):
     
     for i, row in enumerate(position_arr):
         if row[1] < height - 1:
-            centre = row[0] - height +row[1]
-            position_arr[i,0] = centre
+            if row[0] < 1000:
+                centre = row[0] - height +row[1]
+                position_arr[i,0] = centre
+            else:
+                centre = row[0] + height - row[1]
+                position_arr[i,0] = centre
     
     #=====UNIT=CONVERSION==========================================================
     position_arr *= pix_2_dist
