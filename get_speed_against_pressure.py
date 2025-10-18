@@ -26,7 +26,7 @@ def get_ball_data(ball):
         data = np.genfromtxt(file_path)
     else:
         for folder, pressure in folders:
-            
+            print(folder)
             speed, error = find_ball_speed(folder, True)
             
             data = np.vstack((data, np.array([pressure, speed, error])))
@@ -53,7 +53,6 @@ def redo_pressure(ball, pressure):
 def plot_ball_data(ball):
     
     data = get_ball_data(ball)
-    
     
     fig, ax = plt.subplots()
     ax.errorbar(data[:, 1], data[:, 0], xerr=data[:, 2], yerr=PRESSURE_ERROR, ls='', marker='.')

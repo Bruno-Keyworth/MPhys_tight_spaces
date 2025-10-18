@@ -16,21 +16,27 @@ CONVERSION_ERROR = 0.3 /2056 #cm
 
 def frame_edge_correction(position_arr):
 
-    ball_height = np.max(position_arr[:,3])
+    rect_heights = position_arr[:, 3]
+    off_edge = (position_arr[:, 2] - rect_heights == 0) | (position_arr[:, 2] == 2056)
+
+    ball_height = np.mean(rect_heights[~off_edge])
+    ball_height_err = np.std(rect_heights[~off_edge])
+
+    # For rows where row[2] < 1000
+    low_edge = off_edge & (position_arr[:, 2] < 1000)
+    position_arr[low_edge, 2] = position_arr[low_edge, 2] - ball_height + position_arr[low_edge, 3]
     
-    for i, row in enumerate(position_arr):
-        if row[3] < ball_height - 1:
-            if row[2] < 1000:
-                centre = row[2] - ball_height +row[3]
-                position_arr[i,2] = centre
-            else:
-                centre = row[2] + ball_height - row[3]
-                position_arr[i,2] = centre
+    # For rows where row[2] >= 1000
+    high_edge = off_edge & (position_arr[:, 2] >= 1000)
+    position_arr[high_edge, 2] = position_arr[high_edge, 2] + ball_height - position_arr[high_edge, 3]
+    
+    # Error calculation (works for all off edge rows)
+    position_arr[off_edge, 5] = np.sqrt(ball_height_err**2 + position_arr[off_edge, 5]**2 + position_arr[off_edge, 6]**2)
     
     return position_arr
 
 def map_ball_path(folder, disp=False):   
-    position_arr = np.empty((0,6))
+    position_arr = np.empty((0,7))
     
     for img_path in folder.glob("*.tiff"):  
         position = find_ball_position(img_path, disp)

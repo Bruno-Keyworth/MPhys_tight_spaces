@@ -74,7 +74,10 @@ def find_ball_position(img_path, disp=False):
 
     print(f"Image: {img_path.name}")
 
-    x, y, h, rect = find_best_rectangle(contours, tube_left)
+    best_rect = find_best_rectangle(contours, tube_left)
+    if best_rect is None:
+        return None
+    x, y, h, rect = best_rect
     
     if disp:
         #plots image with rectangle on it
@@ -90,9 +93,10 @@ def find_ball_position(img_path, disp=False):
     file_name = img_path.name
     hex_num = file_name.split("_")[1].split(".")[0]
     time = int(hex_num, 16)
-    # dummy values
-    xerr = 0.00001
-    yerr = 0.00001
+    # dummy errors
+    xerr = 0.1
+    yerr = 0.1
+    herr = 0.1
         
-    return [time, x, y, h, xerr, yerr]
+    return [time, x, y, h, xerr, yerr, herr]
 
