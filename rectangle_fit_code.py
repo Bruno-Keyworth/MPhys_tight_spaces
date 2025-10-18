@@ -28,38 +28,28 @@ def show_image(img, title, left, right):
     plt.show()
     
 def find_best_rectangle(contours, tube_left):
-    for c in contours:
-        # Shift contour coordinates to global frame
-        c[:, :, 0] += tube_left
-        c[:, :, 1] += ROI_top 
+    c = max(contours, key=cv2.contourArea)
 
-        col, row, w, h = cv2.boundingRect(c)
-        if w < min_radius and w > max_radius:
-            continue
-        if  h > max_radius:
-            continue
-        area = cv2.contourArea(c)
+    col, row, w, h = cv2.boundingRect(c)
+    if (w < min_radius and w > max_radius) or h > max_radius:
+        return None
+
+    area = cv2.contourArea(c)
+    rect_area = w*h
+    rectangularity = area / rect_area if rect_area > 0 else 0 
         
-        rect_area = w*h
-        rectangularity = area / rect_area if rect_area > 0 else 0 
-        
-        # checks how rectangular the object is
-        if rectangularity >= rectangularity_threshold:
-            break
-    
+    # checks how rectangular the object is
     if rectangularity < rectangularity_threshold:
         return None
         
-    x=col
-    y= 2056 - row
+    x= col + tube_left
+    y= ROI_bot - row
     
     centre = (int(x), int(y))
-    
     print(f"Centre = {centre}, height = {h:.2f}, Rectangularity = {rectangularity:.2f}\n")
     
-    rect = plt.Rectangle((col,row), w,h, color='red', fill=False, 
-                        linewidth=2)
-    
+    rect = plt.Rectangle((x, row), w, h, color='red', fill=False, linewidth=2)
+
     return x, y, h, rect
     
     
@@ -72,9 +62,8 @@ def find_ball_position(img_path, disp=False):
     #convert to binary using threshold intensity
     _, binary_inv = cv2.threshold(img, 65, 255, cv2.THRESH_BINARY_INV)
     
-    tube_left, tube_right = calc_tube_left_right(img)
-    
     # only searches this region for rectangles
+    tube_left, tube_right = calc_tube_left_right(img)
     ROI = binary_inv[ROI_top:ROI_bot, tube_left:tube_right]
     
     # Find contours
@@ -101,6 +90,9 @@ def find_ball_position(img_path, disp=False):
     file_name = img_path.name
     hex_num = file_name.split("_")[1].split(".")[0]
     time = int(hex_num, 16)
+    # dummy values
+    xerr = 0.00001
+    yerr = 0.00001
         
-    return [time, x, y, h]
+    return [time, x, y, h, xerr, yerr]
 

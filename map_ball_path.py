@@ -30,7 +30,7 @@ def frame_edge_correction(position_arr):
     return position_arr
 
 def map_ball_path(folder, disp=False):   
-    position_arr = np.empty((0,4))
+    position_arr = np.empty((0,6))
     
     for img_path in folder.glob("*.tiff"):  
         position = find_ball_position(img_path, disp)
