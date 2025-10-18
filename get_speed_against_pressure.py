@@ -54,9 +54,6 @@ def plot_ball_data(ball):
     
     data = get_ball_data(ball)
     
-    y = np.linspace(200, 1000, 100)
-    
-    x = 2.2*y**0.5
     
     fig, ax = plt.subplots()
     ax.errorbar(data[:, 1], data[:, 0], xerr=data[:, 2], yerr=PRESSURE_ERROR, ls='', marker='.')
@@ -64,7 +61,7 @@ def plot_ball_data(ball):
     ax.set_xscale('log')
     ax.set_ylabel('Pressure (mbar)')
     ax.set_xlabel('Speed (cm/s)')
-    ax.plot(x, y)
+
     plt.savefig(MASTER_FOLDER / ball / 'speed_pressure.png', dpi=300)
     plt.show()
     

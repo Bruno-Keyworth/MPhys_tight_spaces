@@ -16,7 +16,6 @@ def linear_func(beta, x):
     return m * x + c
 
 def find_ball_speed(folder, disp=False, savefig=False):
-    print(folder)
     
     time, position, t_err, p_err = map_ball_path(folder, disp)
     
@@ -43,6 +42,7 @@ def find_ball_speed(folder, disp=False, savefig=False):
         ax1.plot(x_fit, y_fit, label = f"gradient = ({output.beta[0]:.2f} ± {output.sd_beta[0]:.2f})\n intercept = {output.beta[1]:.2f} ± {output.sd_beta[1]:.2f}")
         ax1.set_ylabel("distance (cm)")
         ax1.set_xlabel("time (s)")
+        ax1.set_title(folder.name)
         ax1.legend()
         ax1.grid()
         if savefig:
