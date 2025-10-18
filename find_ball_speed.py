@@ -6,7 +6,7 @@ Created on Wed Oct 15 21:20:26 2025
 @author: brunokeyworth
 """
 
-from rectangle_fit_code import map_ball_path
+from map_ball_path import map_ball_path
 import matplotlib.pyplot as plt
 from scipy import odr
 import numpy as np
