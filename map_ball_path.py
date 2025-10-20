@@ -17,21 +17,21 @@ CONVERSION_ERROR = 0.3 /2056 #cm
 def frame_edge_correction(position_arr):
 
     rect_heights = position_arr[:, 3]
-    off_edge = (position_arr[:, 2] - rect_heights == 0) | (position_arr[:, 2] == 2056)
+    off_edge = (position_arr[:, 2] - rect_heights / 2 < 1) | (position_arr[:, 2] + rect_heights / 2 > 2055)
 
     ball_height = np.mean(rect_heights[~off_edge])
     ball_height_err = np.std(rect_heights[~off_edge])
 
     # For rows where row[2] < 1000
     low_edge = off_edge & (position_arr[:, 2] < 1000)
-    position_arr[low_edge, 2] = position_arr[low_edge, 2] - ball_height + position_arr[low_edge, 3]
+    position_arr[low_edge, 2] = position_arr[low_edge, 2] + (position_arr[low_edge, 3] - ball_height) / 2
     
     # For rows where row[2] >= 1000
     high_edge = off_edge & (position_arr[:, 2] >= 1000)
-    position_arr[high_edge, 2] = position_arr[high_edge, 2] + ball_height - position_arr[high_edge, 3]
+    position_arr[high_edge, 2] = position_arr[high_edge, 2] + (ball_height - position_arr[high_edge, 3]) / 2
     
     # Error calculation (works for all off edge rows)
-    position_arr[off_edge, 5] = np.sqrt(ball_height_err**2 + position_arr[off_edge, 5]**2 + position_arr[off_edge, 6]**2)
+    position_arr[off_edge, 5] = np.sqrt(position_arr[off_edge, 5]**2 + (ball_height_err**2  + position_arr[off_edge, 6]**2) / 4)
     
     return position_arr
 

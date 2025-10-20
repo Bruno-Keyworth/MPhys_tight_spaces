@@ -47,7 +47,7 @@ def update_ball_data(folders, file_path):
     
     for folder, pressure in folders:
         print(folder)
-        speed, error = find_ball_speed(folder, True)
+        speed, error = find_ball_speed(folder)
 
         data[data[:, 0]==pressure, 1] = speed
         data[data[:, 0]==pressure, 2] = error
