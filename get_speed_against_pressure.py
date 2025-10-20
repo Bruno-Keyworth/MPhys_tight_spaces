@@ -8,11 +8,9 @@ Created on Wed Oct 15 21:47:55 2025
 
 from get_folderpaths import get_folderpaths, MASTER_FOLDER, get_folder
 from find_ball_speed import find_ball_speed
+from plot_ball_data import plot_ball_data
 import numpy as np
-import matplotlib.pyplot as plt
 import os
-
-PRESSURE_ERROR = np.sqrt(0.2**2 +0.3**2)
 
 BALL = 'ball4_retake'   
 
@@ -24,22 +22,27 @@ def redo_pressure(ball, pressure):
     
     data = update_ball_data([(folder, pressure)], file_path)
     plot_ball_data(ball, data)
-
-def get_ball_data(ball):
-
-    data = np.empty((0, 3))
-    folders = get_folderpaths(ball)
-
-    file_path = MASTER_FOLDER / ball / 'speed_pressure.txt'
-    if file_path.exists():
-        return np.genfromtxt(file_path)
-    else:
-        pressures = np.array([f[1] for f in folders])
-        data = np.column_stack((pressures, np.full(len(pressures), np.nan), 
-                                np.full(len(pressures), np.nan)))
-        np.savetxt(file_path, data)   
     
-    return update_ball_data(folders, file_path)
+def _ensure_file_initialized(file_path, folders):
+    if not file_path.exists():
+        pressures = np.array([f[1] for f in folders])
+        data = np.column_stack((pressures,
+                                np.full(len(pressures), np.nan),
+                                np.full(len(pressures), np.nan)))
+        np.savetxt(file_path, data)
+        return False
+    return True
+
+def analyse_ball(ball):
+    folders = get_folderpaths(ball)
+    file_path = MASTER_FOLDER / ball / 'speed_pressure.txt'
+    data_exists = _ensure_file_initialized(file_path, folders)
+    if data_exists:
+        data = np.genfromtxt(file_path)
+    else:
+        data = update_ball_data(folders, file_path)
+    plot_ball_data(ball, data)
+    return data
 
 def update_ball_data(folders, file_path):
     
@@ -56,27 +59,12 @@ def update_ball_data(folders, file_path):
 
     return data  
 
-def plot_ball_data(ball, data=None):
-    
-    if data is None:
-        data = get_ball_data(ball)
-
-    fig, ax = plt.subplots()
-    ax.errorbar(data[:, 1], data[:, 0], xerr=data[:, 2], yerr=PRESSURE_ERROR, ls='', marker='.')
-    ax.set_yscale('log')
-    ax.set_xscale('log')
-    ax.set_ylabel('Pressure (mbar)')
-    ax.set_xlabel('Speed (cm/s)')
-    
-    plt.savefig(MASTER_FOLDER / ball / 'speed_pressure.png', dpi=300)
-    plt.show()
-
 def redo_all(ball):
     file_path = MASTER_FOLDER / ball / 'speed_pressure.txt'
     if os.path.exists(file_path):
         os.remove(file_path)
 
-    plot_ball_data(ball)
+    analyse_ball(ball)
     
 if __name__ == '__main__':
-    plot_ball_data(BALL)
+    analyse_ball(BALL)

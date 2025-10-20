@@ -9,7 +9,6 @@ import cv2
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.cm as cm
 from get_tube_ROI import calc_tube_left_right
 
 #constants
@@ -20,7 +19,7 @@ rectangularity_threshold = 0.7
 ROI_top = 0 
 ROI_bot = 2056 #2*max_radius
 
-cmap = cm.get_cmap('viridis', 80)
+cmap = plt.get_cmap('viridis', 80)
 
 def show_image(img, title, left, right):
     plt.imshow(img, cmap='gray')
