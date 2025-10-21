@@ -12,7 +12,7 @@ from plot_ball_data import plot_ball_data
 import numpy as np
 import os
 
-BALL = 'ball4_retake'   
+BALL = 'ball5'   
 
 def redo_pressure(ball, pressure):
 
@@ -50,7 +50,7 @@ def update_ball_data(folders, file_path):
     
     for folder, pressure in folders:
         print(folder)
-        speed, error = find_ball_speed(folder)
+        speed, error = find_ball_speed(folder, True, True)
 
         data[data[:, 0]==pressure, 1] = speed
         data[data[:, 0]==pressure, 2] = error

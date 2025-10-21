@@ -34,7 +34,7 @@ def get_folderpaths(ball):
     for p in base_path.iterdir():
         if p.is_dir():
             m = pattern.match(p.name)
-            if m:
+            if m and any(p.iterdir()):
                 number = int(m.group(1))
                 subdirs.append((p, number))
 
