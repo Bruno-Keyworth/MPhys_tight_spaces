@@ -21,7 +21,7 @@ else:
 def get_folder(ball, pressure):
     return MASTER_FOLDER / ball / f'{pressure}mbar'
 
-def get_folderpaths(ball):
+def get_folderpaths(ball, version=None):
     # Determine master folder
 
     base_path = MASTER_FOLDER / ball
@@ -40,5 +40,16 @@ def get_folderpaths(ball):
 
     # Sort by pressure number (optional)
     subdirs.sort(key=lambda x: x[1])
+
+    # If version is provided, attempt to substitute folders
+    if version is not None:
+        updated_subdirs = []
+        for p, number in subdirs:
+            new_path = base_path / f"{number}mbar_{version}"
+            if new_path.is_dir() and any(new_path.iterdir()):
+                updated_subdirs.append((new_path, number))
+            else:
+                updated_subdirs.append((p, number))
+        subdirs = updated_subdirs
 
     return subdirs

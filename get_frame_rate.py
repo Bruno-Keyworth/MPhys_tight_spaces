@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Path to your folder
-folder_path = r"../data/test_photos"
+folder_path = '/Volumes/Transcend/2025-26 MPhys Project/ball5/200mbar'
 
 # Lists to hold the data
 indices = []

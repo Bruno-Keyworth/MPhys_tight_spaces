@@ -45,6 +45,14 @@ def map_ball_path(folder, disp=False):
             continue
 
         position_arr = np.vstack((position_arr, position))
+        
+    for img_path in folder.glob("*.bmp"):
+        position = find_ball_position(img_path, disp)
+        
+        if position is None:
+            continue
+
+        position_arr = np.vstack((position_arr, position))
     
     position_arr = frame_edge_correction(position_arr)
     
@@ -55,5 +63,7 @@ def map_ball_path(folder, disp=False):
     
     t_err = np.linspace(TIME_ERROR, TIME_ERROR, len(position_arr))
     p_err = np.sqrt((CONVERSION_ERROR * np.absolute(position_arr[:, 2]))**2 + 0.5**2)
-
-    return (position_arr[:, 0], position_arr[:, 2], t_err, p_err)
+    
+    data = np.column_stack((position_arr[:, 0], position_arr[:, 2], t_err, p_err))
+    
+    np.savetxt(folder / 'position_time.txt', data)

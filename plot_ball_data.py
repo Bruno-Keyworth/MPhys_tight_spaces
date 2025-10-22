@@ -40,10 +40,11 @@ def plot_ball_data(ball, data):
     fig, ax = plt.subplots()
     ax.errorbar(data[:, 1], data[:, 0], xerr=data[:, 2], yerr=PRESSURE_ERROR, ls='', marker='.')
     ax.plot(x, y)
-    # ax.set_yscale('log')
-    # ax.set_xscale('log')
     ax.set_ylabel('Pressure (mbar)')
     ax.set_xlabel('Speed (cm/s)')
 
     plt.savefig(MASTER_FOLDER / ball / 'speed_pressure.png', dpi=300)
+    ax.set_yscale('log')
+    ax.set_xscale('log')
+    plt.savefig(MASTER_FOLDER / ball / 'log_speed_pressure.png', dpi=300)
     plt.show()

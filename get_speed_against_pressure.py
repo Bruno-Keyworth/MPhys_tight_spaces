@@ -12,11 +12,16 @@ from plot_ball_data import plot_ball_data
 import numpy as np
 import os
 
-BALL = 'ball5'   
+BALL = 'ball1'   
 
 def redo_pressure(ball, pressure):
 
     folder = get_folder(ball, pressure)
+    
+    speed_path = MASTER_FOLDER / ball / f'{pressure}mbar' / 'position_time.txt'
+    
+    if speed_path.exists():
+        os.remove(speed_path)
 
     file_path = MASTER_FOLDER / ball / 'speed_pressure.txt'
     
@@ -33,14 +38,23 @@ def _ensure_file_initialized(file_path, folders):
         return False
     return True
 
-def analyse_ball(ball):
-    folders = get_folderpaths(ball)
-    file_path = MASTER_FOLDER / ball / 'speed_pressure.txt'
+def analyse_ball(ball, redo=False, version=None):
+    folders = get_folderpaths(ball, version)
+    if version is not None:
+        file_path = MASTER_FOLDER / ball / f'speed_pressure_{version}.txt'
+    else: 
+        file_path = MASTER_FOLDER / ball / 'speed_pressure.txt'
     data_exists = _ensure_file_initialized(file_path, folders)
+    if redo:
+        for folder, _ in folders:
+            speed_path = folder / 'position_time.txt'
+            if speed_path.exists():
+                os.remove(speed_path)
     if data_exists:
         data = np.genfromtxt(file_path)
     else:
         data = update_ball_data(folders, file_path)
+        
     plot_ball_data(ball, data)
     return data
 
@@ -59,12 +73,25 @@ def update_ball_data(folders, file_path):
 
     return data  
 
-def redo_all(ball):
-    file_path = MASTER_FOLDER / ball / 'speed_pressure.txt'
+def redo(ball, version=None):
+    if version is not None:
+        file_path = MASTER_FOLDER / ball / f'speed_pressure_{version}.txt'
+    else: 
+        file_path = MASTER_FOLDER / ball / 'speed_pressure.txt'
     if os.path.exists(file_path):
         os.remove(file_path)
 
-    analyse_ball(ball)
+    analyse_ball(ball, version=version)
+
+def redo_all(ball, version=None):
+    if version is not None:
+        file_path = MASTER_FOLDER / ball / f'speed_pressure_{version}.txt'
+    else: 
+        file_path = MASTER_FOLDER / ball / 'speed_pressure.txt'
+    if os.path.exists(file_path):
+        os.remove(file_path)
+
+    analyse_ball(ball, True, version)
     
 if __name__ == '__main__':
     analyse_ball(BALL)

@@ -15,9 +15,20 @@ def linear_func(beta, x):
     m, c = beta
     return m * x + c
 
+def get_speed_data(folder, disp):
+    
+    file_path = folder / 'position_time.txt'
+    
+    if not file_path.exists():
+        map_ball_path(folder, disp)
+        
+    data = np.genfromtxt(file_path)
+    
+    return data[:, 0], data[:, 1], data[:, 2], data[:, 3]
+
 def find_ball_speed(folder, disp=False, savefig=False):
     
-    time, position, t_err, p_err = map_ball_path(folder, disp)
+    time, position, t_err, p_err = get_speed_data(folder, disp)
     
     model = odr.Model(linear_func)
 
