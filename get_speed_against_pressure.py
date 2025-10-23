@@ -14,11 +14,13 @@ import os
 
 BALL = 'ball1'   
 
-def redo_pressure(ball, pressure):
+def redo_pressure(ball, pressure, version=None):
 
     folder = get_folder(ball, pressure)
-    
-    speed_path = MASTER_FOLDER / ball / f'{pressure}mbar' / 'position_time.txt'
+    if version is None:
+        speed_path = MASTER_FOLDER / ball / f'{pressure}mbar' / 'position_time.txt'
+    else:
+        speed_path = MASTER_FOLDER / ball / f'{pressure}mbar_{version}' / 'position_time.txt'
     
     if speed_path.exists():
         os.remove(speed_path)
@@ -26,7 +28,7 @@ def redo_pressure(ball, pressure):
     file_path = MASTER_FOLDER / ball / 'speed_pressure.txt'
     
     data = update_ball_data([(folder, pressure)], file_path)
-    plot_ball_data(ball, data)
+    plot_ball_data(ball, data, version=version)
     
 def _ensure_file_initialized(file_path, folders):
     if not file_path.exists():
@@ -55,7 +57,7 @@ def analyse_ball(ball, redo=False, version=None):
     else:
         data = update_ball_data(folders, file_path)
         
-    plot_ball_data(ball, data)
+    plot_ball_data(ball, data, version=version)
     return data
 
 def update_ball_data(folders, file_path):
@@ -91,7 +93,7 @@ def redo_all(ball, version=None):
     if os.path.exists(file_path):
         os.remove(file_path)
 
-    analyse_ball(ball, True, version)
+    analyse_ball(ball, redo=True, version=version)
     
 if __name__ == '__main__':
     analyse_ball(BALL)
