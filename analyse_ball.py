@@ -9,6 +9,7 @@ Created on Wed Oct 15 21:47:55 2025
 from get_folderpaths import get_folderpaths, MASTER_FOLDER, get_folder
 from find_ball_speed import find_ball_speed
 from plot_ball_data import plot_ball_data
+from read_ASCII_timestamp import sort_folder
 import numpy as np
 import os
 
@@ -41,6 +42,7 @@ def _ensure_file_initialized(file_path, folders):
     return True
 
 def analyse_ball(ball, redo=False, version=None):
+    sort_folder(MASTER_FOLDER / ball)
     folders = get_folderpaths(ball, version)
     if version is not None:
         file_path = MASTER_FOLDER / ball / f'speed_pressure_{version}.txt'

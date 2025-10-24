@@ -9,7 +9,6 @@ Created on Fri Oct 24 01:13:14 2025
 import cv2
 import numpy as np
 import pickle
-from get_folderpaths import MASTER_FOLDER
 import os
 
 with open('timestamp_templates.pkl', 'rb') as f:
@@ -58,9 +57,8 @@ def sort_image(img_path, delete_original=True):
     print(img_path)
     if delete_original:
         os.remove(img_path)
-
-folder_path = MASTER_FOLDER / 'timestamp_test/ASCII'
-
-for filepath in folder_path.glob("*.tif"):
-    print(filepath)
-    sort_image(filepath)
+        
+def sort_folder(folder_path):
+    for filepath in folder_path.glob("*.tif"):
+        print(filepath)
+        sort_image(filepath)
