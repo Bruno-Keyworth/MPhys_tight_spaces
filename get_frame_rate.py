@@ -1,9 +1,8 @@
 import os
 import matplotlib.pyplot as plt
-import numpy as np
 
 # Path to your folder
-folder_path = '/Volumes/Transcend/2025-26 MPhys Project/ball5/200mbar'
+folder_path = '/Volumes/Transcend/2025-26 MPhys Project/timestamp_test/ASCII/test2'
 
 # Lists to hold the data
 indices = []
@@ -11,14 +10,13 @@ decimal_values = []
 
 # Iterate through all files in the folder
 for filename in os.listdir(folder_path):
-    if filename.endswith(".tiff"):
-        # Example filename: 00000001_000000000095FDC4.tiff
+    if filename.endswith(".tif"):
         name, _ = os.path.splitext(filename)
         index_str, hex_str = name.split("_")
 
         # Convert to int
         index = int(index_str)
-        decimal_value = int(hex_str, 16)  # Convert hexadecimal to decimal
+        decimal_value = int(hex_str)  # Convert hexadecimal to decimal
 
         indices.append(index)
         decimal_values.append(decimal_value)
