@@ -36,14 +36,14 @@ def frame_edge_correction(position_arr):
     return position_arr
 
 def map_ball_path(folder, disp=False):   
-    position_arr = np.empty((0,7))
+    positions = []
     
     for ext in ("*.tiff", "*.bmp", "*.tif"):
         for img_path in folder.glob(ext):
             position = find_ball_position(img_path, disp)
-            if position is None:
-                continue
-            position_arr = np.vstack((position_arr, position))
+            if position is not None:
+                positions.append(position)
+    position_arr = np.vstack(positions)
     
     position_arr = frame_edge_correction(position_arr)
     position_arr[:, 1:] *= pix_2_dist
