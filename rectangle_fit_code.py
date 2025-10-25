@@ -12,12 +12,9 @@ import matplotlib.pyplot as plt
 from get_tube_ROI import calc_tube_left_right
 
 #constants
-min_radius = 100
-max_radius = 1000
+min_radius = 10
+max_radius = 500
 rectangularity_threshold = 0.7
-
-ROI_top = 0 
-ROI_bot = 2056 #2*max_radius
 
 cmap = plt.get_cmap('viridis', 80)
 
@@ -25,7 +22,6 @@ def show_image(img, title, left, right):
     plt.imshow(img, cmap='gray')
     plt.axvline(left)
     plt.axvline(right)
-    plt.axhline(ROI_bot)
     plt.title(title)
     plt.axis('off')
     plt.show()
@@ -51,7 +47,7 @@ def find_rectangle(threshold, ROI, tube_left):
         return None, None
         
     x= col + tube_left +  w / 2
-    y= ROI_bot - row - h / 2
+    y= row + h / 2
     
     centre = (int(x), int(y))
     print(f"Centre = {centre}, height = {h:.2f}, Rectangularity = {rectangularity:.2f}\n")
@@ -87,7 +83,7 @@ def find_ball_position(img_path, disp=False):
     
     # only searches this region for rectangles
     tube_left, tube_right = calc_tube_left_right(img)
-    ROI = img[ROI_top:ROI_bot, tube_left:tube_right]
+    ROI = img[0:len(img), tube_left:tube_right]
 
     print(f"Image: {img_path.name}")
     rect = get_rect_with_errors(ROI, tube_left)
