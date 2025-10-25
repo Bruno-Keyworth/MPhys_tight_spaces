@@ -46,11 +46,8 @@ def map_ball_path(folder, disp=False):
             position_arr = np.vstack((position_arr, position))
     
     position_arr = frame_edge_correction(position_arr)
-    
-    #=====UNIT=CONVERSION==========================================================
     position_arr[:, 1:] *= pix_2_dist
     position_arr[:, 0] -= np.min(position_arr[:, 0])
-    position_arr[:, 0]/= 1000
     
     t_err = np.linspace(TIME_ERROR, TIME_ERROR, len(position_arr))
     p_err = np.sqrt((CONVERSION_ERROR * np.absolute(position_arr[:, 2]))**2 + 0.5**2)

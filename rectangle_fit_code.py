@@ -108,12 +108,15 @@ def find_ball_position(img_path, disp=False):
         ax.axvline(tube_right)
         for r in rects:
             ax.add_patch(r)
-        plt.title("Rectangle Found")
+        plt.title(img_path.parent.name +'\n'+ img_path.name)
         plt.show() 
         
     file_name = img_path.name
-    hex_num = file_name.split("_")[1].split(".")[0]
-    time = int(hex_num, 16)
+    timestamp = file_name.split("_")[1].split(".")[0]
+    if len(timestamp) == 16:
+        time = int(timestamp, 16) / 1000
+    else:
+        time = int(timestamp) * 10**-6
         
     return np.concatenate(([time], mean_rect, rect_err))
 

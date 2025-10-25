@@ -54,11 +54,9 @@ def sort_image(img_path, delete_original=True):
     # ---- Save cropped image ----
     save_path = output_folder / save_as
     cv2.imwrite(str(save_path), cropped_img)
-    print(img_path)
     if delete_original:
         os.remove(img_path)
         
 def sort_folder(folder_path):
     for filepath in folder_path.glob("*.tif"):
-        print(filepath)
         sort_image(filepath)
