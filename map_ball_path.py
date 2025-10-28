@@ -10,9 +10,10 @@ from rectangle_fit_code import find_ball_position
 import numpy as np
 
 TIME_ERROR = 0.01 #s
-ruler_len = 12.8 #cm
-pix_2_dist = ruler_len / 2056 # cm per pixel
-CONVERSION_ERROR = 0.3 /2056 #cm
+ruler_len = 14.9 #cm
+frame_height = 1016 # pixels
+pix_2_dist = ruler_len / frame_height # cm per pixel
+CONVERSION_ERROR = 0.3 / frame_height #cm
 
 def frame_edge_correction(position_arr):
 
