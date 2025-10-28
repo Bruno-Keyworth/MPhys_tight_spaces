@@ -60,7 +60,6 @@ def analyse_ball(ball, redo=False, version=None):
         data = update_ball_data(folders, file_path)
         
     plot_ball_data(ball, data, version=version)
-    return data
 
 def update_ball_data(folders, file_path):
     

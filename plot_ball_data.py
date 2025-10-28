@@ -39,7 +39,7 @@ def plot_ball_data(ball, data, version=None):
 
     fig, ax = plt.subplots()
     ax.errorbar(data[:, 1], data[:, 0], xerr=data[:, 2], yerr=PRESSURE_ERROR, ls='', marker='.')
-    ax.plot(x, y, label = r"$y=a+bx^\alpha$"+'\n'+fr" $\alpha$ = {beta[0]:.2f} ± {sd_beta[0]:.2f}"+'\n'+fr"  b = {beta[1]:.2f} ± {sd_beta[1]:.2f}"+'\n'+fr"  a = {beta[2]:.2f} ± {sd_beta[2]:.2f}")
+    #ax.plot(x, y, label = r"$y=a+bx^\alpha$"+'\n'+fr" $\alpha$ = {beta[0]:.2f} ± {sd_beta[0]:.2f}"+'\n'+fr"  b = {beta[1]:.2f} ± {sd_beta[1]:.2f}"+'\n'+fr"  a = {beta[2]:.2f} ± {sd_beta[2]:.2f}")
     ax.set_ylabel('Pressure (mbar)')
     ax.set_xlabel('Speed (cm/s)')
     if version is None:
