@@ -16,7 +16,6 @@ import os
 BALL = 'ball1'   
 
 def redo_pressure(ball, pressure, version=None):
-
     folder = get_folder(ball, pressure)
     if version is None:
         speed_path = MASTER_FOLDER / ball / f'{pressure}mbar' / 'position_time.txt'
@@ -28,7 +27,7 @@ def redo_pressure(ball, pressure, version=None):
 
     file_path = MASTER_FOLDER / ball / 'speed_pressure.txt'
     
-    data = update_ball_data([(folder, pressure)], file_path)
+    data = update_ball_data(folder, file_path)
     plot_ball_data(ball, data, version=version)
     
 def _ensure_file_initialized(file_path, folders):

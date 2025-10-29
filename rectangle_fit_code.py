@@ -91,21 +91,23 @@ def find_ball_position(img_path, disp=False):
     if rect is None:
         os.remove(img_path)
         return None
-
-    mean_rect = rect[0]
-    rect_err = rect[1]
-    rects = rect[2]
-    
-    if disp:
-        #plots image with rectangle on it
-        fig, ax = plt.subplots()
-        ax.imshow(img, cmap='gray')
-        ax.axvline(tube_left)                       
-        ax.axvline(tube_right)
-        for r in rects:
-            ax.add_patch(r)
-        plt.title(img_path.parent.name +'\n'+ img_path.name)
-        plt.show() 
+    if len(rect[0]) == 0 or len(rect[1]) == 0 or len(img) == 0:
+        mean_rect = np.full(3, np.nan)
+        rect_err = np.full(3, np.nan)
+    else:
+        mean_rect = np.array(rect[0]) / len(img)
+        rect_err = np.array(rect[1]) / len(img)
+        rects = rect[2]
+        if disp:
+            #plots image with rectangle on it
+            fig, ax = plt.subplots()
+            ax.imshow(img, cmap='gray')
+            ax.axvline(tube_left)                       
+            ax.axvline(tube_right)
+            for r in rects:
+                ax.add_patch(r)
+            plt.title(img_path.parent.name +'\n'+ img_path.name)
+            plt.show() 
         
     file_name = img_path.name
     timestamp = file_name.split("_")[1].split(".")[0]
