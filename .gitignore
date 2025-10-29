@@ -1,0 +1,53 @@
+# === OS & Editor junk ===
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+Icon?
+._*
+.Spotlight-V100
+.Trashes
+
+# === Python cache ===
+__pycache__/
+*.py[cod]
+*$py.class
+
+# === Virtual environments ===
+.env
+.venv
+env/
+venv/
+ENV/
+
+# === IDE / Editor files ===
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# === Jupyter ===
+.ipynb_checkpoints
+
+# === Logs & temp files ===
+*.log
+*.tmp
+*.bak
+
+# === Build & packaging ===
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# === Data ===
+*.csv
+*.dat
+*.tsv
+*.npz
+*.npy
+
+# === System ===
+*.swp
+*.lock

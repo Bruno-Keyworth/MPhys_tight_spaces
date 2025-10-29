@@ -49,13 +49,16 @@ def find_ball_speed(folder, disp=False, savefig=False):
         y_fit = output.beta[0] * x_fit + output.beta[1]
         
         fig, ax1 = plt.subplots()
-        ax1.errorbar(time, position, xerr=t_err, yerr=p_err, ls='', marker='.')
-        ax1.plot(x_fit, y_fit, label = f"gradient = ({output.beta[0]:.2f} ± {output.sd_beta[0]:.2f})\n intercept = {output.beta[1]:.2f} ± {output.sd_beta[1]:.2f}")
+        ax1.errorbar(time, position, xerr=t_err, yerr=p_err, fmt='o',
+        linestyle='', color='black', markerfacecolor='red', markeredgecolor='black',
+        markersize=4, ecolor='black', elinewidth=0.8, markeredgewidth=0.5)
+        ax1.plot(x_fit, y_fit, color = "blue", linewidth = 2, label = f"gradient = ({output.beta[0]:.2f} ± {output.sd_beta[0]:.2f})\n intercept = {output.beta[1]:.2f} ± {output.sd_beta[1]:.2f}")
         ax1.set_ylabel("distance (cm)")
         ax1.set_xlabel("time (s)")
         ax1.set_title(folder.name)
         ax1.legend()
         ax1.grid()
+        ax1.minorticks_on()
         if savefig:
             plt.savefig(folder / 'position_time.png' , dpi=300)
         plt.show()

@@ -30,7 +30,7 @@ def calc_tube_left_right(img):
 
     #convert to binary using threshold intensity
     _, binary_inv = cv2.threshold(
-        gray_blur, 160, 255, cv2.THRESH_BINARY_INV)
+        gray_blur, 110, 255, cv2.THRESH_BINARY_INV)
     
     #show_image(binary_inv, "", 0, 0)
     
@@ -45,25 +45,3 @@ def calc_tube_left_right(img):
     rightmost_x = np.max(xs) + cropping
     
     return leftmost_x, rightmost_x
-
-
-
-# # Define the folder path correctly
-# folder = Path(r"C:\Users\User\OneDrive - The University of Manchester\DM UNI\YEAR 4\MPHYS SEM 1\test_codes\test_images_ball_in_tube")
-
-# # Dictionary to store images as NumPy arrays
-# images = {}
-# centre_arr = np.empty((0,2))
-
-# # Use glob for files in this folder only, or rglob for all subfolders
-# for img_path in folder.glob("*.tiff"):  
-#     img = cv2.imread(str(img_path))  # read as BGR NumPy array
-#     if img is not None:
-#         images[img_path.name] = img
-        
-#         # Convert to grayscale
-#         gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-#         tube_left, tube_right = calc_tube_left_right(gray_image)
-#         show_image(img, "tube boundary", tube_left, tube_right)
-    
