@@ -10,8 +10,6 @@ import numpy as np
 from get_folderpaths import MASTER_FOLDER
 from scipy import odr
 
-PRESSURE_ERROR = np.sqrt(0.2**2 +0.3**2)
-
 def power_law(beta, x):
     return beta[2] + beta[1] * x**beta[0]
 
@@ -20,7 +18,7 @@ def get_log_fit(data):
     model = odr.Model(power_law)
 
     # Create a RealData object (includes errors)
-    odr_data = odr.RealData(data[:, 1], data[:, 0], sx=data[:, 2], sy=np.linspace(PRESSURE_ERROR, PRESSURE_ERROR, len(data)))
+    odr_data = odr.RealData(data[:, 1], data[:, 0], sx=data[:, 2], sy=data[:, 3])
     # Create the ODR object
     odr_instance = odr.ODR(odr_data, model, beta0=[0.5, 10, 30])  # initial guess
 
@@ -38,10 +36,11 @@ def plot_ball_data(ball, data, version=None):
     y = power_law(beta, x)
 
     fig, ax = plt.subplots()
-    ax.errorbar(data[:, 1], data[:, 0], xerr=data[:, 2], yerr=PRESSURE_ERROR, ls='', marker='.')
-    #ax.plot(x, y, label = r"$y=a+bx^\alpha$"+'\n'+fr" $\alpha$ = {beta[0]:.2f} ± {sd_beta[0]:.2f}"+'\n'+fr"  b = {beta[1]:.2f} ± {sd_beta[1]:.2f}"+'\n'+fr"  a = {beta[2]:.2f} ± {sd_beta[2]:.2f}")
+    ax.errorbar(data[:, 1], data[:, 0], xerr=data[:, 2], yerr=data[:, 3], ls='', marker='.')
+    ax.plot(x, y, label = r"$y=a+bx^\alpha$"+'\n'+fr" $\alpha$ = {beta[0]:.2f} ± {sd_beta[0]:.2f}"+'\n'+fr"  b = {beta[1]:.2f} ± {sd_beta[1]:.2f}"+'\n'+fr"  a = {beta[2]:.2f} ± {sd_beta[2]:.2f}")
     ax.set_ylabel('Pressure (mbar)')
     ax.set_xlabel('Speed (cm/s)')
+    ax.set_title(ball)
     if version is None:
         save_name = 'speed_pressure.png'
     else:

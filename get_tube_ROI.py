@@ -21,7 +21,7 @@ def show_image(img, title, left, right):
 
 def calc_tube_left_right(img):
     
-    cropping = 150
+    cropping = 70
     img = img[:, cropping:-cropping]
     gray_blur = cv2.medianBlur(img, 9)
     gray_blur = cv2.medianBlur(gray_blur, 9)

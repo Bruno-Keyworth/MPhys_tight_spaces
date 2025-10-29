@@ -13,7 +13,7 @@ from read_ASCII_timestamp import sort_folder
 import numpy as np
 import os
 
-BALL = 'ball1'   
+BALL = 'ball3'   
 
 def redo_pressure(ball, pressure, version=None):
 
@@ -34,9 +34,10 @@ def redo_pressure(ball, pressure, version=None):
 def _ensure_file_initialized(file_path, folders):
     if not file_path.exists():
         pressures = np.array([f[1] for f in folders])
+        pressure_err = np.array([f[2] for f in folders])
         data = np.column_stack((pressures,
                                 np.full(len(pressures), np.nan),
-                                np.full(len(pressures), np.nan)))
+                                np.full(len(pressures), np.nan), pressure_err))
         np.savetxt(file_path, data)
         return False
     return True
@@ -50,7 +51,7 @@ def analyse_ball(ball, redo=False, version=None):
         file_path = MASTER_FOLDER / ball / 'speed_pressure.txt'
     data_exists = _ensure_file_initialized(file_path, folders)
     if redo:
-        for folder, _ in folders:
+        for folder, _, _ in folders:
             speed_path = folder / 'position_time.txt'
             if speed_path.exists():
                 os.remove(speed_path)
@@ -65,7 +66,7 @@ def update_ball_data(folders, file_path):
     
     data = np.genfromtxt(file_path)
     
-    for folder, pressure in folders:
+    for folder, pressure, error in folders:
         print(folder)
         speed, error = find_ball_speed(folder, True, True)
 

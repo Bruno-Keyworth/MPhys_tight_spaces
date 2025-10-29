@@ -9,6 +9,10 @@ Created on Wed Oct 15 21:05:12 2025
 import os, socket
 from pathlib import Path
 import re
+import numpy as np
+from read_pressure_data import read_pressure_data
+
+HYDROSTATIC_ERROR = 1
 
 if socket.gethostname() == "Brunos-MacBook-Air-2.local":
     if os.path.exists("/Volumes/Transcend/"):
@@ -25,6 +29,8 @@ def get_folderpaths(ball, version=None):
     # Determine master folder
 
     base_path = MASTER_FOLDER / ball
+    
+    data_dict = read_pressure_data(base_path)
 
     # Regex: capture the number before "mbar"
     pattern = re.compile(r"^(\d+)mbar$")
@@ -36,7 +42,12 @@ def get_folderpaths(ball, version=None):
             m = pattern.match(p.name)
             if m and any(p.iterdir()):
                 number = int(m.group(1))
-                subdirs.append((p, number))
+                if data_dict is None:
+                    subdirs.append((p, number, HYDROSTATIC_ERROR))
+                else:
+                    values = data_dict[number]
+                    error = np.sqrt(values[1]**2 + HYDROSTATIC_ERROR**2)
+                    subdirs.append((p, values[0], error))
 
     # Sort by pressure number (optional)
     subdirs.sort(key=lambda x: x[1])
@@ -50,6 +61,6 @@ def get_folderpaths(ball, version=None):
                 updated_subdirs.append((new_path, number))
             else:
                 updated_subdirs.append((p, number))
-        subdirs = updated_subdirs
+        return updated_subdirs
 
     return subdirs
