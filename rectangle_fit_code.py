@@ -71,7 +71,10 @@ def get_rect_with_errors(ROI, tube_left):
     if not rects:
         return None
     mean_rect = np.mean(rect_coords, axis=0)
-    std_threshold = np.std(rect_coords, axis=0, ddof=1)
+    if len(rect_coords) > 1:
+        std_threshold = np.std(rect_coords, axis=0, ddof=1)
+    else:
+        std_threshold = np.array([1, 1, 1])
     
     return mean_rect, std_threshold, rects
 
