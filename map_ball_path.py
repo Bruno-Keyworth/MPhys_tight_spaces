@@ -10,7 +10,7 @@ from rectangle_fit_code import find_ball_position
 import numpy as np
 
 TIME_ERROR = 0.01 #s
-frame_size = 14.9 #cm
+FRAME_SIZE = 0.149 #m
 CONVERSION_ERROR = 0.3/14.9
 
 def frame_edge_correction(position_arr):
@@ -45,7 +45,7 @@ def map_ball_path(folder, disp=False):
     position_arr = np.vstack(positions)
     
     position_arr = frame_edge_correction(position_arr)
-    position_arr[:, 1:] *= frame_size
+    position_arr[:, 1:] *= FRAME_SIZE
     position_arr[:, 0] -= np.min(position_arr[:, 0])
     
     t_err = np.linspace(TIME_ERROR, TIME_ERROR, len(position_arr))

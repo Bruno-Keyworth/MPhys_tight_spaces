@@ -16,6 +16,8 @@ def read_pressure_data(folder_path):
         return None
     
     data = np.genfromtxt(file_path, skip_header=1, usecols=(1, 2))
+    
+    data*=100 # convert to Pa
     # Find indices where the first column is zero
     split_indices = np.where(data[:, 0] == 0)[0]
     

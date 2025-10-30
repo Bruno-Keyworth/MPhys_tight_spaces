@@ -12,7 +12,7 @@ import re
 import numpy as np
 from read_pressure_data import read_pressure_data
 
-HYDROSTATIC_ERROR = 1
+HYDROSTATIC_ERROR = 100 #Pa
 
 if socket.gethostname() == "Brunos-MacBook-Air-2.local":
     if os.path.exists("/Volumes/Transcend/"):
@@ -47,7 +47,7 @@ def get_folderpaths(ball, version=None):
         if p.is_dir():
             m = pattern.match(p.name)
             if m and any(p.iterdir()):
-                number = int(m.group(1))
+                number = int(m.group(1)) * 100
                 if data_dict is None:
                     subdirs.append((p, number, HYDROSTATIC_ERROR))
                 else:
