@@ -13,10 +13,15 @@ from read_ASCII_timestamp import sort_folder
 import numpy as np
 import os
 
-
-BALL = 'ball4_hold_method'   
+BALL = 'ball3_hold_method'   
 
 def redo_pressure(ball, pressure, version=None):
+    """
+    Reruns the code to find position for images at a given pressure (in mbar), 
+    then fits to find the speed. Updates the cached value for this pressure and
+    repeats power law fitting. 
+    """
+    pressure *= 100
     folder = get_folder(ball, pressure)
     if version is None:
         speed_path = MASTER_FOLDER / ball / f'{pressure}mbar' / 'position_time.txt'
@@ -28,7 +33,7 @@ def redo_pressure(ball, pressure, version=None):
 
     file_path = MASTER_FOLDER / ball / 'speed_pressure.txt'
     
-    data = update_ball_data(folder, file_path)
+    data = _update_data(folder, file_path)
     plot_ball_data(ball, data, version=version)
     
 def _ensure_file_initialized(file_path, folders):
@@ -58,12 +63,14 @@ def analyse_ball(ball, redo=False, version=None):
     if data_exists:
         data = np.genfromtxt(file_path)
     else:
-        data = update_ball_data(folders, file_path)
+        data = _update_data(folders, file_path)
         
     plot_ball_data(ball, data, version=version)
 
-def update_ball_data(folders, file_path):
-    
+def _update_data(folders, file_path):
+    """
+    Helper function
+    """
     data = np.genfromtxt(file_path)
     
     for folder, pressure, error in folders:
@@ -78,6 +85,10 @@ def update_ball_data(folders, file_path):
     return data  
 
 def redo(ball, version=None):
+    """
+    Refits to distance time graphs but uses the data cached for ball position in
+    each photo.
+    """
     if version is not None:
         file_path = MASTER_FOLDER / ball / f'speed_pressure_{version}.txt'
     else: 
@@ -88,6 +99,9 @@ def redo(ball, version=None):
     analyse_ball(ball, version=version)
 
 def redo_all(ball, version=None):
+    """
+    Completely reruns the code including finding the position of the ball in each image. 
+    """
     if version is not None:
         file_path = MASTER_FOLDER / ball / f'speed_pressure_{version}.txt'
     else: 
@@ -96,6 +110,19 @@ def redo_all(ball, version=None):
         os.remove(file_path)
 
     analyse_ball(ball, redo=True, version=version)
+    
+def delete_empty(ball):
+    """
+    Deletes all photos in which a ball was not identified. Can be called manually
+    after checking that images with the ball have not been deleted. This is not required 
+    as the code will already ignore these images in future runs. 
+    """
+    folder = MASTER_FOLDER / ball
+    
+    for file_path in folder.rglob("*.tif"): 
+        if file_path.name.startswith("empty_"):
+            print(f"Deleting: {file_path}")
+            file_path.unlink()
     
 if __name__ == '__main__':
     analyse_ball(BALL)

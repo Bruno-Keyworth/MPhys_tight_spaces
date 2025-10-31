@@ -6,7 +6,6 @@ Created on Sun Oct 12 15:49:42 2025
 """
 
 import cv2
-import os
 import numpy as np
 import matplotlib.pyplot as plt
 from get_tube_ROI import calc_tube_left_right
@@ -80,6 +79,10 @@ def get_rect_with_errors(ROI, tube_left):
 
 def find_ball_position(img_path, disp=False):
     
+    filename = img_path.name
+    if filename.split('_')[0]=='empty':
+        return None
+    
     img = cv2.imread(str(img_path), cv2.IMREAD_GRAYSCALE)
     if img is None:
         return None
@@ -91,26 +94,24 @@ def find_ball_position(img_path, disp=False):
     print(f"Image: {img_path.name}")
     rect = get_rect_with_errors(ROI, tube_left)
     
+    if disp:
+        #plots image with rectangle on it
+        fig, ax = plt.subplots()
+        ax.imshow(img, cmap='gray')
+        ax.axvline(tube_left)                       
+        ax.axvline(tube_right)
     if rect is None:
-        os.remove(img_path)
+        img_path.rename(img_path.with_name('empty_'+filename))
+        plt.title(img_path.parent.name +'\n'+ filename + '\nempty')
         return None
-    if len(rect[0]) == 0 or len(rect[1]) == 0 or len(img) == 0:
-        mean_rect = np.full(3, np.nan)
-        rect_err = np.full(3, np.nan)
-    else:
-        mean_rect = np.array(rect[0]) / len(img)
-        rect_err = np.array(rect[1]) / len(img)
-        rects = rect[2]
-        if disp:
-            #plots image with rectangle on it
-            fig, ax = plt.subplots()
-            ax.imshow(img, cmap='gray')
-            ax.axvline(tube_left)                       
-            ax.axvline(tube_right)
-            for r in rects:
-                ax.add_patch(r)
-            plt.title(img_path.parent.name +'\n'+ img_path.name)
-            plt.show() 
+    mean_rect = np.array(rect[0]) / len(img)
+    rect_err = np.array(rect[1]) / len(img)
+    rects = rect[2]
+    if disp:
+        for r in rects:
+            ax.add_patch(r)
+        plt.title(img_path.parent.name +'\n'+ filename)
+        plt.show() 
         
     file_name = img_path.name
     timestamp = file_name.split("_")[1].split(".")[0]
