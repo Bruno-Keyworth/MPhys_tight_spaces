@@ -13,7 +13,7 @@ from read_ASCII_timestamp import sort_folder
 import numpy as np
 import os
 
-BALL = 'ball3_hold_method'   
+BALL = 'ball4_hold_method'   
 
 def redo_pressure(ball, pressure, version=None):
     """
