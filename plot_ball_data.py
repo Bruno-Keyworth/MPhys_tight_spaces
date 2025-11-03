@@ -16,11 +16,12 @@ def power_law(beta, x):
 def true_power_law(beta, x):
     return beta[1] * x**beta[0]
 
-def errorbar(data, dimensions=False):
-    ax = plt.gca()
+def _errorbar(data, dimensions=False, label=None, ax=None):
+    if ax is None:
+        ax = plt.gca()
     ax.errorbar(data[:, 1], data[:, 0], xerr=data[:, 2], yerr=data[:, 3], fmt='o',
-    linestyle='', color='black', markerfacecolor='red', markeredgecolor='black',
-    markersize=4, ecolor='black', elinewidth=0.8, markeredgewidth=0.5)
+    linestyle='', markeredgecolor='black',
+    markersize=4, elinewidth=0.8, markeredgewidth=0.5, label=label)
     if dimensions:
         ax.set_xlabel('Speed (m/s)')
     else:
@@ -37,7 +38,7 @@ def plot_ball_data(ball, data, version=''):
     save_name = f'speed_pressure_{version or ""}.png'
 
     beta, sd_beta = fit_power_law_odr(data)
-    
+
     fit_results = '\n'+fr" $\alpha$ = {beta[0]:.2f} ± {sd_beta[0]:.2f}"+'\n'+\
     fr"b = {beta[1]:.2f} ± {sd_beta[1]:.2f}"+'\n'+fr"  a = {beta[2]:.2f} ± {sd_beta[2]:.2f}"
     
@@ -46,7 +47,7 @@ def plot_ball_data(ball, data, version=''):
 
     fig, ax = plt.subplots()
     ax.plot(x, y, color = "blue",  label = r"$y=a+bx^\alpha$" + fit_results)
-    errorbar(data, dimensions)
+    _errorbar(data, dimensions)
     if dimensions:
         ax.set_ylabel('Pressure (Pa)')
     else:
@@ -67,7 +68,7 @@ def plot_ball_data(ball, data, version=''):
     
     fig, ax = plt.subplots()
     ax.plot(x, y_fit_corr, color='blue', label=r"$y' = (y-a) = bx^\alpha$" + fit_results)
-    errorbar(data, dimensions)
+    _errorbar(data, dimensions)
     if dimensions:
         ax.set_ylabel(r'$y - a$ (Pa)')
     else:

@@ -14,7 +14,7 @@ from make_dimensionless import make_dimensionless
 import numpy as np
 import os
 
-BALL = 'ball3_hold_method'   
+BALL = 'ball3'   
 
 def redo_pressure(ball, pressure, version=None):
     """
@@ -71,6 +71,7 @@ def analyse_ball(ball, redo=False, version=None):
     plot_ball_data(ball, data, version=(version or ''))
     dimensionless_data = make_dimensionless(data, ball)
     plot_ball_data(ball, dimensionless_data, version = (version or '') + '_dimensionless')
+    np.savetxt(MASTER_FOLDER / ball / 'dimensionless_data.txt', dimensionless_data)
 
 def _update_data(folders, file_path):
     """

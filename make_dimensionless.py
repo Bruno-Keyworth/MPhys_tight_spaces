@@ -14,9 +14,9 @@ VISCOCITY_ERR = 0.0028
 
 # Estimate, we need to measure
 TUBE_DIAM = 0.01
-TUBE_DIAM_ERR = 0.001
-TUBE_THICK = 0.001
-TUBE_THICK_ERR = 0.0005
+TUBE_DIAM_ERR = 0.0001
+TUBE_THICK = 0.0005
+TUBE_THICK_ERR = 0.0001
 
 ball_size_err = 0.0001
 ball_sizes = { #metres
