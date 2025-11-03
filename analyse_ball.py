@@ -10,10 +10,11 @@ from get_folderpaths import get_folderpaths, MASTER_FOLDER, get_folder
 from find_ball_speed import find_ball_speed
 from plot_ball_data import plot_ball_data
 from read_ASCII_timestamp import sort_folder
+from make_dimensionless import make_dimensionless
 import numpy as np
 import os
 
-BALL = 'ball4_hold_method'   
+BALL = 'ball3_hold_method'   
 
 def redo_pressure(ball, pressure, version=None):
     """
@@ -34,7 +35,9 @@ def redo_pressure(ball, pressure, version=None):
     file_path = MASTER_FOLDER / ball / 'speed_pressure.txt'
     
     data = _update_data(folder, file_path)
-    plot_ball_data(ball, data, version=version)
+    plot_ball_data(ball, data, version=(version or ''))
+    dimensionless_data = make_dimensionless(data, ball)
+    plot_ball_data(ball, dimensionless_data, version = (version or '') + '_dimensionless')
     
 def _ensure_file_initialized(file_path, folders):
     if not file_path.exists():
@@ -65,7 +68,9 @@ def analyse_ball(ball, redo=False, version=None):
     else:
         data = _update_data(folders, file_path)
         
-    plot_ball_data(ball, data, version=version)
+    plot_ball_data(ball, data, version=(version or ''))
+    dimensionless_data = make_dimensionless(data, ball)
+    plot_ball_data(ball, dimensionless_data, version = (version or '') + '_dimensionless')
 
 def _update_data(folders, file_path):
     """

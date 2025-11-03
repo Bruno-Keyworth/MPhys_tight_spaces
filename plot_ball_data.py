@@ -16,15 +16,23 @@ def power_law(beta, x):
 def true_power_law(beta, x):
     return beta[1] * x**beta[0]
 
-def errorbar(data):
+def errorbar(data, dimensions=False):
     ax = plt.gca()
     ax.errorbar(data[:, 1], data[:, 0], xerr=data[:, 2], yerr=data[:, 3], fmt='o',
     linestyle='', color='black', markerfacecolor='red', markeredgecolor='black',
     markersize=4, ecolor='black', elinewidth=0.8, markeredgewidth=0.5)
-    ax.set_xlabel('Speed (m/s)')
+    if dimensions:
+        ax.set_xlabel('Speed (m/s)')
+    else:
+        ax.set_xlabel(r'$\lambda$')
     ax.legend(framealpha=0)
 
-def plot_ball_data(ball, data, version=None):
+def plot_ball_data(ball, data, version=''):
+    
+    if version.split('_')[-1] == 'dimensionless':
+        dimensions = False
+    else:
+        dimensions = True
     
     save_name = f'speed_pressure_{version or ""}.png'
 
@@ -38,8 +46,11 @@ def plot_ball_data(ball, data, version=None):
 
     fig, ax = plt.subplots()
     ax.plot(x, y, color = "blue",  label = r"$y=a+bx^\alpha$" + fit_results)
-    errorbar(data)
-    ax.set_ylabel('Pressure (Pa)')
+    errorbar(data, dimensions)
+    if dimensions:
+        ax.set_ylabel('Pressure (Pa)')
+    else:
+        ax.set_ylabel('Dimensionless Pressure')
     ax.set_title(ball)
 
     plt.savefig(MASTER_FOLDER / ball / save_name, dpi=300)
@@ -56,8 +67,11 @@ def plot_ball_data(ball, data, version=None):
     
     fig, ax = plt.subplots()
     ax.plot(x, y_fit_corr, color='blue', label=r"$y' = (y-a) = bx^\alpha$" + fit_results)
-    errorbar(data)
-    ax.set_ylabel(r"$y - a$ (Pa)")
+    errorbar(data, dimensions)
+    if dimensions:
+        ax.set_ylabel(r'$y - a$ (Pa)')
+    else:
+        ax.set_ylabel(r'Dimensionless Pressure $y - a$')
     ax.set_title(ball + ' (log–log straightened)')
     ax.set_yscale('log')
     ax.set_xscale('log')
