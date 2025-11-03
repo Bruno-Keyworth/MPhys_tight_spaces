@@ -23,7 +23,7 @@ else:
     MASTER_FOLDER = Path(r"D:\2025-26 MPhys Project") / 'new_camera'
     
 def get_folder(ball, pressure):
-    folder = MASTER_FOLDER / ball / f'{pressure}mbar'
+    folder = MASTER_FOLDER / ball / f'{int(pressure/100)}mbar'
     data_dict = read_pressure_data(MASTER_FOLDER / ball)
     if data_dict is not None:
         values = data_dict[pressure]

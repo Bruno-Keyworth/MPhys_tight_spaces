@@ -40,7 +40,6 @@ def ball_comparison():
         # Ensure it's a directory (e.g., "ball1", "ball2", ...)
         if os.path.isdir(folder_path):
             file_path = os.path.join(folder_path, "dimensionless_data.txt")
-            file_path2 = os.path.join(folder_path, "speed_pressure.txt")
             if folder_name in ['ball3', 'ball4']:
                 ax = axes[0]
             elif folder_name in ['ball3_hold_method', 'ball4_hold_method']:
@@ -51,7 +50,6 @@ def ball_comparison():
             if os.path.isfile(file_path):
                 try:
                     data = np.genfromtxt(file_path)
-                    #data = make_dimensionless(data, folder_name.split('_')[0])
                     _add_to_plot(data, label=folder_name, ax=ax)
                 
                 except Exception as e:
@@ -61,7 +59,7 @@ def ball_comparison():
     for ax in axes:
         ax.set_xlabel(r"$\lambda$")
         ax.set_ylabel("Dimensionless Pressure")
-        ax.set_title("Speed vs Pressure for All Balls")
+        #ax.set_title("Speed vs Pressure for All Balls")
         ax.legend(framealpha=0)
         ax.set_yscale('log')
         ax.set_xscale('log')
