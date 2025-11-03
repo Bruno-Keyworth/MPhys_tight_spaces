@@ -14,7 +14,7 @@ from make_dimensionless import make_dimensionless
 import numpy as np
 import os
 
-BALL = 'ball3_hold_method'   
+BALL = 'ball2'   
 
 def redo_pressure(ball, pressure, version=None):
     """
@@ -35,9 +35,7 @@ def redo_pressure(ball, pressure, version=None):
     file_path = MASTER_FOLDER / ball / 'speed_pressure.txt'
     
     data, dimless_data = _update_data(folder, file_path)
-    old = data
     plot_ball_data(ball, data, version=(version or ''))
-    print(np.array_equal(old, data))
     plot_ball_data(ball, dimless_data, version = (version or '') + '_dimensionless')
     
 def _ensure_file_initialized(file_path, folders):
@@ -66,7 +64,7 @@ def analyse_ball(ball, redo=False, version=None):
         dimless_data = np.genfromtxt(file_path.parent / "dimensionless_data.txt")
     else:
         data, dimless_data = _update_data(folders, file_path)
-        
+
     plot_ball_data(ball, data, version=(version or ''))
     plot_ball_data(ball, dimless_data, version = (version or '') + '_dimensionless')
 

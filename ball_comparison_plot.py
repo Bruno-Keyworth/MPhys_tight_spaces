@@ -11,7 +11,6 @@ import numpy as np
 from get_folderpaths import MASTER_FOLDER
 from fit_power_law_odr import fit_power_law_odr
 from plot_ball_data import _errorbar, true_power_law
-from make_dimensionless import make_dimensionless
 
 def _add_to_plot(data, label, ax=None):
     if ax is None:
@@ -40,7 +39,8 @@ def ball_comparison():
         # Ensure it's a directory (e.g., "ball1", "ball2", ...)
         if os.path.isdir(folder_path):
             file_path = os.path.join(folder_path, "dimensionless_data.txt")
-            if folder_name in ['ball3', 'ball4']:
+
+            if folder_name in ['ball3', 'ball4', 'ball1', 'ball2']:
                 ax = axes[0]
             elif folder_name in ['ball3_hold_method', 'ball4_hold_method']:
                 ax = axes[1]
