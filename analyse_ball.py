@@ -14,7 +14,7 @@ from make_dimensionless import make_dimensionless
 import numpy as np
 import os
 
-BALL = 'ball2'   
+BALL = 'ball3'   
 
 def redo_pressure(ball, pressure, version=None):
     """
@@ -49,7 +49,7 @@ def _ensure_file_initialized(file_path, folders):
         return False
     return True
 
-def analyse_ball(ball, redo=False, version=None):
+def analyse_ball(ball, redo=False, version=None, plot=True):
     sort_folder(MASTER_FOLDER / ball)
     folders = get_folderpaths(ball, version)
     file_path = MASTER_FOLDER / ball / f'speed_pressure{version or ""}.txt'
@@ -64,9 +64,10 @@ def analyse_ball(ball, redo=False, version=None):
         dimless_data = np.genfromtxt(file_path.parent / "dimensionless_data.txt")
     else:
         data, dimless_data = _update_data(folders, file_path)
-
-    plot_ball_data(ball, data, version=(version or ''))
-    plot_ball_data(ball, dimless_data, version = (version or '') + '_dimensionless')
+        
+    if plot:
+        plot_ball_data(ball, data, version=(version or ''))
+        plot_ball_data(ball, dimless_data, version = (version or '') + '_dimensionless')
 
 def _update_data(folders, file_path):
     """
@@ -80,6 +81,8 @@ def _update_data(folders, file_path):
 
         data[data[:, 0]==pressure, 1] = speed
         data[data[:, 0]==pressure, 2] = error
+        
+    data[:, 0] -= 5800 * data[:, 1]
 
     dimensionless_data = make_dimensionless(data, ball=file_path.parent.name)
     np.savetxt(file_path, data)

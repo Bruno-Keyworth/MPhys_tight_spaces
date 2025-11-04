@@ -9,8 +9,8 @@ import numpy as np
 # From last year report
 YOUNG_MODULUS = 1.99e6 #Pa
 YOUNG_MODULUS_ERR = 1.36e5
-VISCOCITY = 0.0729
-VISCOCITY_ERR = 0.0028
+VISCOSITY = 0.0729 #Pas
+VISCOSITY_ERR = 0.0028
 
 # Estimate, we need to measure
 TUBE_RADIUS = 0.00488
@@ -41,7 +41,7 @@ def _get_delta3(R, R_err=ball_size_err, a=TUBE_RADIUS, a_err=TUBE_RADIUS_ERR):
     return delta3, delta3_err
 
 def _get_lambda(V, V_err, R, R_err=ball_size_err, a=TUBE_RADIUS, a_err=TUBE_RADIUS_ERR,
-                E=YOUNG_MODULUS, E_err=YOUNG_MODULUS_ERR, mu=VISCOCITY, mu_err=VISCOCITY_ERR,
+                E=YOUNG_MODULUS, E_err=YOUNG_MODULUS_ERR, mu=VISCOSITY, mu_err=VISCOSITY_ERR,
                 b=TUBE_THICK, b_err=TUBE_THICK_ERR):
     
     delta3, delta3_err = _get_delta3(R, R_err, a, a_err)

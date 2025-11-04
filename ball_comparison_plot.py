@@ -16,6 +16,7 @@ def _add_to_plot(data, label, ax=None):
     if ax is None:
         ax = plt.gca()
     print(label)
+    
     beta, sd_beta = fit_power_law_odr(data)
     
     data[:, 0] -= beta[2]

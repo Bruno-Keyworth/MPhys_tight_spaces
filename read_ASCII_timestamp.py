@@ -60,6 +60,6 @@ def sort_image(img_path, delete_original=True):
 def sort_folder(folder_path):
     for filepath in folder_path.glob("*.tif"):
         sort_image(filepath)
-        print(filepath + ": COMPLETE")
+        print(filepath.name + ": COMPLETE")
     
     
