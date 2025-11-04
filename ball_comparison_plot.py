@@ -28,11 +28,11 @@ def _add_to_plot(data, label, ax=None):
     
     # Plot data with label
     _errorbar(data, label=label, ax=ax)
-    ax.plot(x, y, label=label + fr': $\alpha$={beta[0]:.2f}±{sd_beta[0]:.2f}')
+    ax.plot(x, y, label=label + fr': $\alpha$={beta[0]:.2f}±{sd_beta[0]:.2f}' + '\n' + f'C={beta[1]:.2f}±{sd_beta[1]:.2f}')
     
 def ball_comparison():
     
-    _, axes = plt.subplots(2, figsize=(6, 6))
+    _, axes = plt.subplots(ncols = 2, figsize=(12, 8))
     
     for folder_name in os.listdir(MASTER_FOLDER):
         folder_path = os.path.join(MASTER_FOLDER, folder_name)
@@ -41,9 +41,9 @@ def ball_comparison():
         if os.path.isdir(folder_path):
             file_path = os.path.join(folder_path, "dimensionless_data.txt")
 
-            if folder_name in ['ball3', 'ball4', 'ball1', 'ball2']:
+            if folder_name in ['ball3', 'ball4', 'ball1', 'ball2', 'ball3_repeat']:
                 ax = axes[0]
-            elif folder_name in ['ball3_hold_method', 'ball4_hold_method']:
+            elif folder_name in ['ball3_hold_method', 'ball4_hold_method', 'ball3_hold_repeat']:
                 ax = axes[1]
             else:
                 continue
@@ -64,7 +64,18 @@ def ball_comparison():
         ax.legend(framealpha=0)
         ax.set_yscale('log')
         ax.set_xscale('log')
-    plt.tight_layout()
+        
+    plt.tight_layout(rect=[0, 0.5, 1, 1])  # Leave space at the bottom for legends
+
+    # Add legends below each subplot
+    for i, ax in enumerate(axes):
+        ax.legend(
+            framealpha=0,
+            loc='upper center',
+            bbox_to_anchor=(0.5, -0.1),  # position below each subplot
+            ncol=2,
+            fontsize='small'
+        )
     plt.savefig(MASTER_FOLDER / ('ball_comparison'), dpi=300)
     
     # Show the plot
