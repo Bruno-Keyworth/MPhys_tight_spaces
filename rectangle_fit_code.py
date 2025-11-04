@@ -95,6 +95,7 @@ def find_ball_position(img_path, disp=False):
     rect = get_rect_with_errors(ROI, tube_left)
     
     if disp:
+        plt.close('all')
         #plots image with rectangle on it
         fig, ax = plt.subplots()
         ax.imshow(img, cmap='gray')

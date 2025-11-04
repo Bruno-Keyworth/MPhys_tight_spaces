@@ -14,7 +14,7 @@ from make_dimensionless import make_dimensionless
 import numpy as np
 import os
 
-BALL = 'ball3'   
+BALL = 'ball3_hold_repeat'   
 
 def redo_pressure(ball, pressure, version=None):
     """
@@ -81,8 +81,6 @@ def _update_data(folders, file_path):
 
         data[data[:, 0]==pressure, 1] = speed
         data[data[:, 0]==pressure, 2] = error
-        
-    data[:, 0] -= 5800 * data[:, 1]
 
     dimensionless_data = make_dimensionless(data, ball=file_path.parent.name)
     np.savetxt(file_path, data)

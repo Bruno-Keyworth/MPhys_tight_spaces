@@ -20,6 +20,7 @@ TUBE_THICK_ERR = 0.00007
 
 ball_size_err = 0.0001
 ball_sizes = { #metres
+    'ball0': 0.009,
     'ball1': 0.011,
     'ball2': 0.012,
     'ball3': 0.014,

@@ -18,20 +18,20 @@ def plot_small_ball(ball):
     
     data = np.genfromtxt(filepath)
     
-    parameters = np.polyfit(data[:, 1], data[:, 0], 1)
+    parameters = np.polyfit(data[2:-3, 1], data[2:-3, 0], 1)
     
     x = np.linspace(np.min(data[:, 1]), np.max(data[:, 1]), 2)
     y = np.polyval(parameters, x)
     
     fig, ax = plt.subplots()
     ax.plot(x, y, label=f'Gradient = {parameters[0]}' + '\n' + f'Intercept = {parameters[1]}')
-    _errorbar(data)
-    plt.savefig(MASTER_FOLDER / ball / 'plot.txt', dpi=300)
+    _errorbar(data, dimensions=True)
+    plt.savefig(MASTER_FOLDER / ball / 'plot.png', dpi=300)
     
 
 def analyse_small_ball(ball=BALL):
     
-    analyse_ball(ball)
+    analyse_ball(ball, plot=False)
     plot_small_ball(ball)
     
 if __name__ == '__main__':
