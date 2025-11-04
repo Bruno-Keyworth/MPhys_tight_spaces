@@ -11,6 +11,8 @@ import numpy as np
 from get_folderpaths import MASTER_FOLDER
 from fit_power_law_odr import fit_power_law_odr
 from plot_ball_data import _errorbar, true_power_law
+from make_dimensionless import ball_sizes
+from value_to_string import value_to_string
 
 def _add_to_plot(data, label, ax=None):
     if ax is None:
@@ -28,13 +30,13 @@ def _add_to_plot(data, label, ax=None):
     
     # Plot data with label
     _errorbar(data, label=label, ax=ax)
-    ax.plot(x, y, label=label + fr': $\alpha$={beta[0]:.2f}±{sd_beta[0]:.2f}' + '\n' + f'C={beta[1]:.2f}±{sd_beta[1]:.2f}')
+    ax.plot(x, y, label=label +': \n' + fr'$\alpha$={value_to_string(beta[0], sd_beta[0])}' + '\n' + fr'$\beta$={value_to_string(beta[1], sd_beta[1])}')
     
 def ball_comparison():
     
     _, axes = plt.subplots(ncols = 2, figsize=(12, 8))
     
-    for folder_name in os.listdir(MASTER_FOLDER):
+    for folder_name in sorted(os.listdir(MASTER_FOLDER)):
         folder_path = os.path.join(MASTER_FOLDER, folder_name)
         
         # Ensure it's a directory (e.g., "ball1", "ball2", ...)
@@ -51,30 +53,30 @@ def ball_comparison():
             if os.path.isfile(file_path):
                 try:
                     data = np.genfromtxt(file_path)
-                    _add_to_plot(data, label=folder_name, ax=ax)
+                    ball_size = ball_sizes[folder_name.split("_")[0]]
+                    _add_to_plot(data, label=f'Diametre = {ball_size:g} mm', ax=ax)
                 
                 except Exception as e:
                     print(f"Error reading {file_path}: {e}")
     
     # Add labels and legend
     for ax in axes:
-        ax.set_xlabel(r"$\lambda$")
-        ax.set_ylabel("Dimensionless Pressure")
-        #ax.set_title("Speed vs Pressure for All Balls")
+        ax.set_xlabel(r"Dimensionless Speed, $\lambda$")
+        ax.set_ylabel("Dimensionless Pressure, P")
+        ax.set_title(r"$P = \beta \lambda^\alpha$")
         ax.legend(framealpha=0)
         ax.set_yscale('log')
         ax.set_xscale('log')
         
-    plt.tight_layout(rect=[0, 0.5, 1, 1])  # Leave space at the bottom for legends
+    plt.tight_layout(rect=[0, 0.4, 1, 1])  # Leave space at the bottom for legends
 
     # Add legends below each subplot
     for i, ax in enumerate(axes):
         ax.legend(
             framealpha=0,
             loc='upper center',
-            bbox_to_anchor=(0.5, -0.1),  # position below each subplot
-            ncol=2,
-            fontsize='small'
+            bbox_to_anchor=(0.5, -0.12),  # position below each subplot
+            ncol=2
         )
     plt.savefig(MASTER_FOLDER / ('ball_comparison'), dpi=300)
     
