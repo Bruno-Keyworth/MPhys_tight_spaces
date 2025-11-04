@@ -13,10 +13,10 @@ VISCOCITY = 0.0729
 VISCOCITY_ERR = 0.0028
 
 # Estimate, we need to measure
-TUBE_DIAM = 0.01
-TUBE_DIAM_ERR = 0.0001
-TUBE_THICK = 0.0005
-TUBE_THICK_ERR = 0.0001
+TUBE_RADIUS = 0.00488
+TUBE_RADIUS_ERR = 0.00014
+TUBE_THICK = 0.00048
+TUBE_THICK_ERR = 0.00007
 
 ball_size_err = 0.0001
 ball_sizes = { #metres
@@ -27,7 +27,7 @@ ball_sizes = { #metres
     'ball5': 0.018,
     }
 
-def _get_L(R, R_err=ball_size_err, a=TUBE_DIAM/2, a_err=TUBE_DIAM_ERR/2):
+def _get_L(R, R_err=ball_size_err, a=TUBE_RADIUS, a_err=TUBE_RADIUS_ERR):
     L = 2 * np.sqrt(R**2 - a**2)
     L_err = np.sqrt(
         ((2 * R / np.sqrt(R**2 - a**2)) * R_err)**2 +
@@ -35,12 +35,12 @@ def _get_L(R, R_err=ball_size_err, a=TUBE_DIAM/2, a_err=TUBE_DIAM_ERR/2):
     )
     return L, L_err
 
-def _get_delta3(R, R_err=ball_size_err, a=TUBE_DIAM/2, a_err=TUBE_DIAM_ERR/2):
+def _get_delta3(R, R_err=ball_size_err, a=TUBE_RADIUS, a_err=TUBE_RADIUS_ERR):
     delta3 = (R - a)**3
     delta3_err = 3 * (R - a)**2 * np.sqrt(R_err**2 + a_err**2)
     return delta3, delta3_err
 
-def _get_lambda(V, V_err, R, R_err=ball_size_err, a=TUBE_DIAM/2, a_err=TUBE_DIAM_ERR/2,
+def _get_lambda(V, V_err, R, R_err=ball_size_err, a=TUBE_RADIUS, a_err=TUBE_RADIUS_ERR,
                 E=YOUNG_MODULUS, E_err=YOUNG_MODULUS_ERR, mu=VISCOCITY, mu_err=VISCOCITY_ERR,
                 b=TUBE_THICK, b_err=TUBE_THICK_ERR):
     
@@ -66,7 +66,7 @@ def _get_lambda(V, V_err, R, R_err=ball_size_err, a=TUBE_DIAM/2, a_err=TUBE_DIAM
 def _get_dimensionless_pressure(P, P_err, R, R_err=ball_size_err, 
                                 E=YOUNG_MODULUS, E_err=YOUNG_MODULUS_ERR,
                                 b=TUBE_THICK, b_err=TUBE_THICK_ERR, 
-                                a=TUBE_DIAM/2, a_err=TUBE_DIAM_ERR/2):
+                                a=TUBE_RADIUS, a_err=TUBE_RADIUS_ERR):
     delta = R - a
     delta_err = np.sqrt(R_err**2 + a_err**2)
     
