@@ -14,7 +14,7 @@ from make_dimensionless import make_dimensionless
 import numpy as np
 import os
 
-BALL = 'ball2_hold_repeat'   
+BALL = 'ball1_hold_repeat'   
 
 def redo_pressure(ball, pressure, version=None):
     """

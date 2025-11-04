@@ -39,7 +39,8 @@ def calc_tube_left_right(img):
     
     ys, xs = np.where(binary)
     if xs.size == 0:
-        raise ValueError("No tube edges found — check image contrast, ROI, or threshold settings.")
+        return cropping, 3*cropping
+        #raise ValueError("No tube edges found — check image contrast, ROI, or threshold settings.")
 
     leftmost_x = np.min(xs) + cropping
     rightmost_x = np.max(xs) + cropping

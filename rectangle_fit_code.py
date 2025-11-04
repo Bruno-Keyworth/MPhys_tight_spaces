@@ -60,7 +60,7 @@ def get_rect_with_errors(ROI, tube_left):
     rects = []
     rect_coords = np.empty((0, 3))
     
-    thresh_levels = range(0, 255, 20)
+    thresh_levels = range(30, 100, 10)
     for level in thresh_levels:
         coords, rect = find_rectangle(level, ROI, tube_left)
         if rect is None:

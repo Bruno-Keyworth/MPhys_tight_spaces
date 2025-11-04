@@ -41,9 +41,9 @@ def ball_comparison():
         if os.path.isdir(folder_path):
             file_path = os.path.join(folder_path, "dimensionless_data.txt")
 
-            if folder_name in ['ball3', 'ball4', 'ball1', 'ball2', 'ball3_repeat']:
+            if folder_name in ['ball3', 'ball4', 'ball1_repeat', 'ball2_repeat', 'ball3_repeat']:
                 ax = axes[0]
-            elif folder_name in ['ball3_hold_method', 'ball4_hold_method', 'ball3_hold_repeat']:
+            elif folder_name in ['ball3_hold_method', 'ball4_hold_method', 'ball3_hold_repeat', 'ball1_hold_repeat', 'ball2_hold_repeat']:
                 ax = axes[1]
             else:
                 continue
