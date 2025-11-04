@@ -14,7 +14,7 @@ from make_dimensionless import make_dimensionless
 import numpy as np
 import os
 
-BALL = 'ball3_hold_repeat'   
+BALL = 'ball2_hold_repeat'   
 
 def redo_pressure(ball, pressure, version=None):
     """
@@ -22,13 +22,12 @@ def redo_pressure(ball, pressure, version=None):
     then fits to find the speed. Updates the cached value for this pressure and
     repeats power law fitting. 
     """
-    pressure *= 100
-    folder = get_folder(ball, pressure)
     if version is None:
         speed_path = MASTER_FOLDER / ball / f'{pressure}mbar' / 'position_time.txt'
     else:
         speed_path = MASTER_FOLDER / ball / f'{pressure}mbar_{version}' / 'position_time{version}.txt'
-    
+    pressure *= 100
+    folder = get_folder(ball, pressure)
     if speed_path.exists():
         os.remove(speed_path)
 
