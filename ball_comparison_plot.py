@@ -13,6 +13,14 @@ from fit_power_law_odr import fit_power_law_odr
 from plot_ball_data import _errorbar, true_power_law
 from make_dimensionless import ball_sizes
 from value_to_string import value_to_string
+import matplotlib.colors as mcolors
+
+# pick a colormap
+cmap = plt.get_cmap('viridis', 10)  # '10' = number of distinct colors you want
+
+plt.rcParams['axes.prop_cycle'] = plt.cycler(
+    color=[mcolors.to_hex(cmap(i)) for i in range(cmap.N)]
+)
 
 def _add_to_plot(data, label, ax=None):
     if ax is None:
@@ -43,9 +51,9 @@ def ball_comparison():
         if os.path.isdir(folder_path):
             file_path = os.path.join(folder_path, "dimensionless_data.txt")
 
-            if folder_name in ['ball3', 'ball4', 'ball1_repeat', 'ball2_repeat', 'ball3_repeat']:
+            if folder_name in ['ball3', 'ball4', 'ball1_repeat', 'ball2_repeat', 'ball3_repeat', 'ball5']:
                 ax = axes[0]
-            elif folder_name in ['ball3_hold_method', 'ball4_hold_method', 'ball3_hold_repeat', 'ball1_hold_repeat', 'ball2_hold_repeat']:
+            elif folder_name in ['ball3_hold_method', 'ball4_hold_method', 'ball3_hold_repeat', 'ball1_hold_repeat', 'ball2_hold_repeat', 'ball5_hold']:
                 ax = axes[1]
             else:
                 continue
@@ -58,20 +66,16 @@ def ball_comparison():
                 
                 except Exception as e:
                     print(f"Error reading {file_path}: {e}")
-    
-    # Add labels and legend
-    for ax in axes:
-        ax.set_xlabel(r"Dimensionless Speed, $\lambda$")
-        ax.set_ylabel("Dimensionless Pressure, P")
-        ax.set_title(r"$P = \beta \lambda^\alpha$")
-        ax.legend(framealpha=0)
-        ax.set_yscale('log')
-        ax.set_xscale('log')
         
     plt.tight_layout(rect=[0, 0.4, 1, 1])  # Leave space at the bottom for legends
 
     # Add legends below each subplot
     for i, ax in enumerate(axes):
+        ax.set_xlabel(r"Dimensionless Speed, $\lambda$")
+        ax.set_ylabel("Dimensionless Pressure, P")
+        ax.set_title(r"$P = \beta \lambda^\alpha$")
+        ax.set_yscale('log')
+        ax.set_xscale('log')
         ax.legend(
             framealpha=0,
             loc='upper center',

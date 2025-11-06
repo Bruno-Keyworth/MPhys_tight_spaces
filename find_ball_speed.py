@@ -24,11 +24,13 @@ def get_speed_data(folder, disp):
         
     data = np.genfromtxt(file_path)
     
-    return data[:, 0], data[:, 1], data[:, 2], data[:, 3]
+    return data
 
 def find_ball_speed(folder, disp=False, savefig=False):
     
-    time, position, t_err, p_err = get_speed_data(folder, disp)
+    data = get_speed_data(folder, disp)
+    
+    time, position, t_err, p_err = data[:, 0], data[:, 1], data[:, 2], data[:, 3]
     
     model = odr.Model(linear_func)
 
