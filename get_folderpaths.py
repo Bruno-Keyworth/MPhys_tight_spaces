@@ -20,7 +20,7 @@ if socket.gethostname() == "Brunos-MacBook-Air-2.local":
     else:
         MASTER_FOLDER = Path("/Users/brunokeyworth/Desktop/MPhys/2025-26 MPhys Project") / 'new_camera'
 else:
-    MASTER_FOLDER = Path(r"D:\2025-26 MPhys Project") / 'new_camera'
+    MASTER_FOLDER = Path(r"D:\2025-26 MPhys Project") / 'new_camera' 
     
 def get_folder(ball, pressure):
     folder = MASTER_FOLDER / ball / f'{int(pressure/100)}mbar'
@@ -70,3 +70,19 @@ def get_folderpaths(ball, version=None):
         return updated_subdirs
 
     return subdirs
+
+def get_folder_dict(folders):
+    for method in folders.keys():
+        folders[method] = sorted(folders[method])
+
+    if socket.gethostname() != "Brunos-MacBook-Air-2.local":
+        return {
+            "hold": [MASTER_FOLDER / folder for folder in folders["hold"]],
+            "no_hold": [MASTER_FOLDER / folder for folder in folders["no_hold"]],
+            }
+    return {
+        "no_hold": [MASTER_FOLDER / 'no_hold_method' / folder for folder in folders["no_hold"]],
+        "hold": [MASTER_FOLDER / 'hold_method' / folder for folder in folders["hold"]],
+        }
+    
+    

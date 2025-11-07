@@ -16,11 +16,11 @@ def power_law(beta, x):
 def true_power_law(beta, x):
     return beta[1] * x**beta[0]
 
-def _errorbar(data, dimensions=False, label=None, ax=None):
+def _errorbar(data, dimensions=False, label=None, ax=None, marker=None):
     if ax is None:
         ax = plt.gca()
     ax.errorbar(data[:, 1], data[:, 0], xerr=data[:, 2], yerr=data[:, 3], fmt='o',
-    linestyle='', markeredgecolor='black',
+    linestyle='', markeredgecolor='black', marker =marker,
     markersize=4, elinewidth=0.8, markeredgewidth=0.5, label=label)
     if dimensions:
         ax.set_xlabel('Speed (m/s)')

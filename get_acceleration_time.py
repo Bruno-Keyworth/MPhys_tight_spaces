@@ -121,6 +121,8 @@ def get_accelaration_time(folder):
    # t1 = get_constant_v_region(data)
    
    ax.errorbar(data[:, 0], data[:, 1], xerr=data[:, 2], yerr=data[:, 3], c='b', alpha=0.5)
+   ax.set_title(folder.parent.name + ' ' + folder.name)
+   
    #ax.plot(x, y, c='r')
    # ax.axvline(t0, ls='dashed', c='k')
    # if t1 is not None:
@@ -128,8 +130,8 @@ def get_accelaration_time(folder):
    plt.savefig(folder, dpi=300)
    
 for i in range(5):
-    sort_folder(MASTER_FOLDER / f'ball{i+1}_acceleration')
-    folders = get_folderpaths(f'ball{i+1}_acceleration')
+    sort_folder(MASTER_FOLDER / 'acceleration' / f'ball{i+1}_acceleration')
+    folders = get_folderpaths(f'acceleration/ball{i+1}_acceleration')
     for folder, _, _ in folders:
    
         get_accelaration_time(folder)
