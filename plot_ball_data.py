@@ -28,7 +28,9 @@ def _errorbar(data, dimensions=False, label=None, ax=None, marker=None):
         ax.set_xlabel(r'$\lambda$')
     ax.legend(framealpha=0)
 
-def plot_ball_data(ball, data, version=''):
+def plot_ball_data(folder, data, version=''):
+    
+    ball = folder.name
     
     if version.split('_')[-1] == 'dimensionless':
         dimensions = False
@@ -54,10 +56,10 @@ def plot_ball_data(ball, data, version=''):
         ax.set_ylabel('Dimensionless Pressure')
     ax.set_title(ball)
 
-    plt.savefig(MASTER_FOLDER / ball / save_name, dpi=300)
+    plt.savefig(folder / save_name, dpi=300)
     ax.set_yscale('log')
     ax.set_xscale('log')
-    plt.savefig(MASTER_FOLDER / ball / ('log_' + save_name), dpi=300)
+    plt.savefig(folder / ('log_' + save_name), dpi=300)
     plt.show()
     
     data[:, 0] -= beta[2]
@@ -77,5 +79,5 @@ def plot_ball_data(ball, data, version=''):
     ax.set_yscale('log')
     ax.set_xscale('log')
 
-    plt.savefig(MASTER_FOLDER / ball / ('log_linear_' + save_name), dpi=300)
+    plt.savefig(folder / ('log_linear_' + save_name), dpi=300)
     plt.show()

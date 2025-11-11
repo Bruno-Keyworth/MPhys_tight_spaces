@@ -14,9 +14,11 @@ from make_dimensionless import make_dimensionless
 import numpy as np
 import os
 
-BALL = 'ball1_hold_repeat'   
+FLUID = 'oil'
+METHOD = 'no-hold'
+BALL = 'ball1_repeat'   
 
-def redo_pressure(ball, pressure, version=None):
+def redo_pressure(ball, pressure, version=None, fluid=FLUID, method=METHOD):
     """
     Reruns the code to find position for images at a given pressure (in mbar), 
     then fits to find the speed. Updates the cached value for this pressure and
@@ -27,15 +29,17 @@ def redo_pressure(ball, pressure, version=None):
     else:
         speed_path = MASTER_FOLDER / ball / f'{pressure}mbar_{version}' / 'position_time{version}.txt'
     pressure *= 100
-    folder = get_folder(ball, pressure)
+    folder = get_folder(ball, pressure, fluid=fluid, method=METHOD)
     if speed_path.exists():
         os.remove(speed_path)
+    
+    ball_folder = MASTER_FOLDER / (fluid or "") / (method or "") / ball
 
-    file_path = MASTER_FOLDER / ball / 'speed_pressure.txt'
+    file_path = ball_folder / 'speed_pressure.txt'
     
     data, dimless_data = _update_data(folder, file_path)
-    plot_ball_data(ball, data, version=(version or ''))
-    plot_ball_data(ball, dimless_data, version = (version or '') + '_dimensionless')
+    plot_ball_data(ball_folder, data, version=(version or ''))
+    plot_ball_data(ball_folder, dimless_data, version = (version or '') + '_dimensionless')
     
 def _ensure_file_initialized(file_path, folders):
     if not file_path.exists():
@@ -48,10 +52,11 @@ def _ensure_file_initialized(file_path, folders):
         return False
     return True
 
-def analyse_ball(ball, redo=False, version=None, plot=True):
-    sort_folder(MASTER_FOLDER / ball)
-    folders = get_folderpaths(ball, version)
-    file_path = MASTER_FOLDER / ball / f'speed_pressure{version or ""}.txt'
+def analyse_ball(ball, redo=False, version=None, plot=True, fluid=FLUID, method=METHOD):
+    ball_folder = MASTER_FOLDER / (fluid or "") / (method or "") / ball
+    sort_folder(ball_folder)
+    folders = get_folderpaths(ball, version, fluid=fluid, method=method)
+    file_path = ball_folder / f'speed_pressure{version or ""}.txt'
     data_exists = _ensure_file_initialized(file_path, folders)
     if redo:
         for folder, _, _ in folders:
@@ -65,8 +70,8 @@ def analyse_ball(ball, redo=False, version=None, plot=True):
         data, dimless_data = _update_data(folders, file_path)
         
     if plot:
-        plot_ball_data(ball, data, version=(version or ''))
-        plot_ball_data(ball, dimless_data, version = (version or '') + '_dimensionless')
+        plot_ball_data(ball_folder, data, version=(version or ''))
+        plot_ball_data(ball_folder, dimless_data, version = (version or '') + '_dimensionless')
 
 def _update_data(folders, file_path):
     """

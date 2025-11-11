@@ -22,8 +22,8 @@ if socket.gethostname() == "Brunos-MacBook-Air-2.local":
 else:
     MASTER_FOLDER = Path(r"D:\2025-26 MPhys Project") / 'new_camera' 
     
-def get_folder(ball, pressure):
-    folder = MASTER_FOLDER / ball / f'{int(pressure/100)}mbar'
+def get_folder(ball, pressure, fluid=None, method=None):
+    folder = MASTER_FOLDER / (fluid or "") / (method or "") / ball / f'{int(pressure/100)}mbar'
     data_dict = read_pressure_data(MASTER_FOLDER / ball)
     if data_dict is not None:
         values = data_dict[pressure]
@@ -31,10 +31,10 @@ def get_folder(ball, pressure):
         values = [pressure, HYDROSTATIC_ERROR]
     return [(folder, values[0], np.sqrt(values[1]**2 + HYDROSTATIC_ERROR**2))]
 
-def get_folderpaths(ball, version=None):
+def get_folderpaths(ball, version=None, fluid=None, method=None):
     # Determine master folder
 
-    base_path = MASTER_FOLDER / ball
+    base_path = MASTER_FOLDER / (fluid or "") / (method or "") / ball
     
     data_dict = read_pressure_data(base_path)
 
