@@ -69,11 +69,11 @@ def ball_comparison():
     
     axes = {
         "hold": axes[1],
-        "no_hold": axes[0],
+        "no-hold": axes[0],
         }
     
     folders_to_plot = {
-        "no_hold": ['ball3', 'ball4', 'ball1_repeat', 'ball2_repeat', 'ball3_repeat', 'ball5'],
+        "no-hold": ['ball3', 'ball4', 'ball1_repeat', 'ball2_repeat', 'ball3_repeat', 'ball5'],
         "hold":    ['ball3_hold_method', 'ball4_hold_method', 'ball3_hold_repeat', 
                     'ball1_hold_repeat', 'ball2_hold_repeat', 'ball5_hold'],
     }

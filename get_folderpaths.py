@@ -78,11 +78,11 @@ def get_folder_dict(folders):
     if socket.gethostname() != "Brunos-MacBook-Air-2.local":
         return {
             "hold": [MASTER_FOLDER / folder for folder in folders["hold"]],
-            "no_hold": [MASTER_FOLDER / folder for folder in folders["no_hold"]],
+            "no-hold": [MASTER_FOLDER / folder for folder in folders["no_hold"]],
             }
     return {
-        "no_hold": [MASTER_FOLDER / 'no_hold_method' / folder for folder in folders["no_hold"]],
-        "hold": [MASTER_FOLDER / 'hold_method' / folder for folder in folders["hold"]],
+        "no-hold": [MASTER_FOLDER / 'no-hold' / folder for folder in folders["no_hold"]],
+        "hold": [MASTER_FOLDER / 'hold' / folder for folder in folders["hold"]],
         }
     
     
