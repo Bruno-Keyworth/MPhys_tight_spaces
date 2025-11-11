@@ -26,6 +26,20 @@ def get_speed_data(folder, disp):
     
     return data
 
+def _get_effective_error(gradient, x_err, y_err):
+    
+    return y_err + np.absolute(x_err * gradient)
+
+def plot_errors(time, position, t_err, p_err, gradient):
+    
+    ax = plt.gca()
+    
+    error = _get_effective_error(gradient, t_err, p_err)
+    upper_bound = position + error
+    lower_bound = position - error
+    
+    ax.fill_between(time, lower_bound, upper_bound, alpha=0.4)
+
 def find_ball_speed(folder, disp=False, savefig=False):
     
     data = get_speed_data(folder, disp)
@@ -49,11 +63,10 @@ def find_ball_speed(folder, disp=False, savefig=False):
         
         x_fit = np.linspace(0, np.max(time), 2)
         y_fit = output.beta[0] * x_fit + output.beta[1]
-        
+
         fig, ax1 = plt.subplots()
-        ax1.errorbar(time, position, xerr=t_err, yerr=p_err, fmt='o',
-        linestyle='', color='black', markerfacecolor='red', markeredgecolor='black',
-        markersize=4, ecolor='black', elinewidth=0.8, markeredgewidth=0.5)
+        plot_errors(time, position, t_err, p_err, output.beta[0])
+        ax1.scatter(time, position)
         ax1.plot(x_fit, y_fit, color = "blue", linewidth = 2, label = f"gradient = ({output.beta[0]:.2f} ± {output.sd_beta[0]:.2f})\n intercept = {output.beta[1]:.2f} ± {output.sd_beta[1]:.2f}")
         ax1.set_ylabel("distance (cm)")
         ax1.set_xlabel("time (s)")
