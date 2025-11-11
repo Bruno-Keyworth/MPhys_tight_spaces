@@ -14,8 +14,9 @@ from read_pressure_data import read_pressure_data
 
 FLUID_DEPTH_ERROR = 0.01 #m
 FLUID_DENSITY = { # kg/m^3
-    "oil": [907, 45], # value, error
-    "glycerol": [1261, 2]
+ # value, error 
+    "oil": [907, 45], # from Thomas Sigsworth report
+    "glycerol": [1261, 2] # from google
     }
 g = 9.81 #m/s^2
 
