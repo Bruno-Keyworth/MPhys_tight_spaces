@@ -72,17 +72,15 @@ def get_folderpaths(ball, version=None, fluid=None, method=None):
     return subdirs
 
 def get_folder_dict(folders):
-    for method in folders.keys():
-        folders[method] = sorted(folders[method])
+    for fluid in folders.keys():
+        for method in folders[fluid].keys():
+            folders[fluid][method] = sorted(folders[fluid][method])
 
-    if socket.gethostname() != "Brunos-MacBook-Air-2.local":
-        return {
-            "hold": [MASTER_FOLDER / folder for folder in folders["hold"]],
-            "no-hold": [MASTER_FOLDER / folder for folder in folders["no_hold"]],
-            }
     return {
-        "no-hold": [MASTER_FOLDER / 'no-hold' / folder for folder in folders["no_hold"]],
-        "hold": [MASTER_FOLDER / 'hold' / folder for folder in folders["hold"]],
+        "oil no-hold": [MASTER_FOLDER / "oil" / 'no-hold' / folder for folder in folders["oil"]["no-hold"]],
+        "oil hold": [MASTER_FOLDER / "oil" / 'hold' / folder for folder in folders["oil"]["hold"]],
+        "glycerol no-hold": [MASTER_FOLDER / "glycerol" / 'no-hold' / folder for folder in folders["glycerol"]["no-hold"]],
+        "glycerol hold": [MASTER_FOLDER / "glycerol" / 'hold' / folder for folder in folders["glycerol"]["hold"]],
         }
     
     

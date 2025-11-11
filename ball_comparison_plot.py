@@ -65,17 +65,25 @@ def _process_folder(folder_path, ax):
     
 def ball_comparison():
     
-    _, axes = plt.subplots(ncols = 2, figsize=(12, 8))
+    _, axes = plt.subplots(ncols = 4, figsize=(24, 8))
     
     axes = {
-        "hold": axes[1],
-        "no-hold": axes[0],
-        }
+        "oil hold": axes[1],
+        "oil no-hold": axes[0],
+        "glycerol hold": axes[3],
+        "glycerol no-hold": axes[2],
+    }
     
     folders_to_plot = {
-        "no-hold": ['ball3', 'ball4', 'ball1_repeat', 'ball2_repeat', 'ball3_repeat', 'ball5'],
-        "hold":    ['ball3_hold_method', 'ball4_hold_method', 'ball3_hold_repeat', 
-                    'ball1_hold_repeat', 'ball2_hold_repeat', 'ball5_hold'],
+        "oil": {
+            "no-hold": ['ball3', 'ball4', 'ball1_repeat', 'ball2_repeat', 'ball3_repeat', 'ball5'],
+            "hold":    ['ball3_hold_method', 'ball4_hold_method', 'ball3_hold_repeat', 
+                        'ball1_hold_repeat', 'ball2_hold_repeat', 'ball5_hold'],
+        },
+        "glycerol": {
+            "no-hold": ['ball1', 'ball3'],
+            "hold": [],
+            }
     }
     folders = get_folder_dict(folders_to_plot)
     
