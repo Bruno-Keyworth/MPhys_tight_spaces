@@ -86,7 +86,7 @@ def _update_data(folders, file_path):
         data[data[:, 0]==pressure, 1] = speed
         data[data[:, 0]==pressure, 2] = error
 
-    dimensionless_data = make_dimensionless(data, ball=file_path.parent.name)
+    dimensionless_data = make_dimensionless(data, file_path)
     np.savetxt(file_path, data)
     np.savetxt(file_path.parent / "dimensionless_data.txt", dimensionless_data)
 

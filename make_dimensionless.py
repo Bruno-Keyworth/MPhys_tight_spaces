@@ -9,8 +9,11 @@ import numpy as np
 # From last year report
 YOUNG_MODULUS = 1.99e6 #Pa
 YOUNG_MODULUS_ERR = 1.36e5
-VISCOSITY = 0.0729 #Pas
-VISCOSITY_ERR = 0.0028
+
+VISCOSITY = { #Pas
+    'oil': [0.0729, 0.0028], #value, error
+    'glycerol': [1.49, 0.01] #from google
+}
 
 # Estimate, we need to measure
 TUBE_RADIUS = 0.00488
@@ -91,9 +94,16 @@ def _get_dimensionless_pressure(P, P_err, R, R_err=ball_size_err,
     return P_dimless, P_dimless_err
     
 
-def make_dimensionless(data, ball):
+def make_dimensionless(data, data_file):
     
-    lamb, error = _get_lambda(data[:, 1], data[:, 2], ball_sizes[ball.split('_')[0]])
-    P, P_err = _get_dimensionless_pressure(data[:, 0], data[:, 3], ball_sizes[ball.split('_')[0]])
+    ball = data_file.parent.name
+    fluid = data_file.parent.parent.parent.name
+    
+    ball_size = ball_sizes[ball.split('_')[0]]
+    
+    viscosity = VISCOSITY[fluid]
+    
+    lamb, error = _get_lambda(data[:, 1], data[:, 2], ball_size, mu=viscosity[0], mu_err=viscosity[1])
+    P, P_err = _get_dimensionless_pressure(data[:, 0], data[:, 3], ball_size)
     
     return np.column_stack((P, lamb, error, P_err))
