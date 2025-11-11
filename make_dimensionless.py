@@ -44,8 +44,8 @@ def _get_delta3(R, R_err=ball_size_err, a=TUBE_RADIUS, a_err=TUBE_RADIUS_ERR):
     delta3_err = 3 * (R - a)**2 * np.sqrt(R_err**2 + a_err**2)
     return delta3, delta3_err
 
-def _get_lambda(V, V_err, R, R_err=ball_size_err, a=TUBE_RADIUS, a_err=TUBE_RADIUS_ERR,
-                E=YOUNG_MODULUS, E_err=YOUNG_MODULUS_ERR, mu=VISCOSITY, mu_err=VISCOSITY_ERR,
+def _get_lambda(V, V_err, R, mu, mu_err, R_err=ball_size_err, a=TUBE_RADIUS, a_err=TUBE_RADIUS_ERR,
+                E=YOUNG_MODULUS, E_err=YOUNG_MODULUS_ERR,
                 b=TUBE_THICK, b_err=TUBE_THICK_ERR):
     
     delta3, delta3_err = _get_delta3(R, R_err, a, a_err)

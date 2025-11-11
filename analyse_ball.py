@@ -14,9 +14,9 @@ from make_dimensionless import make_dimensionless
 import numpy as np
 import os
 
-FLUID = 'oil'
+FLUID = 'glycerol'
 METHOD = 'no-hold'
-BALL = 'ball1_repeat'   
+BALL = 'ball3'   
 
 def redo_pressure(ball, pressure, version=None, fluid=FLUID, method=METHOD):
     """
@@ -92,28 +92,28 @@ def _update_data(folders, file_path):
 
     return data, dimensionless_data 
 
-def redo(ball, version=None):
+def redo(ball, version=None, fluid=FLUID, method=METHOD):
     """
     Refits to distance time graphs but uses the data cached for ball position in
     each photo.
     """
     if version is not None:
-        file_path = MASTER_FOLDER / ball / f'speed_pressure_{version}.txt'
+        file_path = MASTER_FOLDER / (fluid or "") / (method or "") / ball / f'speed_pressure_{version}.txt'
     else: 
-        file_path = MASTER_FOLDER / ball / 'speed_pressure.txt'
+        file_path = MASTER_FOLDER / (fluid or "") / (method or "") / ball / 'speed_pressure.txt'
     if os.path.exists(file_path):
         os.remove(file_path)
 
     analyse_ball(ball, version=version)
 
-def redo_all(ball, version=None):
+def redo_all(ball, version=None, fluid=FLUID, method=METHOD):
     """
     Completely reruns the code including finding the position of the ball in each image. 
     """
     if version is not None:
-        file_path = MASTER_FOLDER / ball / f'speed_pressure_{version}.txt'
+        file_path = MASTER_FOLDER / (fluid or "") / (method or "") / ball / f'speed_pressure_{version}.txt'
     else: 
-        file_path = MASTER_FOLDER / ball / 'speed_pressure.txt'
+        file_path = MASTER_FOLDER / (fluid or "") / (method or "") / ball / 'speed_pressure.txt'
     if os.path.exists(file_path):
         os.remove(file_path)
 
