@@ -51,7 +51,7 @@ def value_to_string(value, error, significant_figures = 3):
 
     precision = significant_figures - 1
 
-    if magnitude == 0:
+    if np.absolute(magnitude) < 2:
 
         return f'{value:.{precision}f} ± {error:.{precision}f}'
 

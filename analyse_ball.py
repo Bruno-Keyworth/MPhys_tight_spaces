@@ -15,8 +15,8 @@ import numpy as np
 import os
 
 FLUID = 'glycerol'
-METHOD = 'no-hold'
-BALL = 'ball1'   
+METHOD = 'hold'
+BALL = 'ball3_repeat'   
 
 def redo_pressure(ball, pressure, version=None, fluid=FLUID, method=METHOD):
     """

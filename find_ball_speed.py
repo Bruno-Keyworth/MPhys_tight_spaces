@@ -42,7 +42,7 @@ def plot_errors(time, position, t_err, p_err, gradient):
 
 def find_ball_speed(folder, disp=False, savefig=False):
     
-    data = get_speed_data(folder, disp)
+    data = get_speed_data(folder, disp=False)
     
     time, position, t_err, p_err = data[:, 0], data[:, 1], data[:, 2], data[:, 3]
     
@@ -66,7 +66,7 @@ def find_ball_speed(folder, disp=False, savefig=False):
 
         fig, ax1 = plt.subplots()
         plot_errors(time, position, t_err, p_err, output.beta[0])
-        ax1.scatter(time, position)
+        ax1.scatter(time, position, s=2)
         ax1.plot(x_fit, y_fit, color = "blue", linewidth = 2, label = f"gradient = ({output.beta[0]:.2f} ± {output.sd_beta[0]:.2f})\n intercept = {output.beta[1]:.2f} ± {output.sd_beta[1]:.2f}")
         ax1.set_ylabel("distance (cm)")
         ax1.set_xlabel("time (s)")

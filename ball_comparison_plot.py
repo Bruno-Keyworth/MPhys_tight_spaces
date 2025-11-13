@@ -58,14 +58,14 @@ def _process_folder(folder_path, ax):
     try:
         data = np.genfromtxt(file_path)
         ball_size = ball_sizes[folder_path.name.split("_")[0]]
-        _add_to_plot(data, label=f'Diametre = {ball_size:g} mm', ax=ax)
+        _add_to_plot(data, label=f'Diametre = {(ball_size*1000):g} mm', ax=ax)
     
     except Exception as e:
         print(f"Error reading {file_path}: {e}")
     
 def ball_comparison():
     
-    _, axes = plt.subplots(ncols = 4, figsize=(24, 8))
+    _, axes = plt.subplots(ncols = 4, figsize=(24, 10))
     
     axes = {
         "oil hold": axes[1],
@@ -76,13 +76,13 @@ def ball_comparison():
     
     folders_to_plot = {
         "oil": {
-            "no-hold": ['ball3', 'ball4', 'ball1_repeat', 'ball2_repeat', 'ball3_repeat', 'ball5'],
-            "hold":    ['ball3_hold_method', 'ball4_hold_method', 'ball3_hold_repeat', 
-                        'ball1_hold_repeat', 'ball2_hold_repeat', 'ball5_hold'],
+            "no-hold": ['ball3', 'ball4', 'ball1_repeat', 'ball2', 'ball3', 'ball5'],
+            "hold":    ['ball3', 'ball4', 'ball3_repeat', 
+                        'ball1', 'ball2', 'ball5'],
         },
         "glycerol": {
-            "no-hold": ['ball1', 'ball3'],
-            "hold": [],
+            "no-hold": ['ball1', 'ball3', 'ball2', 'ball4', 'ball5'],
+            "hold": ['ball2', 'ball3', 'ball4', 'ball1'],
             }
     }
     folders = get_folder_dict(folders_to_plot)
@@ -91,7 +91,7 @@ def ball_comparison():
         for folder in folders[method]:
             _process_folder(folder, axes[method])
         
-    plt.tight_layout(rect=[0, 0.4, 1, 1])  # Leave space at the bottom for legends
+    plt.tight_layout(rect=[0, 0.4, 1, 0.95])  # Leave space at the bottom for legends
 
     # Add legends below each subplot
     for method, ax in axes.items():

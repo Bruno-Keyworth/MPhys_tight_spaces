@@ -44,9 +44,11 @@ def _get_delta3(R, R_err=ball_size_err, a=TUBE_RADIUS, a_err=TUBE_RADIUS_ERR):
     delta3_err = 3 * (R - a)**2 * np.sqrt(R_err**2 + a_err**2)
     return delta3, delta3_err
 
-def _get_lambda(V, V_err, R, mu, mu_err, R_err=ball_size_err, a=TUBE_RADIUS, a_err=TUBE_RADIUS_ERR,
+def _get_lambda(V, V_err, R, viscosity, R_err=ball_size_err, a=TUBE_RADIUS, a_err=TUBE_RADIUS_ERR,
                 E=YOUNG_MODULUS, E_err=YOUNG_MODULUS_ERR,
                 b=TUBE_THICK, b_err=TUBE_THICK_ERR):
+    
+    mu, mu_err = viscosity
     
     delta3, delta3_err = _get_delta3(R, R_err, a, a_err)
     L, L_err = _get_L(R, R_err, a, a_err)
@@ -103,7 +105,7 @@ def make_dimensionless(data, data_file):
     
     viscosity = VISCOSITY[fluid]
     
-    lamb, error = _get_lambda(data[:, 1], data[:, 2], ball_size, mu=viscosity[0], mu_err=viscosity[1])
+    lamb, error = _get_lambda(data[:, 1], data[:, 2], ball_size, viscosity=viscosity)
     P, P_err = _get_dimensionless_pressure(data[:, 0], data[:, 3], ball_size)
     
     return np.column_stack((P, lamb, error, P_err))
