@@ -8,17 +8,17 @@ import matplotlib.pyplot as plt
 import numpy as np
 from get_folderpaths import MASTER_FOLDER
 from plot_ball_data import _errorbar, true_power_law, power_law
-from make_dimensionless import ball_sizes
+from make_dimensionless import BALL_DIAMETERS
 from fit_power_law_odr import fit_power_law_odr
 from value_to_string import value_to_string
 
 
 balls = [
-    {'name': 'ball5', 
+    {'name': 'ball1', 
      'method': 'no-hold', 
      'fluid': 'glycerol'},
     
-    {'name': 'ball5', 
+    {'name': 'ball1', 
      'method': 'hold', 
      'fluid': 'glycerol'}
 ]
@@ -61,7 +61,7 @@ def comparison_plot():
         data = process_data(data, beta)
 
         label = f"{ball['name']} {ball['method']} {ball['fluid']}"
-        ball_size = ball_sizes[ball['name'].split('_')[0]]
+        ball_size = BALL_DIAMETERS[ball['name'].split('_')[0]][0]
 
         _errorbar(data, dimensions=dimensionless)
 
