@@ -16,16 +16,23 @@ from value_to_string import value_to_string
 balls = [
     {'name': 'ball1', 
      'method': 'no-hold', 
-     'fluid': 'glycerol'},
+     'fluid': 'glycerol',
+     'cropping': True ,
+     'crop_fraction': 0.8 ,
+     'location' : 'end'},  # plot only start or end
     
     {'name': 'ball1', 
      'method': 'hold', 
-     'fluid': 'glycerol'}
+     'fluid': 'glycerol', 
+     'cropping': False ,
+     'crop_fraction': 0.8 ,
+     'location' : 'start'}
 ]
 
 log_scale = False
 dimensionless = False
 linear = False
+
 
 
 def load_data(ball_info):
@@ -42,11 +49,20 @@ def load_data(ball_info):
     return np.genfromtxt(path, delimiter=' ')
 
 
-def process_data(data, beta):
+def process_data(data, beta, ball_info):
     """Apply linear correction and mask if needed."""
     if linear:
         data[:, 0] -= beta[2]
         data = data[data[:, 0] > 0, :]
+    
+    if ball_info['cropping']:
+        n_rows = data.shape[0]
+        cut = int(ball_info['crop_fraction'] * n_rows)
+
+        if ball_info['location'] == 'end':
+            data = data[cut:, :] #keep end
+        else:
+            data = data[:-cut, :] #keep start 
     return data
 
 
@@ -58,7 +74,7 @@ def comparison_plot():
     for ball in balls:
         data = load_data(ball)
         beta, sd_beta = fit_power_law_odr(data)
-        data = process_data(data, beta)
+        data = process_data(data, beta, ball)
 
         label = f"{ball['name']} {ball['method']} {ball['fluid']}"
         ball_size = BALL_DIAMETERS[ball['name'].split('_')[0]][0]
