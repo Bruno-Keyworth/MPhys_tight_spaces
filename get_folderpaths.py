@@ -11,14 +11,7 @@ from pathlib import Path
 import re
 import numpy as np
 from read_pressure_data import read_pressure_data
-
-FLUID_DEPTH_ERROR = 0.01 #m
-FLUID_DENSITY = { # kg/m^3
- # value, error 
-    "oil": [907, 45], # from Thomas Sigsworth report
-    "glycerol": [1261, 2] # from google
-    }
-g = 9.81 #m/s^2
+from constants import FLUID_DEPTH_ERROR, FLUID_PARAMS, g
 
 if socket.gethostname() == "Brunos-MacBook-Air-2.local":
     if os.path.exists("/Volumes/Transcend/"):
@@ -31,7 +24,10 @@ else:
 def _hydrostatic_err(fluid):
     if fluid is None: 
         fluid = 'oil'
-    return g * FLUID_DEPTH_ERROR * FLUID_DENSITY[fluid][0]
+    return g * FLUID_DEPTH_ERROR * FLUID_PARAMS[fluid]['density'][0]
+
+def ball_folder(ball, fluid, method):
+    return MASTER_FOLDER / fluid / method / ball
 
 def get_folder(ball, pressure, fluid=None, method=None):
     folder = MASTER_FOLDER / (fluid or "") / (method or "") / ball / f'{int(pressure/100)}mbar'
@@ -44,8 +40,10 @@ def get_folder(ball, pressure, fluid=None, method=None):
 
 def get_folderpaths(ball, version=None, fluid=None, method=None):
     # Determine master folder
-
-    base_path = MASTER_FOLDER / (fluid or "") / (method or "") / ball
+    if isinstance(ball, Path):
+        base_path = ball
+    else:
+        base_path = MASTER_FOLDER / (fluid or "") / (method or "") / ball
     
     data_dict = read_pressure_data(base_path)
 

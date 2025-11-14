@@ -119,13 +119,13 @@ def redo_all(ball, version=None, fluid=FLUID, method=METHOD):
 
     analyse_ball(ball, redo=True, version=version)
     
-def delete_empty(ball):
+def delete_empty():
     """
     Deletes all photos in which a ball was not identified. Can be called manually
     after checking that images with the ball have not been deleted. This is not required 
     as the code will already ignore these images in future runs. 
     """
-    folder = MASTER_FOLDER / ball
+    folder = MASTER_FOLDER / FLUID / METHOD / BALL
     
     for file_path in folder.rglob("*.tif"): 
         if file_path.name.startswith("empty_"):

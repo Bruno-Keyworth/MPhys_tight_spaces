@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from get_tube_ROI import calc_tube_left_right
 
-#constants
+#parameters
 min_radius = 10
 max_radius = 500
 rectangularity_threshold = 0.7

@@ -8,10 +8,7 @@ Created on Sat Oct 18 09:18:02 2025
 
 from rectangle_fit_code import find_ball_position
 import numpy as np
-
-TIME_ERROR = 0.01 #s
-FRAME_SIZE = 0.149 #m
-CONVERSION_ERROR = 0.3/14.9
+from constants import FRAME_SIZE_ERR, FRAME_SIZE, TIME_ERROR
 
 def frame_edge_correction(position_arr):
 
@@ -49,7 +46,7 @@ def map_ball_path(folder, disp=False):
     position_arr[:, 0] -= np.min(position_arr[:, 0])
     
     t_err = np.linspace(TIME_ERROR, TIME_ERROR, len(position_arr))
-    p_err = np.sqrt((np.absolute(position_arr[:, 5]))**2 + (CONVERSION_ERROR * position_arr[:, 2])**2)
+    p_err = np.sqrt((np.absolute(position_arr[:, 5]))**2 + (FRAME_SIZE_ERR * position_arr[:, 2])**2)
     
     data = np.column_stack((position_arr[:, 0], position_arr[:, 2], t_err, p_err))
     

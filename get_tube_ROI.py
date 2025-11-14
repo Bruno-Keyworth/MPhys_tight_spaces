@@ -8,8 +8,6 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-
-
 def show_image(img, title, left, right):
     plt.imshow(img, cmap='gray')
     plt.axvline(left)
@@ -17,7 +15,6 @@ def show_image(img, title, left, right):
     plt.title(title)
     plt.axis('off')
     plt.show()    
-
 
 def calc_tube_left_right(img):
     
