@@ -17,15 +17,15 @@ balls = [
     {'name': 'ball1', 
      'method': 'no-hold', 
      'fluid': 'glycerol',
-     'cropping': True ,
-     'crop_fraction': 0.8 ,
+     'cropping': False ,
+     'crop_fraction': 0.2 ,
      'location' : 'end'},  # plot only start or end
     
     {'name': 'ball1', 
      'method': 'hold', 
      'fluid': 'glycerol', 
      'cropping': False ,
-     'crop_fraction': 0.8 ,
+     'crop_fraction': 0.3 ,
      'location' : 'start'}
 ]
 

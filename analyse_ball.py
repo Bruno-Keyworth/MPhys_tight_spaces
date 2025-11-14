@@ -16,7 +16,7 @@ import os
 
 FLUID = 'glycerol'
 METHOD = 'hold'
-BALL = 'ball3_repeat'   
+BALL = 'ball3'   
 
 def redo_pressure(ball, pressure, version=None, fluid=FLUID, method=METHOD):
     """
