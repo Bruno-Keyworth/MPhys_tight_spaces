@@ -16,38 +16,26 @@ from value_to_string import value_to_string
 balls = [
     {'name': 'ball3',
      'method': 'no-hold',
-     'fluid': 'oil',
-     'cropping': True ,
-     'crop_fraction': 0.5,
-     'location' : 'start'},
+     'fluid': 'oil',},
 
     {'name': 'ball3_repeat',
      'method': 'no-hold',
-     'fluid': 'oil',
-     'cropping': True ,
-     'crop_fraction': 0.5,
-     'location' : 'start'},
+     'fluid': 'oil',},
 
     {'name': 'ball3',
      'method': 'hold',
-     'fluid': 'oil',
-     'cropping': True ,
-     'crop_fraction': 0.5,
-     'location' : 'start'},
+     'fluid': 'oil',},
 
     {'name': 'ball3_repeat',
      'method': 'hold',
-     'fluid': 'oil',
-     'cropping': True ,
-     'crop_fraction': 0.5,
-     'location' : 'start'}
+     'fluid': 'oil',}
 ]
+
+crop_speed = (0, 0.5)
 
 log_scale = False
 dimensionless = False
 linear = False
-
-
 
 def load_data(ball_info):
     """Load data for a single ball."""
@@ -64,15 +52,11 @@ def load_data(ball_info):
 
 
 def crop_data(data, ball_info):
-    
-    if ball_info['cropping']:
-        n_rows = data.shape[0]
-        cut = int(ball_info['crop_fraction'] * n_rows)
-
-        if ball_info['location'] == 'end':
-            data = data[cut:, :] #keep end
-        else:
-            data = data[:-cut, :] #keep start 
+    if 'cropping' in ball_info.keys():
+        crop = ball_info['cropping']
+    else:
+        crop = crop_speed
+    data = data[(crop[0]<data[:, 1]) & (data[:, 1]<crop[1]), :]
     return data
 
 def adjust_to_make_linear(data, beta, ball_info):
@@ -96,7 +80,7 @@ def comparison_plot():
         label = f"{ball['name']} {ball['method']} {ball['fluid']}"
         ball_size = BALL_DIAMETERS[ball['name'].split('_')[0]][0]
 
-        _errorbar(data, dimensions=dimensionless)
+        _errorbar(data, dimensions=not dimensionless, legend=False)
 
         x_fit = np.linspace(np.min(data[:, 1]), np.max(data[:, 1]), 50)
         
@@ -122,7 +106,6 @@ def comparison_plot():
     if log_scale:
         ax.set_xscale('log')
         ax.set_yscale('log')
-
     ax.legend(
         framealpha=0,
         loc='upper center',

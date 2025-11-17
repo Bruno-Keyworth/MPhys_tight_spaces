@@ -9,7 +9,7 @@ Created on Thu Nov 13 14:35:41 2025
 import numpy as np
 from constants import FRAME_SIZE
 import cv2
-from get_folderpaths import get_folderpaths, ball_folder
+from get_folderpaths import get_folderpaths, ball_folder, MASTER_FOLDER
 import matplotlib.pyplot as plt
 import itertools
 from make_dimensionless import _get_delta
@@ -99,7 +99,6 @@ def average_swelling(pressure_folder, plot=False, n=10):
     swelling_diff = []
     
     for photo, position in photos:
-        print(photo)
         diff, ratio = _get_swelling(photo, position, plot=plot)
         if diff is None:
             continue
@@ -145,7 +144,7 @@ def analyse_swelling(ball, fluid='glycerol', method='no-hold'):
     np.savetxt(ball_folder(ball, fluid, method) / 'swelling_data.txt', data)
     
 def plot_swelling(balls, fluid='glycerol', method='no-hold', redo=False):
-    fig, ax = plt.subplots(1, 2, figsize=(12, 6))
+    fig, ax = plt.subplots(1, 2, figsize=(12, 5))
     for ball in balls:
         file_path = ball_folder(ball, fluid, method) / 'swelling_data.txt'
         if (not file_path.exists()) or redo:
@@ -160,10 +159,12 @@ def plot_swelling(balls, fluid='glycerol', method='no-hold', redo=False):
     ax[1].set_ylim(0, 0.15)
     ax[0].set_ylabel(r'$r/r_0$')
     ax[1].set_ylabel(r'$(r-r_0)/\delta$')
+    fig.suptitle(f'Tube Swelling Comparison for {method} method in {fluid}', fontsize=20)
     for axes in ax:
         axes.set_xlim(10000, 60000)
+        axes.set_xlabel('Pressure (Pa)')
         axes.legend(framealpha=0)
+    plt.savefig(MASTER_FOLDER / fluid / method / 'tube_swelling_comparison.png', dpi=300)
 if __name__ == '__main__':
     balls = [f'ball{i+1}' for i in range(5)]
-    #balls[2] +='_repeat'
     plot_swelling(balls)

@@ -7,7 +7,6 @@ Created on Mon Oct 20 22:35:26 2025
 """
 import matplotlib.pyplot as plt
 import numpy as np
-from get_folderpaths import MASTER_FOLDER
 from fit_power_law_odr import fit_power_law_odr
 
 def power_law(beta, x):
@@ -16,7 +15,7 @@ def power_law(beta, x):
 def true_power_law(beta, x):
     return beta[1] * x**beta[0]
 
-def _errorbar(data, dimensions=False, label=None, ax=None, marker=None):
+def _errorbar(data, dimensions=False, label=None, ax=None, marker=None, legend=True):
     if ax is None:
         ax = plt.gca()
     ax.errorbar(data[:, 1], data[:, 0], xerr=data[:, 2], yerr=data[:, 3], fmt='o',
@@ -26,7 +25,8 @@ def _errorbar(data, dimensions=False, label=None, ax=None, marker=None):
         ax.set_xlabel('Speed (m/s)')
     else:
         ax.set_xlabel(r'$\lambda$')
-    ax.legend(framealpha=0)
+    if legend:
+        ax.legend(framealpha=0)
 
 def plot_ball_data(folder, data, version=''):
     
