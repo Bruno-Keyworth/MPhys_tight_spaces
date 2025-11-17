@@ -116,7 +116,14 @@ def average_swelling(pressure_folder, plot=False, n=10):
     delta, delta_err = _get_delta(pressure_folder.parent.name.split('_')[0])
     
     dimless_diff = diff_av/(2 * delta)
-    dimless_err = dimless_diff * np.sqrt((diff_err/diff_av)**2 + (delta_err/delta)**2)
+        
+    valid = (diff_av != 0) & (delta != 0) & ~np.isnan(diff_av) & ~np.isnan(delta)
+    dimless_err = np.full_like(dimless_diff, np.nan)
+    dimless_err[valid] = (
+    dimless_diff[valid] *
+    np.sqrt((diff_err[valid]/diff_av[valid])**2 + (delta_err[valid]/delta[valid])**2)
+    )
+
     return dimless_diff, dimless_err, ratio_av, ratio_err
 
 def analyse_swelling(ball, fluid='glycerol', method='no-hold'):

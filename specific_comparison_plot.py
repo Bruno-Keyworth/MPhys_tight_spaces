@@ -14,26 +14,40 @@ from value_to_string import value_to_string
 
 
 balls = [
-    {'name': 'ball3', 
-     'method': 'no-hold', 
-     'fluid': 'oil'},
+    {'name': 'ball3',
+     'method': 'no-hold',
+     'fluid': 'oil',
+     'cropping': True ,
+     'crop_fraction': 0.5,
+     'location' : 'start'},
 
-    {'name': 'ball3_repeat', 
-     'method': 'no-hold', 
-     'fluid': 'oil'},
+    {'name': 'ball3_repeat',
+     'method': 'no-hold',
+     'fluid': 'oil',
+     'cropping': True ,
+     'crop_fraction': 0.5,
+     'location' : 'start'},
 
-    # {'name': 'ball3',
-    #  'method': 'hold',
-    #  'fluid': 'oil'},
+    {'name': 'ball3',
+     'method': 'hold',
+     'fluid': 'oil',
+     'cropping': True ,
+     'crop_fraction': 0.5,
+     'location' : 'start'},
 
     {'name': 'ball3_repeat',
      'method': 'hold',
-     'fluid': 'oil'},
+     'fluid': 'oil',
+     'cropping': True ,
+     'crop_fraction': 0.5,
+     'location' : 'start'}
 ]
 
 log_scale = False
 dimensionless = False
 linear = False
+
+
 
 def load_data(ball_info):
     """Load data for a single ball."""
@@ -49,13 +63,24 @@ def load_data(ball_info):
     return np.genfromtxt(path, delimiter=' ')
 
 
-def process_data(data, beta):
+def crop_data(data, ball_info):
+    
+    if ball_info['cropping']:
+        n_rows = data.shape[0]
+        cut = int(ball_info['crop_fraction'] * n_rows)
+
+        if ball_info['location'] == 'end':
+            data = data[cut:, :] #keep end
+        else:
+            data = data[:-cut, :] #keep start 
+    return data
+
+def adjust_to_make_linear(data, beta, ball_info):
     """Apply linear correction and mask if needed."""
     if linear:
         data[:, 0] -= beta[2]
         data = data[data[:, 0] > 0, :]
     return data
-
 
 def comparison_plot():
     fig, ax = plt.subplots(figsize=(8, 6), dpi=150)
@@ -64,8 +89,9 @@ def comparison_plot():
 
     for ball in balls:
         data = load_data(ball)
+        data = crop_data(data, ball)
         beta, sd_beta = fit_power_law_odr(data)
-        data = process_data(data, beta)
+        data = adjust_to_make_linear(data, beta, ball)
 
         label = f"{ball['name']} {ball['method']} {ball['fluid']}"
         ball_size = BALL_DIAMETERS[ball['name'].split('_')[0]][0]
