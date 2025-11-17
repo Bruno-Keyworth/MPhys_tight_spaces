@@ -64,7 +64,7 @@ def _get_swelling(img_path, x, plot=False):
     r_0 = _get_radius(ROI_low_pressure, label='Low Pressure', plot=plot)
     r = _get_radius(ROI_high_pressure, label='High Pressure', plot=plot)
     if (r_0 is None) or (r is None) or (r < r_0):
-        return None
+        return None, None
     if plot:
         plt.title(_plot_title(img_path) + f': Swelling = {r/r_0:.2g}')
         plt.xlabel('width (pixels)')
@@ -72,7 +72,7 @@ def _get_swelling(img_path, x, plot=False):
         plt.legend()
         plt.savefig(img_path.parent / 'swelling_plot.png', dpi=300)
         plt.show()
-    return (r - r_0)
+    return (r - r_0)/m_to_pixel, r/r_0
     
 def _sample_paths(paths, positions, n=10):
     """Return up to n evenly spaced Path objects from a list."""
@@ -95,58 +95,68 @@ def average_swelling(pressure_folder, plot=False, n=10):
     
     photos = _sample_paths(paths, positions, n=n)
     
-    swellings = []
+    swelling_ratio = []
+    swelling_diff = []
     
     for photo, position in photos:
-        swelling = _get_swelling(photo, position, plot=plot)
-        if swelling is None:
+        print(photo)
+        diff, ratio = _get_swelling(photo, position, plot=plot)
+        if diff is None:
             continue
-        swellings.append(swelling)
-    if not swellings:
-        return None, None
+        swelling_ratio.append(ratio)
+        swelling_diff.append(diff)
+    if not swelling_diff:
+        return None, None, None, None
     
-    average = np.mean(swellings)
-    error = np.std(swellings)
+    ratio_av= np.mean(swelling_ratio)
+    ratio_err = np.std(swelling_ratio)
+    diff_av= np.mean(swelling_diff)
+    diff_err = np.std(swelling_diff)
     
     delta, delta_err = _get_delta(pressure_folder.parent.name.split('_')[0])
     
-    dimless_swelling = average/(2 * delta)
-    dimless_err = dimless_swelling * np.sqrt((error/average)**2 + (delta_err/delta)**2)
-    return dimless_swelling, dimless_err
+    dimless_diff = diff_av/(2 * delta)
+    dimless_err = dimless_diff * np.sqrt((diff_err/diff_av)**2 + (delta_err/delta)**2)
+    return dimless_diff, dimless_err, ratio_av, ratio_err
 
 def analyse_swelling(ball, fluid='glycerol', method='no-hold'):
     
     folders = get_folderpaths(ball, fluid=fluid, method=method)
-    
-    data = np.empty((len(folders), 4))
+
+    data = np.empty((len(folders), 6))
     count = 0
     
     for folder, P, P_err in folders:
-        swelling, swelling_err = average_swelling(folder)
-        if swelling is None:
+        diff, diff_err, ratio, ratio_err = average_swelling(folder)
+        if diff is None:
             continue
-        data[count] = [P, P_err, swelling, swelling_err]
+        data[count] = [P, P_err, diff, diff_err, ratio, ratio_err]
         count += 1
         
     data = data[:count] 
     
     np.savetxt(ball_folder(ball, fluid, method) / 'swelling_data.txt', data)
     
-def plot_swelling(ball, fluid='glycerol', method='no-hold', redo=True):
-    file_path = ball_folder(ball, fluid, method) / 'swelling_data.txt'
-    if (not file_path.exists()) or redo:
-        analyse_swelling(ball, fluid, method)
-    
-    data = np.genfromtxt(file_path)
-    
-    plt.errorbar(data[:, 0], data[:, 2], xerr=data[:, 1], yerr=data[:, 3], ls='')
-    #plt.yscale('log')
-    #plt.xscale('log')
-    plt.xlim(10000, 60000)
-    
+def plot_swelling(balls, fluid='glycerol', method='no-hold', redo=False):
+    fig, ax = plt.subplots(1, 2, figsize=(12, 6))
+    for ball in balls:
+        file_path = ball_folder(ball, fluid, method) / 'swelling_data.txt'
+        if (not file_path.exists()) or redo:
+            analyse_swelling(ball, fluid, method)
+
+        data = np.genfromtxt(file_path)
+        if len(data) == 0:
+            continue
+        ax[0].errorbar(data[:, 0], data[:, 4], xerr=data[:, 1], yerr=data[:, 5], ls='', label=ball)
+        ax[1].errorbar(data[:, 0], data[:, 2], xerr=data[:, 1], yerr=data[:, 3], ls='', label=ball)
+    ax[0].set_ylim(1, 1.4)
+    ax[1].set_ylim(0, 0.15)
+    ax[0].set_ylabel(r'$r/r_0$')
+    ax[1].set_ylabel(r'$(r-r_0)/\delta$')
+    for axes in ax:
+        axes.set_xlim(10000, 60000)
+        axes.legend(framealpha=0)
 if __name__ == '__main__':
-    plot_swelling('ball1')
-    plot_swelling('ball2')
-    plot_swelling('ball3')
-    plot_swelling('ball4')
-    plot_swelling('ball5')
+    balls = [f'ball{i+1}' for i in range(5)]
+    #balls[2] +='_repeat'
+    plot_swelling(balls)

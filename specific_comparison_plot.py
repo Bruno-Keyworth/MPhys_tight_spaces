@@ -14,19 +14,26 @@ from value_to_string import value_to_string
 
 
 balls = [
-    {'name': 'ball1', 
+    {'name': 'ball3', 
      'method': 'no-hold', 
-     'fluid': 'glycerol'},
-    
-    {'name': 'ball1', 
-     'method': 'hold', 
-     'fluid': 'glycerol'}
+     'fluid': 'oil'},
+
+    {'name': 'ball3_repeat', 
+     'method': 'no-hold', 
+     'fluid': 'oil'},
+
+    # {'name': 'ball3',
+    #  'method': 'hold',
+    #  'fluid': 'oil'},
+
+    {'name': 'ball3_repeat',
+     'method': 'hold',
+     'fluid': 'oil'},
 ]
 
 log_scale = False
 dimensionless = False
 linear = False
-
 
 def load_data(ball_info):
     """Load data for a single ball."""
@@ -82,9 +89,9 @@ def comparison_plot():
 
         results.append((label, beta, sd_beta))
 
-    a, b = balls
-    ax.set_title(f"{a['name']} {a['method']} {a['fluid']} vs "
-                 f"{b['name']} {b['method']} {b['fluid']}")
+    # a, b = balls
+    # ax.set_title(f"{a['name']} {a['method']} {a['fluid']} vs "
+    #              f"{b['name']} {b['method']} {b['fluid']}")
 
     if log_scale:
         ax.set_xscale('log')
