@@ -143,7 +143,7 @@ def analyse_swelling(ball, fluid='glycerol', method='no-hold'):
     
     np.savetxt(ball_folder(ball, fluid, method) / 'swelling_data.txt', data)
     
-def plot_swelling(balls, fluid='glycerol', method='no-hold', redo=False):
+def plot_swelling(balls, fluid='glycerol', method='hold', redo=False):
     fig, ax = plt.subplots(1, 2, figsize=(12, 5))
     for ball in balls:
         file_path = ball_folder(ball, fluid, method) / 'swelling_data.txt'
@@ -167,4 +167,6 @@ def plot_swelling(balls, fluid='glycerol', method='no-hold', redo=False):
     plt.savefig(MASTER_FOLDER / fluid / method / 'tube_swelling_comparison.png', dpi=300)
 if __name__ == '__main__':
     balls = [f'ball{i+1}' for i in range(5)]
+    balls[2] +='_repeat'
+    balls.append('ball3_stretched')
     plot_swelling(balls)

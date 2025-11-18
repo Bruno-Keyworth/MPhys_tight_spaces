@@ -16,22 +16,22 @@ from value_to_string import value_to_string
 balls = [
     {'name': 'ball3',
      'method': 'no-hold',
-     'fluid': 'oil',},
+     'fluid': 'glycerol',},
 
     {'name': 'ball3_repeat',
      'method': 'no-hold',
-     'fluid': 'oil',},
+     'fluid': 'glycerol',},
 
-    {'name': 'ball3',
+    {'name': 'ball3_stretched',
      'method': 'hold',
-     'fluid': 'oil',},
+     'fluid': 'glycerol',},
 
     {'name': 'ball3_repeat',
      'method': 'hold',
-     'fluid': 'oil',}
+     'fluid': 'glycerol',}
 ]
 
-crop_speed = (0, 0.5)
+crop_speed = (0, 0.1 )
 
 log_scale = False
 dimensionless = False
@@ -74,6 +74,8 @@ def comparison_plot():
     for ball in balls:
         data = load_data(ball)
         data = crop_data(data, ball)
+        if len(data) < 10: 
+            continue
         beta, sd_beta = fit_power_law_odr(data)
         data = adjust_to_make_linear(data, beta, ball)
 

@@ -76,7 +76,7 @@ def find_ball_speed(folder, disp=False, savefig=False):
         ax1.minorticks_on()
         if savefig:
             plt.savefig(folder / 'position_time.png' , dpi=300)
-        plt.show()
-        
+        #plt.show()
+    plt.close('all')
     return np.absolute(output.beta[0]), output.sd_beta[0]
         

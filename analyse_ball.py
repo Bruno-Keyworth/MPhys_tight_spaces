@@ -13,10 +13,54 @@ from read_ASCII_timestamp import sort_folder
 from make_dimensionless import make_dimensionless
 import numpy as np
 import os
+import argparse
 
 FLUID = 'glycerol'
-METHOD = 'hold'
-BALL = 'ball3_repeat'   
+METHOD = 'no-hold'
+BALL = 'ball3_stretched_1.5'   
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(
+        description=f"Will analyse image data stored at fluid/method/ball inside\
+ {MASTER_FOLDER} and fit power law."
+    )
+    parser.add_argument(
+        "--fluid",
+        default = FLUID,
+        type=str,
+        choices=('oil', 'glycerol'),
+        help="The name of the fluid folder the data is stored in.",
+    )
+    parser.add_argument(
+        "--method",
+        default = METHOD,
+        type=str,
+        choices=('hold', 'no-hold'),
+        help="The name of the method folder the data is stored in.",
+    )
+    parser.add_argument(
+        "--ball",
+        default = BALL,
+        type=str,
+        help="The name of the ball folder the data is stored in.",
+    )
+    parser.add_argument(
+        "--redo",
+        action='store_true',
+        help="If given, the speed fitting will be reperformed for each pressure:" +
+            "the fitting for position in each photo will not be redone.",
+    )
+    parser.add_argument(
+        "--redo_all",
+        action='store_true',
+        help="If given, the fitting for the position in each photo will be redone.",
+    )
+    parser.add_argument(
+        "--delete_empty",
+        action='store_true',
+        help="If given, the photos in which the code could not identify a ball will be deleted.",
+    )
+    return parser.parse_args()
 
 def redo_pressure(ball, pressure, version=None, fluid=FLUID, method=METHOD):
     """
@@ -79,7 +123,7 @@ def _update_data(folders, file_path):
     """
     data = np.genfromtxt(file_path)
     
-    for folder, pressure, error in folders:
+    for folder, pressure, error in reversed(folders):
         print(folder)
         speed, error = find_ball_speed(folder, True, True)
 
@@ -119,13 +163,13 @@ def redo_all(ball, version=None, fluid=FLUID, method=METHOD):
 
     analyse_ball(ball, redo=True, version=version)
     
-def delete_empty():
+def delete_empty(ball=BALL, fluid=FLUID, method=METHOD):
     """
     Deletes all photos in which a ball was not identified. Can be called manually
     after checking that images with the ball have not been deleted. This is not required 
     as the code will already ignore these images in future runs. 
     """
-    folder = MASTER_FOLDER / FLUID / METHOD / BALL
+    folder = MASTER_FOLDER / fluid / method / ball
     
     for file_path in folder.rglob("*.tif"): 
         if file_path.name.startswith("empty_"):
@@ -133,4 +177,12 @@ def delete_empty():
             file_path.unlink()
     
 if __name__ == '__main__':
-    analyse_ball(BALL)
+    args = parse_arguments()
+    if args.redo_all:
+        redo_all(args.ball, fluid=args.fluid, method=args.method)
+    elif args.redo:
+        redo(args.ball, fluid=args.fluid, method=args.method)
+    else:
+        analyse_ball(ball=args.ball, fluid=args.fluid, method=args.method)
+    if args.delete_empty:
+        delete_empty(ball=args.ball, fluid=args.fluid, method=args.method)

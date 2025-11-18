@@ -17,7 +17,7 @@ if socket.gethostname() == "Brunos-MacBook-Air-2.local":
     if os.path.exists("/Volumes/Transcend/"):
         MASTER_FOLDER = Path("/Volumes/Transcend/2025-26 MPhys Project") / 'new_camera'
     else:
-        MASTER_FOLDER = Path("/Users/brunokeyworth/Desktop/MPhys/2025-26 MPhys Project") / 'new_camera'
+        MASTER_FOLDER = Path("/Volumes/Transcend 1/2025-26 MPhys Project") / 'new_camera'
 else:
     MASTER_FOLDER = Path(r"D:\2025-26 MPhys Project") / 'new_camera' 
     
