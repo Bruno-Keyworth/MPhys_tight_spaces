@@ -7,7 +7,7 @@ Created on Thu Nov 13 20:36:19 2025
 import matplotlib.pyplot as plt
 import numpy as np
 from get_folderpaths import MASTER_FOLDER
-from plot_ball_data import _errorbar, true_power_law, power_law
+from get_fit_params import _errorbar, true_power_law, power_law
 from make_dimensionless import BALL_DIAMETERS
 from fit_power_law_odr import fit_power_law_odr
 from value_to_string import value_to_string
@@ -82,7 +82,7 @@ def comparison_plot():
         label = f"{ball['name']} {ball['method']} {ball['fluid']}"
         ball_size = BALL_DIAMETERS[ball['name'].split('_')[0]][0]
 
-        _errorbar(data, dimensions=not dimensionless, legend=False)
+        _errorbar(data, legend=False)
 
         x_fit = np.linspace(np.min(data[:, 1]), np.max(data[:, 1]), 50)
         

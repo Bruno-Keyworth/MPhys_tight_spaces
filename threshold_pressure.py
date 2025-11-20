@@ -27,12 +27,12 @@ def get_results():
     
     for fluid in os.listdir(MASTER_FOLDER):
         fluid_path = os.path.join(MASTER_FOLDER, fluid)
-        if not os.path.isdir(fluid_path):
+        if not (os.path.isdir(fluid_path) and fluid in ['oil', 'glycerol']):
             continue
     
         for method in os.listdir(fluid_path):
             method_path = os.path.join(fluid_path, method)
-            if not os.path.isdir(method_path):
+            if not os.path.isdir(method_path) :
                 continue
 
             # e.g. ball3 and ball3_repeat both "ball3"

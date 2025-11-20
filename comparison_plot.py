@@ -9,9 +9,8 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 from get_folderpaths import MASTER_FOLDER, get_folder_dict
-from fit_power_law_odr import fit_power_law_odr
-from plot_ball_data import _errorbar, true_power_law
-from make_dimensionless import ball_sizes
+from get_fit_params import _errorbar, true_power_law, get_fit_params, _log_linear_data
+from constants import BALL_DIAMETERS
 from value_to_string import value_to_string
 import matplotlib.colors as mcolors
 from itertools import cycle
@@ -29,18 +28,15 @@ plt.rcParams['axes.prop_cycle'] = plt.cycler(color=colors)
 linestyles = cycle(['-', '--', '-.', ':'])
 markers = cycle(['o', 's', 'D', '^', 'v', '*', 'x', 'P'])
 
-def _add_to_plot(data, label, ax=None):
+def _add_to_plot(data, params, label, ax=None):
+    beta = params[:3]
+    sd_beta = params[3:]
     if ax is None:
         ax = plt.gca()
-    print(label)
     ls = next(linestyles)
     mk = next(markers)
     
-    beta, sd_beta = fit_power_law_odr(data)
-    
-    data[:, 0] -= beta[2]
-    mask = data[:, 0] > 0
-    data = data[mask, :]
+    data = _log_linear_data(data, beta)
 
     x = np.linspace(np.min(data[:, 1]), np.max(data[:, 1]), 2)
     y = true_power_law(beta, x)
@@ -53,12 +49,16 @@ def _add_to_plot(data, label, ax=None):
     
 def _process_folder(folder_path, ax):
     file_path = os.path.join(folder_path, "dimensionless_data.txt")
-    print(file_path)
     # Check if the text file exists
     try:
         data = np.genfromtxt(file_path)
-        ball_size = ball_sizes[folder_path.name.split("_")[0]]
-        _add_to_plot(data, label=f'Diametre = {(ball_size*1000):g} mm', ax=ax)
+        ball_size = BALL_DIAMETERS[folder_path.name.split("_")[0]][0]
+        label=f'Diametre = {(ball_size*1000):g} mm'
+        if not (folder_path / 'fit_params.txt').exists():
+            print("/".join(folder_path.parts[-3:]))
+            get_fit_params(folder_path)
+        params = np.genfromtxt(folder_path / 'fit_params.txt')[1]
+        _add_to_plot(data, params, label=label, ax=ax)
     
     except Exception as e:
         print(f"Error reading {file_path}: {e}")
@@ -76,13 +76,12 @@ def ball_comparison():
     
     folders_to_plot = {
         "oil": {
-            "no-hold": ['ball3', 'ball4', 'ball1_repeat', 'ball2', 'ball3', 'ball5'],
-            "hold":    ['ball3', 'ball4', 'ball3_repeat', 
-                        'ball1', 'ball2', 'ball5'],
+            "no-hold": ['ball3', 'ball4', 'ball1', 'ball2', 'ball3_repeat', 'ball5'],
+            "hold":    ['ball3', 'ball4', 'ball3_repeat', 'ball1', 'ball2', 'ball5'],
         },
         "glycerol": {
-            "no-hold": ['ball1', 'ball3', 'ball2', 'ball4', 'ball5'],
-            "hold": ['ball2', 'ball3', 'ball4', 'ball1'],
+            "no-hold": ['ball1', 'ball3', 'ball2', 'ball4', 'ball5', 'ball4_stretched_1.5', 'ball3_stretched_1.5'],
+            "hold": ['ball2', 'ball3', 'ball4', 'ball1', 'ball5', 'ball2_stretched_1.5', 'ball4_stretched_1.5'],
             }
     }
     folders = get_folder_dict(folders_to_plot)

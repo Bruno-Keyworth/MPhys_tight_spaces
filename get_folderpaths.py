@@ -26,7 +26,7 @@ def _hydrostatic_err(fluid):
         fluid = 'oil'
     return g * FLUID_DEPTH_ERROR * FLUID_PARAMS[fluid]['density'][0]
 
-def ball_folder(ball, fluid, method):
+def _ball_folder(ball, fluid, method):
     return MASTER_FOLDER / fluid / method / ball
 
 def get_folder(ball, pressure, fluid=None, method=None):

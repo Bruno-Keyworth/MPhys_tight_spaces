@@ -9,7 +9,7 @@ Created on Thu Nov 13 14:35:41 2025
 import numpy as np
 from constants import FRAME_SIZE
 import cv2
-from get_folderpaths import get_folderpaths, ball_folder, MASTER_FOLDER
+from get_folderpaths import get_folderpaths, _ball_folder, MASTER_FOLDER
 import matplotlib.pyplot as plt
 import itertools
 from make_dimensionless import _get_delta
@@ -141,12 +141,12 @@ def analyse_swelling(ball, fluid='glycerol', method='no-hold'):
         
     data = data[:count] 
     
-    np.savetxt(ball_folder(ball, fluid, method) / 'swelling_data.txt', data)
+    np.savetxt(_ball_folder(ball, fluid, method) / 'swelling_data.txt', data)
     
 def plot_swelling(balls, fluid='glycerol', method='hold', redo=False):
     fig, ax = plt.subplots(1, 2, figsize=(12, 5))
     for ball in balls:
-        file_path = ball_folder(ball, fluid, method) / 'swelling_data.txt'
+        file_path = _ball_folder(ball, fluid, method) / 'swelling_data.txt'
         if (not file_path.exists()) or redo:
             analyse_swelling(ball, fluid, method)
 

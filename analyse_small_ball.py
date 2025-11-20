@@ -7,7 +7,7 @@ Created on Tue Nov  4 10:08:24 2025
 """
 from get_folderpaths import MASTER_FOLDER
 from analyse_ball import analyse_ball
-from plot_ball_data import _errorbar
+from get_fit_params import _errorbar
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -25,7 +25,7 @@ def plot_small_ball(ball):
     
     fig, ax = plt.subplots()
     ax.plot(x, y, label=f'Gradient = {parameters[0]}' + '\n' + f'Intercept = {parameters[1]}')
-    _errorbar(data, dimensions=True)
+    _errorbar(data)
     plt.savefig(MASTER_FOLDER / ball / 'plot.png', dpi=300)
     
 

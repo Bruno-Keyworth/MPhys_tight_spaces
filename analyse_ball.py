@@ -6,9 +6,9 @@ Created on Wed Oct 15 21:47:55 2025
 @author: brunokeyworth
 """
 
-from get_folderpaths import get_folderpaths, MASTER_FOLDER, get_folder
+from get_folderpaths import get_folderpaths, MASTER_FOLDER, get_folder, _ball_folder
 from find_ball_speed import find_ball_speed
-from plot_ball_data import plot_ball_data
+from get_fit_params import get_fit_params
 from read_ASCII_timestamp import sort_folder
 from make_dimensionless import make_dimensionless
 import numpy as np
@@ -17,7 +17,7 @@ import argparse
 
 FLUID = 'glycerol'
 METHOD = 'no-hold'
-BALL = 'ball3_stretched_1.5'   
+BALL = 'ball3'   
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
@@ -29,20 +29,20 @@ def parse_arguments():
         default = FLUID,
         type=str,
         choices=('oil', 'glycerol'),
-        help="The name of the fluid folder the data is stored in.",
+        help=f"The name of the fluid folder the data is stored in. Default is {FLUID}.",
     )
     parser.add_argument(
         "--method",
         default = METHOD,
         type=str,
         choices=('hold', 'no-hold'),
-        help="The name of the method folder the data is stored in.",
+        help=f"The name of the method folder the data is stored in. Default is {METHOD}.",
     )
     parser.add_argument(
         "--ball",
         default = BALL,
         type=str,
-        help="The name of the ball folder the data is stored in.",
+        help=f"The name of the ball folder the data is stored in. Default is {BALL}.",
     )
     parser.add_argument(
         "--redo",
@@ -68,23 +68,21 @@ def redo_pressure(ball, pressure, version=None, fluid=FLUID, method=METHOD):
     then fits to find the speed. Updates the cached value for this pressure and
     repeats power law fitting. 
     """
+    ball_folder = _ball_folder(ball, fluid=fluid, method=method)
     if version is None:
-        speed_path = MASTER_FOLDER / ball / f'{pressure}mbar' / 'position_time.txt'
+        speed_path = ball_folder / f'{pressure}mbar' / 'position_time.txt'
     else:
-        speed_path = MASTER_FOLDER / ball / f'{pressure}mbar_{version}' / 'position_time{version}.txt'
+        speed_path = ball_folder / f'{pressure}mbar_{version}' / 'position_time{version}.txt'
     pressure *= 100
     folder = get_folder(ball, pressure, fluid=fluid, method=METHOD)
     if speed_path.exists():
         os.remove(speed_path)
-    
-    ball_folder = MASTER_FOLDER / (fluid or "") / (method or "") / ball
 
     file_path = ball_folder / 'speed_pressure.txt'
     
-    data, dimless_data = _update_data(folder, file_path)
-    plot_ball_data(ball_folder, data, version=(version or ''))
-    plot_ball_data(ball_folder, dimless_data, version = (version or '') + '_dimensionless')
-    
+    _update_data(folder, file_path)
+    get_fit_params(ball_folder, plot=True)
+
 def _ensure_file_initialized(file_path, folders):
     if not file_path.exists():
         pressures = np.array([f[1] for f in folders])
@@ -97,7 +95,7 @@ def _ensure_file_initialized(file_path, folders):
     return True
 
 def analyse_ball(ball, redo=False, version=None, plot=True, fluid=FLUID, method=METHOD):
-    ball_folder = MASTER_FOLDER / (fluid or "") / (method or "") / ball
+    ball_folder = _ball_folder(ball, fluid=fluid, method=method)
     sort_folder(ball_folder)
     folders = get_folderpaths(ball, version, fluid=fluid, method=method)
     file_path = ball_folder / f'speed_pressure{version or ""}.txt'
@@ -107,15 +105,11 @@ def analyse_ball(ball, redo=False, version=None, plot=True, fluid=FLUID, method=
             speed_path = folder / 'position_time.txt'
             if speed_path.exists():
                 os.remove(speed_path)
-    if data_exists:
-        data = np.genfromtxt(file_path)
-        dimless_data = np.genfromtxt(file_path.parent / "dimensionless_data.txt")
-    else:
-        data, dimless_data = _update_data(folders, file_path)
+    if not data_exists:
+        _update_data(folders, file_path)
         
     if plot:
-        plot_ball_data(ball_folder, data, version=(version or ''))
-        plot_ball_data(ball_folder, dimless_data, version = (version or '') + '_dimensionless')
+        get_fit_params(ball_folder, plot=plot)
 
 def _update_data(folders, file_path):
     """
