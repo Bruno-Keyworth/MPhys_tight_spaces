@@ -6,10 +6,9 @@ Created on Thu Nov 13 20:36:19 2025
 """
 import matplotlib.pyplot as plt
 import numpy as np
-from get_folderpaths import MASTER_FOLDER
-from get_fit_params import _errorbar, true_power_law, power_law
-from make_dimensionless import BALL_DIAMETERS
-from fit_power_law_odr import fit_power_law_odr
+from get_folderpaths import _ball_folder
+from get_fit_params import _errorbar, true_power_law, power_law, _log_linear_data, get_fit_params
+from constants import BALL_DIAMETERS
 from value_to_string import value_to_string
 
 
@@ -31,7 +30,7 @@ balls = [
      'fluid': 'glycerol',}
 ]
 
-crop_speed = (0, 0.1 )
+crop_speed = (0, 0.1)
 
 log_scale = False
 dimensionless = False
@@ -39,17 +38,13 @@ linear = False
 
 def load_data(ball_info):
     """Load data for a single ball."""
-    ball_name = ball_info['name']
-    method = ball_info['method']
-    fluid = ball_info['fluid']
+    ball_folder = _ball_folder(ball=ball_info['name'], fluid=ball_info['fluid'],
+                               method=ball_info['method'])
 
     if dimensionless:
-        path = MASTER_FOLDER / fluid / method / ball_name / "dimensionless_data.txt"
+        return np.genfromtxt(ball_folder / "dimensionless_data.txt")
     else:
-        path = MASTER_FOLDER / fluid / method / ball_name / "speed_pressure.txt"
-
-    return np.genfromtxt(path, delimiter=' ')
-
+        return np.genfromtxt(ball_folder / "speed_pressure.txt")
 
 def crop_data(data, ball_info):
     if 'cropping' in ball_info.keys():
@@ -57,13 +52,6 @@ def crop_data(data, ball_info):
     else:
         crop = crop_speed
     data = data[(crop[0]<data[:, 1]) & (data[:, 1]<crop[1]), :]
-    return data
-
-def adjust_to_make_linear(data, beta, ball_info):
-    """Apply linear correction and mask if needed."""
-    if linear:
-        data[:, 0] -= beta[2]
-        data = data[data[:, 0] > 0, :]
     return data
 
 def comparison_plot():
@@ -76,8 +64,16 @@ def comparison_plot():
         data = crop_data(data, ball)
         if len(data) < 10: 
             continue
-        beta, sd_beta = fit_power_law_odr(data)
-        data = adjust_to_make_linear(data, beta, ball)
+        ball_folder = _ball_folder(ball=ball['name'], fluid=ball['fluid'],
+                                   method=ball['method'])
+        if not (ball_folder / 'fit_params.txt').exists():
+            get_fit_params(ball_folder)
+        if dimensionless:
+            params = np.genfromtxt(ball_folder / 'fit_params.txt')[1]
+        else:
+            params = np.genfromtxt(ball_folder / 'fit_params.txt')[0]
+        beta, sd_beta = params[:3], params[3:]
+        data = _log_linear_data(data, beta)
 
         label = f"{ball['name']} {ball['method']} {ball['fluid']}"
         ball_size = BALL_DIAMETERS[ball['name'].split('_')[0]][0]
