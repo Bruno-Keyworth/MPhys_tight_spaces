@@ -8,7 +8,7 @@ Created on Wed Oct 15 21:47:55 2025
 
 from get_folderpaths import get_folderpaths, MASTER_FOLDER, get_folder, _ball_folder
 from find_ball_speed import find_ball_speed
-from get_fit_params import get_fit_params
+from get_fit_params import get_fit_params, plot_ball_data
 from read_ASCII_timestamp import sort_folder
 from make_dimensionless import make_dimensionless
 import numpy as np
@@ -107,9 +107,10 @@ def analyse_ball(ball, redo=False, version=None, plot=True, fluid=FLUID, method=
                 os.remove(speed_path)
     if not data_exists:
         _update_data(folders, file_path)
-        
-    if plot:
+    if redo:
         get_fit_params(ball_folder, plot=plot)
+    if plot:
+        plot_ball_data(ball_folder)
 
 def _update_data(folders, file_path):
     """

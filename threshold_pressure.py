@@ -9,17 +9,61 @@ Threshold Pressure
 """
 from constants import BALL_DIAMETERS
 from get_folderpaths import MASTER_FOLDER
+from value_to_string import value_to_string
 import numpy as  np
 import matplotlib.pyplot as plt
-
-
+import pickle
 import os
 import re
 from collections import defaultdict
+from make_dimensionless import _get_dimless_pressure
 
+pressure_err = 10  # mbar uncertainty
 
 pressure_pattern = re.compile(r"(\d+)\s*mbar", re.IGNORECASE)
 ball_base_pattern = re.compile(r"(ball\d+)")  # captures ball1 from ball1_repeat
+
+def _level4():
+    return dict()
+def _level3():
+    return defaultdict(_level4)
+def _level2():
+    return defaultdict(_level3)
+def level1():
+    return defaultdict(_level2)
+
+def save_results(results):
+    save_dict = level1()
+    for fluid, method_data in results.items():
+        for method, ball_data in method_data.items():
+    
+            balls = []
+            diameters = []
+            pressures = []
+    
+            for ball, p in ball_data.items():
+                if ball not in BALL_DIAMETERS:
+                    continue
+    
+                diam = BALL_DIAMETERS[ball]
+                balls.append(ball)
+                diameters.append(diam)
+                pressures.append(p)
+    
+            if not balls:
+                continue
+    
+            diameters = np.array(diameters)
+            pressures = np.array(pressures)
+            dimless_P, err = _get_dimless_pressure(pressures[:, 0], pressures[:, 1], diameters)
+            
+            data = np.column_stack((diameters, pressures))
+            dimless_data = np.column_stack((diameters, dimless_P, err))
+            save_dict[fluid][method]['observed']['dimensional'] = data
+            save_dict[fluid][method]['observed']['non-dimensional'] = dimless_data
+
+    with open(MASTER_FOLDER / "threshold_data.pkl", "wb") as f:
+        pickle.dump(save_dict, f)
 
 def get_results():
 
@@ -63,10 +107,14 @@ def get_results():
     
             # Average repeated runs
             for base_ball_name, values in ball_pressures.items():
-                avg_lowest_pressure = sum(values) / len(values)
-                results[fluid][method][base_ball_name] = avg_lowest_pressure
-    return results
-
+                avg_lowest_pressure = np.mean(values)
+                std = np.std(values)
+                if std < pressure_err:
+                    err = pressure_err
+                else:
+                    err = std
+                results[fluid][method][base_ball_name] = [avg_lowest_pressure, err]
+    save_results(results)
 
 def print_results(results):
     if PRINT:
@@ -75,7 +123,7 @@ def print_results(results):
             for method, ball_data in method_data.items():
                 print(f"  -- {method} --")
                 for ball, p in ball_data.items():
-                    print(f" {ball}: lowest averaged pressure = {p:.2f} mbar")
+                    print(f" {ball}: lowest averaged pressure = {value_to_string(p[0], p[1])} mbar")
 
 def plot_threshold(results):
     colour_map = {
@@ -83,52 +131,28 @@ def plot_threshold(results):
     'glycerol': 'tab:blue'
     }
     
+    fitted_cmap = {
+        'oil': 'tab:green',
+        'glycerol': 'tab:purple'}
+    
     marker_map = {
         'hold': 'o',
         'no-hold': 'x'
     }
     
-    pressure_err = 10  # mbar uncertainty
-    
     plt.figure(figsize=(10, 6))
     
     for fluid, method_data in results.items():
         for method, ball_data in method_data.items():
-    
-            balls = []
-            diameters = []
-            diameter_errs = []
-            pressures = []
-    
-            for ball, p in ball_data.items():
-                if ball not in BALL_DIAMETERS:
-                    continue
-    
-                diam, diam_err = BALL_DIAMETERS[ball]
-                balls.append(ball)
-                diameters.append(diam)
-                diameter_errs.append(diam_err)
-                pressures.append(p)
-                
-                
-    
-            if not balls:
-                continue
-    
-            diameters = np.array(diameters)
-            diameter_errs = np.array(diameter_errs)
-            pressures = np.array(pressures)
-            pressure_errs = np.zeros(len(pressures)) + pressure_err
             
-            data = np.column_stack((diameters, pressures, diameter_errs, pressure_errs))
-            np.savetxt(MASTER_FOLDER / fluid/method/'threshold_data.txt', data)
+            data = results[fluid][method]['observed']['non-dimensional']
             
             # Plot with distinct colour + marker
             plt.errorbar(
-                diameters,
-                pressures,
-                xerr=diameter_errs,
-                yerr=pressure_err,
+                data[:, 0],
+                data[:, 2],
+                xerr=data[:, 1],
+                yerr=data[:, 3],
                 fmt=marker_map[method],
                 color=colour_map[fluid],
                 ecolor='black',
@@ -148,7 +172,7 @@ def plot_threshold(results):
     plt.grid(True, linestyle="--", alpha=0.3)
     plt.tight_layout()
     if SAVE_FIG:
-        plt.savefig(MASTER_FOLDER//"threshold_pressure.png", dpi=300)
+        plt.savefig(MASTER_FOLDER/"threshold_pressure.png", dpi=300)
     plt.show()
 
 
@@ -156,11 +180,11 @@ if __name__ == '__main__':
     
     PRINT = True
     PLOT = True
-    SAVE_FIG = False
-
-    results = get_results()
+    SAVE_FIG = True
+    REDO = True
+    if (not (MASTER_FOLDER / "threshold_data.pkl").exists()) or REDO:
+        get_results()
+    with open(MASTER_FOLDER / "threshold_data.pkl", "rb") as f:
+        results = pickle.load(f)
     if PLOT:
         plot_threshold(results)
-    
-    if PRINT:
-        print_results(results)

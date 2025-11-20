@@ -61,8 +61,23 @@ def _get_lambda(V, V_err, ball_diameter, viscosity, tube_params=TUBE_PARAMS):
     lamb_err = abs(lamb) * np.sqrt(rel_err_sq)
     return lamb, lamb_err
 
-def _get_dimensionless_pressure(P, P_err, ball_diameter, tube_params=TUBE_PARAMS):
-    R, R_err = np.array(ball_diameter) / 2
+def _get_dimless_pressure(P, P_err, ball_diameter, tube_params=TUBE_PARAMS):
+    # turn ball_diameter into a 2-column array
+    bd = np.asarray(ball_diameter, dtype=float)
+    if bd.ndim == 1:
+        # expected shape: (2,) → broadcast to match P
+        if bd.size != 2:
+            raise ValueError("ball_diameter must be [value, error] or an Nx2 array.")
+        bd = np.tile(bd, (len(P), 1))
+    elif bd.ndim == 2 and bd.shape[1] == 2:
+        if bd.shape[0] != len(P):
+            raise ValueError("ball_diameter array must have same number of rows as P.")
+    else:
+        raise ValueError("ball_diameter must be [value, error] or an Nx2 array.")
+    
+    # now bd[:,0] is value, bd[:,1] is error
+    R     = bd[:,0] / 2
+    R_err = bd[:,1] / 2
     a, a_err = tube_params['radius']
     b, b_err = tube_params['thickness']
     E, E_err = tube_params['young_modulus']
@@ -100,6 +115,6 @@ def make_dimensionless(data, data_file):
     viscosity = FLUID_PARAMS[fluid]['viscosity']
     
     lamb, error = _get_lambda(data[:, 1], data[:, 2], ball_diameter, viscosity=viscosity)
-    P, P_err = _get_dimensionless_pressure(data[:, 0], data[:, 3], ball_diameter)
+    P, P_err = _get_dimless_pressure(data[:, 0], data[:, 3], ball_diameter)
     
     return np.column_stack((P, lamb, error, P_err))

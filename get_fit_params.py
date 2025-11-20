@@ -74,6 +74,10 @@ def dimensional_plot(ball_folder):
         ax.set_xlabel('Speed (m/s)')
     plt.savefig(ball_folder / 'dimensional-plot.png', dpi=300)
     
+def plot_ball_data(ball_folder):
+    dimless_plot(ball_folder)
+    dimensional_plot(ball_folder)
+
 def get_fit_params(ball_folder, plot=False):
     save_params = ball_folder / 'fit_params.txt'
     
@@ -88,8 +92,4 @@ def get_fit_params(ball_folder, plot=False):
         
         params = np.vstack((dim_params, dimless_params))
         np.savetxt(save_params, params)
-        
-    if plot:
-        dimless_plot(ball_folder)
-        dimensional_plot(ball_folder)
         
