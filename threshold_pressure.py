@@ -125,8 +125,23 @@ def print_results(results):
                 for ball, p in ball_data.items():
                     print(f" {ball}: lowest averaged pressure = {value_to_string(p[0], p[1])} mbar")
 
+def _add_to_plot(data, ax, label, fmt, colour):
+    # Plot with distinct colour + marker
+    ax.errorbar(
+        data[:, 0],
+        data[:, 2],
+        xerr=data[:, 1],
+        yerr=data[:, 3],
+        fmt=fmt,
+        color=colour,
+        ecolor='black',
+        elinewidth=1,
+        capsize=3,
+        label=label,
+    )
+
 def plot_threshold(results):
-    colour_map = {
+    colours = {
     'oil': 'tab:red',
     'glycerol': 'tab:blue'
     }
@@ -135,32 +150,22 @@ def plot_threshold(results):
         'oil': 'tab:green',
         'glycerol': 'tab:purple'}
     
-    marker_map = {
+    markers = {
         'hold': 'o',
         'no-hold': 'x'
     }
     
-    plt.figure(figsize=(10, 6))
+    fig, ax = plt.subplots(1, 2, figsize=(12, 6))
     
     for fluid, method_data in results.items():
         for method, ball_data in method_data.items():
             
+            data = results[fluid][method]['observed']['dimensional']
+            _add_to_plot(data, ax[0], label=f'{fluid} - {method}', 
+                         fmt = markers[method], colour=colours[fluid])
             data = results[fluid][method]['observed']['non-dimensional']
-            
-            # Plot with distinct colour + marker
-            plt.errorbar(
-                data[:, 0],
-                data[:, 2],
-                xerr=data[:, 1],
-                yerr=data[:, 3],
-                fmt=marker_map[method],
-                color=colour_map[fluid],
-                ecolor='black',
-                elinewidth=1,
-                capsize=3,
-                label=f"{fluid} – {method}"
-            )
-    
+            _add_to_plot(data, ax[1], label=f'{fluid} - {method}', 
+                         fmt = markers[method], colour=colours[fluid])
     plt.xlabel("Ball diameter (m)")
     plt.ylabel("Threshold pressure (mbar)")
     plt.title("Threshold pressure vs. ball diameter")

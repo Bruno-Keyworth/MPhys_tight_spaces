@@ -142,13 +142,17 @@ def _delete_data_file(ball, version, fluid, method):
         os.remove(path)
 
 def redo(ball, version=None, fluid=FLUID, method=METHOD, plot=True):
-    """ Refits to distance time graphs but uses the data cached for ball position in each photo. """
+    """ 
+    Refits to distance time graphs but uses the data cached for ball position in each photo.
+    """
     _delete_data_file(ball, version, fluid, method)
     analyse_ball(ball, version=version, plot=plot)
 
 
 def redo_all(ball, version=None, fluid=FLUID, method=METHOD, plot=True):
-    """ Completely reruns the code including finding the position of the ball in each image. """
+    """
+    Completely reruns the code including finding the position of the ball in each image.
+    """
     _delete_data_file(ball, version, fluid, method)
     analyse_ball(ball, redo=True, version=version, plot=plot)
     
