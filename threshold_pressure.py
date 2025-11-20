@@ -65,7 +65,7 @@ def save_results(results):
     with open(MASTER_FOLDER / "threshold_data.pkl", "wb") as f:
         pickle.dump(save_dict, f)
 
-def get_results():
+def get_thresholds():
 
     results = defaultdict(lambda: defaultdict(dict))
     
@@ -188,7 +188,7 @@ if __name__ == '__main__':
     SAVE_FIG = True
     REDO = True
     if (not (MASTER_FOLDER / "threshold_data.pkl").exists()) or REDO:
-        get_results()
+        get_thresholds()
     with open(MASTER_FOLDER / "threshold_data.pkl", "rb") as f:
         results = pickle.load(f)
     if PLOT:

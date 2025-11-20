@@ -17,7 +17,7 @@ import argparse
 
 FLUID = 'glycerol'
 METHOD = 'no-hold'
-BALL = 'ball3'   
+BALL = 'ball1_repeat'   
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
@@ -96,6 +96,8 @@ def _ensure_file_initialized(file_path, folders):
 
 def analyse_ball(ball, redo=False, version=None, plot=True, fluid=FLUID, method=METHOD):
     ball_folder = _ball_folder(ball, fluid=fluid, method=method)
+    if not ball_folder.exists():
+        raise FileNotFoundError(f"Ball folder does not exist: {ball_folder}")
     sort_folder(ball_folder)
     folders = get_folderpaths(ball, version, fluid=fluid, method=method)
     file_path = ball_folder / f'speed_pressure{version or ""}.txt'
@@ -107,7 +109,7 @@ def analyse_ball(ball, redo=False, version=None, plot=True, fluid=FLUID, method=
                 os.remove(speed_path)
     if not data_exists:
         _update_data(folders, file_path)
-    if redo:
+    if redo or (not (ball_folder/"fit_params.txt").exists()):
         get_fit_params(ball_folder, plot=plot)
     if plot:
         plot_ball_data(ball_folder)

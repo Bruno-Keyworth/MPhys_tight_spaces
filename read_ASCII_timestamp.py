@@ -48,8 +48,8 @@ def sort_image(img_path, delete_original=True):
     output_folder, image_index = img_path.stem.split('_')
     save_as = f"{image_index}_{timestamp}.tif"
     
-    output_folder = img_path.parent / output_folder
-    output_folder.mkdir(exist_ok=True)
+    output_folder = img_path.parent / output_folder / "photos"
+    output_folder.mkdir(exist_ok=True, parents=True)
     
     # ---- Save cropped image ----
     save_path = output_folder / save_as

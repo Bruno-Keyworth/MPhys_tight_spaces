@@ -51,7 +51,7 @@ def _plot(data, params, log=False):
     _errorbar(data, ax=ax)
 
 def dimless_plot(ball_folder):
-    fig, axes = plt.subplots(1, 2, figsize=(12, 6))
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4))
     fig.suptitle("/".join(ball_folder.parts[-3:]) + ' Non-Dimensional Fit')
     data = np.genfromtxt(ball_folder / 'dimensionless_data.txt')
     params = np.genfromtxt(ball_folder / 'fit_params.txt')[1]
@@ -63,7 +63,7 @@ def dimless_plot(ball_folder):
     plt.savefig(ball_folder / 'non-dimensional-plot.png', dpi=300)
     
 def dimensional_plot(ball_folder):
-    fig, axes = plt.subplots(1, 2, figsize=(12, 6))
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4))
     fig.suptitle("/".join(ball_folder.parts[-3:]) + ' Dimensional Fit')
     data = np.genfromtxt(ball_folder / 'speed_pressure.txt')
     params = np.genfromtxt(ball_folder / 'fit_params.txt')[0]
@@ -92,4 +92,6 @@ def get_fit_params(ball_folder, plot=False):
         
         params = np.vstack((dim_params, dimless_params))
         np.savetxt(save_params, params)
+        
+    
         

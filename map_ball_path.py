@@ -6,7 +6,7 @@ Created on Sat Oct 18 09:18:02 2025
 @author: brunokeyworth
 """
 
-from rectangle_fit_code import find_ball_position
+from image_analysis import find_ball_position
 import numpy as np
 from constants import FRAME_SIZE_ERR, FRAME_SIZE, TIME_ERROR
 
@@ -31,11 +31,16 @@ def frame_edge_correction(position_arr):
     
     return position_arr
 
-def map_ball_path(folder, disp=False):   
+def map_ball_path(ball_folder, disp=False):   
     positions = []
     
     for ext in ("*.tiff", "*.bmp", "*.tif"):
-        for img_path in folder.glob(ext):
+        if (ball_folder/"photos").exists():
+            for img_path in (ball_folder/"photos").glob(ext):
+                position = find_ball_position(img_path, disp)
+                if position is not None:
+                    positions.append(position)
+        for img_path in ball_folder.glob(ext):
             position = find_ball_position(img_path, disp)
             if position is not None:
                 positions.append(position)
@@ -50,4 +55,4 @@ def map_ball_path(folder, disp=False):
     
     data = np.column_stack((position_arr[:, 0], position_arr[:, 2], t_err, p_err))
     
-    np.savetxt(folder / 'position_time.txt', data)
+    np.savetxt(ball_folder / 'position_time.txt', data)
