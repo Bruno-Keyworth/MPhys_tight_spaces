@@ -131,32 +131,26 @@ def _update_data(folders, file_path):
 
     return data, dimensionless_data 
 
-def redo(ball, version=None, fluid=FLUID, method=METHOD):
-    """
-    Refits to distance time graphs but uses the data cached for ball position in
-    each photo.
-    """
+def _delete_data_file(ball, version, fluid, method):
     if version is not None:
-        file_path = MASTER_FOLDER / (fluid or "") / (method or "") / ball / f'speed_pressure_{version}.txt'
-    else: 
-        file_path = MASTER_FOLDER / (fluid or "") / (method or "") / ball / 'speed_pressure.txt'
-    if os.path.exists(file_path):
-        os.remove(file_path)
+        fname = f"speed_pressure_{version}.txt"
+    else:
+        fname = "speed_pressure.txt"
 
-    analyse_ball(ball, version=version)
+    path = MASTER_FOLDER / (fluid or "") / (method or "") / ball / fname
+    if os.path.exists(path):
+        os.remove(path)
 
-def redo_all(ball, version=None, fluid=FLUID, method=METHOD):
-    """
-    Completely reruns the code including finding the position of the ball in each image. 
-    """
-    if version is not None:
-        file_path = MASTER_FOLDER / (fluid or "") / (method or "") / ball / f'speed_pressure_{version}.txt'
-    else: 
-        file_path = MASTER_FOLDER / (fluid or "") / (method or "") / ball / 'speed_pressure.txt'
-    if os.path.exists(file_path):
-        os.remove(file_path)
+def redo(ball, version=None, fluid=FLUID, method=METHOD, plot=True):
+    """ Refits to distance time graphs but uses the data cached for ball position in each photo. """
+    _delete_data_file(ball, version, fluid, method)
+    analyse_ball(ball, version=version, plot=plot)
 
-    analyse_ball(ball, redo=True, version=version)
+
+def redo_all(ball, version=None, fluid=FLUID, method=METHOD, plot=True):
+    """ Completely reruns the code including finding the position of the ball in each image. """
+    _delete_data_file(ball, version, fluid, method)
+    analyse_ball(ball, redo=True, version=version, plot=plot)
     
 def delete_empty(ball=BALL, fluid=FLUID, method=METHOD):
     """
