@@ -10,31 +10,54 @@ from get_folderpaths import _ball_folder
 from get_fit_params import _errorbar, true_power_law, power_law, _log_linear_data, get_fit_params
 from constants import BALL_DIAMETERS
 from value_to_string import value_to_string
+import matplotlib.colors as mcolors
+from itertools import cycle
 
 
 balls = [
-    {'name': 'ball3',
-     'method': 'no-hold',
-     'fluid': 'glycerol',},
-
-    {'name': 'ball3_repeat',
-     'method': 'no-hold',
-     'fluid': 'glycerol',},
-
-    {'name': 'ball3_stretched',
+    {'name': 'ball1',
      'method': 'hold',
      'fluid': 'glycerol',},
 
-    {'name': 'ball3_repeat',
+    {'name': 'ball2',
+     'method': 'hold',
+     'fluid': 'glycerol',},
+
+    {'name': 'ball3',
+     'method': 'hold',
+     'fluid': 'glycerol',},
+
+    {'name': 'ball4',
      'method': 'hold',
      'fluid': 'glycerol',}
 ]
 
 crop_speed = (0, 0.1)
 
-log_scale = False
-dimensionless = False
-linear = False
+log_scale = True
+dimensionless = True
+linear = True
+
+SAVE_FIG = False
+save_file = 'test_image.png'
+
+
+#==============================================================================
+# pick a colormap
+cmap = plt.get_cmap('cmc.hawaii', 2*len(balls))
+
+
+# generate reversed list of colours from the colormap
+colors = [mcolors.to_hex(cmap(i)) for i in range(cmap.N)][::-1]
+
+# set as the default color cycle
+plt.rcParams['axes.prop_cycle'] = plt.cycler(color=colors)
+
+# Define linestyles and markers
+linestyles = cycle(['-', '--', '-.', ':'])
+markers = cycle(['o', 's', 'x', '^', 'v', '*', 'D', 'P'])
+
+#==============================================================================
 
 def load_data(ball_info):
     """Load data for a single ball."""
@@ -78,7 +101,9 @@ def comparison_plot():
         label = f"{ball['name']} {ball['method']} {ball['fluid']}"
         ball_size = BALL_DIAMETERS[ball['name'].split('_')[0]][0]
 
-        _errorbar(data, legend=False)
+        ls = next(linestyles)
+        mk = next(markers)
+        _errorbar(data, legend=False, marker=mk)
 
         x_fit = np.linspace(np.min(data[:, 1]), np.max(data[:, 1]), 50)
         
@@ -88,7 +113,7 @@ def comparison_plot():
             y_fit = power_law(beta, x_fit)
             
         
-        ax.plot(x_fit, y_fit, linestyle='--', label=(
+        ax.plot(x_fit, y_fit, linestyle=ls, label=(
             f"{label}:\n"
             + fr"$\alpha$={value_to_string(beta[0], sd_beta[0])}" + "\n"
             + fr"$\beta$={value_to_string(beta[1], sd_beta[1])}" + "\n"
@@ -110,6 +135,8 @@ def comparison_plot():
         bbox_to_anchor=(0.5, -0.12),  # position below each subplot
         ncol=2)
     fig.tight_layout()
+    if SAVE_FIG:
+        plt.savefig(MASTER_FOLDER/('PLOTS')/(save_file), dpi=300)
     plt.show()
 
 

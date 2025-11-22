@@ -11,10 +11,15 @@ from constants import FRAME_SIZE
 import cv2
 from get_folderpaths import get_folderpaths, _ball_folder, MASTER_FOLDER
 import matplotlib.pyplot as plt
-import itertools
 from make_dimensionless import _get_delta
+import matplotlib.colors as mcolors
+from itertools import cycle
 
-colors = itertools.cycle(plt.rcParams['axes.prop_cycle'].by_key()['color'])
+
+# Define linestyles and markers
+linestyles = cycle(['-', '--', '-.', ':'])
+markers = cycle(['o', 's', 'x', '^', 'v', '*', 'D', 'P'])
+
 
 def _get_radius(ROI, label, plot=False):
     
@@ -153,8 +158,13 @@ def plot_swelling(balls, fluid='glycerol', method='hold', redo=False):
         data = np.genfromtxt(file_path)
         if len(data) == 0:
             continue
-        ax[0].errorbar(data[:, 0], data[:, 4], xerr=data[:, 1], yerr=data[:, 5], ls='', label=ball)
-        ax[1].errorbar(data[:, 0], data[:, 2], xerr=data[:, 1], yerr=data[:, 3], ls='', label=ball)
+        mk = next(markers)
+        ax[0].errorbar(data[:, 0], data[:, 4], xerr=data[:, 1], yerr=data[:, 5], 
+                       linestyle='', markeredgecolor='black', marker =mk,
+                       markersize=4, elinewidth=0.8, markeredgewidth=0.5,label=ball)
+        ax[1].errorbar(data[:, 0], data[:, 2], xerr=data[:, 1], yerr=data[:, 3], 
+                       linestyle='', markeredgecolor='black', marker =mk,
+                       markersize=4, elinewidth=0.8, markeredgewidth=0.5, label=ball)
     ax[0].set_ylim(1, 1.4)
     ax[1].set_ylim(0, 0.15)
     ax[0].set_ylabel(r'$r/r_0$')
@@ -169,4 +179,12 @@ if __name__ == '__main__':
     balls = [f'ball{i+1}' for i in range(5)]
     balls[2] +='_repeat'
     balls.append('ball3_stretched')
+    
+    #colour map
+    cmap = plt.get_cmap('cmc.hawaii', len(balls))
+    # generate reversed list of colours from the colormap
+    colors = [mcolors.to_hex(cmap(i)) for i in range(cmap.N)][::-1]
+    # set as the default color cycle
+    plt.rcParams['axes.prop_cycle'] = plt.cycler(color=colors)
+
     plot_swelling(balls)
