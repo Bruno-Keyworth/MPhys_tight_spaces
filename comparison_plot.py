@@ -16,7 +16,7 @@ import matplotlib.colors as mcolors
 from itertools import cycle
 
 # pick a colormap
-cmap = plt.get_cmap('cividis', 20)
+cmap = plt.get_cmap('cividis', 7)
 
 # generate reversed list of colours from the colormap
 colors = [mcolors.to_hex(cmap(i)) for i in range(cmap.N)][::-1]
@@ -105,7 +105,7 @@ def ball_comparison():
             bbox_to_anchor=(0.5, -0.12),  # position below each subplot
             ncol=2
         )
-    plt.savefig(MASTER_FOLDER / ('ball_comparison'), dpi=300)
+    plt.savefig(MASTER_FOLDER/ ('ball_comparison'), dpi=400)
     
     # Show the plot
     plt.show()

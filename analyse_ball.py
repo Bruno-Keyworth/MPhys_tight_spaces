@@ -16,7 +16,7 @@ import os
 import argparse
 
 FLUID = 'glycerol'
-METHOD = 'no-hold'
+METHOD = 'hold'
 BALL = 'ball1_repeat'   
 
 def parse_arguments():

@@ -166,15 +166,19 @@ def plot_threshold(results):
             data = results[fluid][method]['observed']['non-dimensional']
             _add_to_plot(data, ax[1], label=f'{fluid} - {method}', 
                          fmt = markers[method], colour=colours[fluid])
-    plt.xlabel("Ball diameter (m)")
-    plt.ylabel("Threshold pressure (mbar)")
-    plt.title("Threshold pressure vs. ball diameter")
+    ax[0].set_xlabel("Ball diameter (m)")
+    ax[0].set_ylabel("Threshold pressure (mbar)")
+    ax[0].set_title("Threshold pressure vs. ball diameter")
+    
+    ax[1].set_xlabel("Ball diameter (m)")
     
     handles, labels = plt.gca().get_legend_handles_labels()
     unique = dict(zip(labels, handles))
-    plt.legend(unique.values(), unique.keys())
+    ax[0].legend(unique.values(), unique.keys())
+    ax[1].legend(unique.values(), unique.keys())
     
-    plt.grid(True, linestyle="--", alpha=0.3)
+    ax[0].grid(True, linestyle="--", alpha=0.3)
+    ax[1].grid(True, linestyle="--", alpha=0.3)
     plt.tight_layout()
     if SAVE_FIG:
         plt.savefig(MASTER_FOLDER/"threshold_pressure.png", dpi=300)
@@ -185,7 +189,7 @@ if __name__ == '__main__':
     
     PRINT = True
     PLOT = True
-    SAVE_FIG = True
+    SAVE_FIG = False
     REDO = True
     if (not (MASTER_FOLDER / "threshold_data.pkl").exists()) or REDO:
         get_thresholds()

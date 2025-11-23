@@ -5,6 +5,7 @@ Created on Thu Nov 13 20:36:19 2025
 @author: David Mawson
 """
 import matplotlib.pyplot as plt
+from matplotlib.gridspec import GridSpec
 import numpy as np
 from get_folderpaths import _ball_folder, MASTER_FOLDER
 from get_fit_params import _errorbar, true_power_law, power_law, _log_linear_data, get_fit_params
@@ -28,12 +29,16 @@ balls = [
      'method': 'no-hold',
      'fluid': 'oil',},
     
+    {'name': 'ball3_repeat',
+     'method': 'no-hold',
+     'fluid': 'oil',},
+    
     {'name': 'ball4',
      'method': 'no-hold',
      'fluid': 'oil',}
 ]
 
-crop_speed = (0, 0.1)
+crop_speed = (0, 0.0003)
 
 log_scale = True
 dimensionless = True
@@ -41,12 +46,12 @@ linear = True
 
 SAVE_FIG = False
 NEW_FIT = True
-save_file = 'test_image.png'
+save_file = 'oil_no_hold.jpg'
 
 
 #==============================================================================
 # pick a colormap
-cmap = plt.get_cmap('cividis', 2*len(balls))
+cmap = plt.get_cmap('cmc.hawaii', 2*len(balls))
 
 
 # generate reversed list of colours from the colormap
@@ -79,12 +84,32 @@ def crop_data(data, ball_info):
     data = data[(crop[0]<data[:, 1]) & (data[:, 1]<crop[1]), :]
     return data
 
+def reduced_chi_squared(y_fit, y, yerr):
+
+    chi2 = np.sum(((y_fit - y) / yerr)**2)
+    dof = len(y) - 2    # two fitted parameters
+    return chi2 / dof
+
+def effective_err(y_err, x_err, grad):
+    return np.sqrt(y_err**2 + (grad * x_err)**2)
+    
 def comparison_plot():
-    fig, ax = plt.subplots(figsize=(8, 8), dpi=150)
+    
+    fig = plt.figure(figsize=(10, 8))
+    gs = GridSpec(2, 1, height_ratios=[3, 1.2], hspace=0.25)
+    ax = fig.add_subplot(gs[0, 0])
+    ax_table = fig.add_subplot(gs[1, 0])
+    ax_table.axis("off")
+    # Construct table rows
+    table_rows = []
     
     if dimensionless:
-        xlabel = r"$\lambda$"
-        ylabel = r"P(Z)"
+        if linear:
+            xlabel = r"$\lambda$"
+            ylabel = r"P(Z) - $P_{th}$"
+        else:
+            xlabel = r"$\lambda$"
+            ylabel = r"P(Z)"
     else:
         xlabel = "Velocity, m/s"
         ylabel = "Pressure, Pa"
@@ -118,9 +143,9 @@ def comparison_plot():
 
         ls = next(linestyles)
         mk = next(markers)
-        _errorbar(data, legend=False, marker=mk)
+        _errorbar(data, label = fr"Diameter = {ball_size * 1000} mm", ax=ax, marker=mk)
 
-        x_fit = np.linspace(np.min(data[:, 1]), np.max(data[:, 1]), 50)
+        x_fit = np.linspace(np.min(data[:, 1]), np.max(data[:, 1]), len(data[:,0]))
         
         if linear:
             y_fit = true_power_law(beta, x_fit)
@@ -128,30 +153,38 @@ def comparison_plot():
             y_fit = power_law(beta, x_fit)
             
         
-        ax.plot(x_fit, y_fit, linestyle=ls, label=(
-            f"{label}:\n"
-            + fr"$\alpha$={value_to_string(beta[0], sd_beta[0])}" + "\n"
-            + fr"$\beta$={value_to_string(beta[1], sd_beta[1])}" + "\n"
-            + fr"Diametre = {ball_size * 1000} mm"
-        ))
+        y_err_eff = effective_err(data[:, 3], data[:, 2], beta[0])
+        chi_2 = reduced_chi_squared(y_fit, data[:, 0], y_err_eff)
+        print(f"reduced chi squared = {chi_2:.2f}")
+        
+        ax.plot(x_fit, y_fit, linestyle=ls)
 
+        table_rows.append([fr"{ball_size * 1000} mm",
+                           fr"{value_to_string(beta[0],sd_beta[0])}",
+                           fr"{value_to_string(beta[1], sd_beta[1])}"])
+        
         results.append((label, beta, sd_beta))
 
-    # a, b = balls
-    # ax.set_title(f"{a['name']} {a['method']} {a['fluid']} vs "
-    #              f"{b['name']} {b['method']} {b['fluid']}")
-
+    ax.scatter(0.0001, 0.001, label=r"$P(Z) = P_{th} + \beta \lambda^{\alpha}$", 
+               linestyle ="",color = "white")
+    ax.legend(fontsize = 12, loc = "best", ncols=2)
+    ax.set_ylabel(ylabel, fontsize=14)
+    ax.set_xlabel(xlabel, fontsize = 14)
     if log_scale:
         ax.set_xscale('log')
         ax.set_yscale('log')
-    ax.legend(
-        framealpha=0,
-        loc='upper center',
-        bbox_to_anchor=(0.5, -0.12),  # position below each subplot
-        ncol=2, fontsize = 16)
-    ax.set_ylabel(ylabel, fontsize=16)
-    ax.set_xlabel(xlabel, fontsize = 16)
-    fig.tight_layout()
+        
+    
+    table = ax_table.table(
+        cellText=table_rows,
+        colLabels=["Ball Diameter", r"$\alpha$", r"$\beta$"],
+        loc="center",
+        cellLoc="center",
+        )
+    table.auto_set_font_size(False)
+    table.set_fontsize(14)      # choose your size
+    table.scale(1, 1.5) 
+    
     if SAVE_FIG:
         plt.savefig(MASTER_FOLDER/('PLOTS')/(save_file), dpi=300)
     plt.show()
