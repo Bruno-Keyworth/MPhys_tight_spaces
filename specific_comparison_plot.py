@@ -10,10 +10,8 @@ from get_folderpaths import _ball_folder, MASTER_FOLDER
 from get_fit_params import _errorbar, true_power_law, power_law, _log_linear_data, get_fit_params
 from constants import BALL_DIAMETERS
 from value_to_string import value_to_string
-from fit_power_law_odr import fit_power_law_odr
 import matplotlib.colors as mcolors
 from itertools import cycle
-import scicomap
 
 balls = [
     {'name': 'ball1',
@@ -81,7 +79,7 @@ def crop_data(data, ball_info):
 
 def comparison_plot():
     fig, ax = plt.subplots(figsize=(8, 8), dpi=150)
-    
+
     if dimensionless:
         xlabel = r"$\lambda$"
         ylabel = r"P(Z)"
@@ -98,17 +96,14 @@ def comparison_plot():
             continue
         ball_folder = _ball_folder(ball=ball['name'], fluid=ball['fluid'],
                                    method=ball['method'])
-        
-        if NEW_FIT:
-            beta, sd_beta = fit_power_law_odr(data)
+
+        if NEW_FIT or not (ball_folder / 'fit_params.txt').exists():
+            get_fit_params(ball_folder)
+        if dimensionless:
+            params = np.genfromtxt(ball_folder / 'fit_params.txt')[1]
         else:
-            if not (ball_folder / 'fit_params.txt').exists():
-                get_fit_params(ball_folder)
-            if dimensionless:
-                params = np.genfromtxt(ball_folder / 'fit_params.txt')[1]
-            else:
-                params = np.genfromtxt(ball_folder / 'fit_params.txt')[0]
-            beta, sd_beta = params[:3], params[3:]
+            params = np.genfromtxt(ball_folder / 'fit_params.txt')[0]
+        beta, sd_beta = params[:3], params[3:]
         
         if linear:
             data = _log_linear_data(data, beta)
@@ -136,10 +131,6 @@ def comparison_plot():
         ))
 
         results.append((label, beta, sd_beta))
-
-    # a, b = balls
-    # ax.set_title(f"{a['name']} {a['method']} {a['fluid']} vs "
-    #              f"{b['name']} {b['method']} {b['fluid']}")
 
     if log_scale:
         ax.set_xscale('log')

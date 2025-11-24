@@ -181,7 +181,7 @@ def plot_threshold(results):
     ax[1].grid(True, linestyle="--", alpha=0.3)
     plt.tight_layout()
     if SAVE_FIG:
-        plt.savefig(MASTER_FOLDER/"threshold_pressure.png", dpi=300)
+        plt.savefig(MASTER_FOLDER/'PLOTS'/"thresholds.png", dpi=300)
     plt.show()
 
 
@@ -189,7 +189,7 @@ if __name__ == '__main__':
     
     PRINT = True
     PLOT = True
-    SAVE_FIG = False
+    SAVE_FIG = True
     REDO = True
     if (not (MASTER_FOLDER / "threshold_data.pkl").exists()) or REDO:
         get_thresholds()

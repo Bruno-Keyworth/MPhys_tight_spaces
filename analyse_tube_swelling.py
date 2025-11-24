@@ -148,7 +148,7 @@ def analyse_swelling(ball, fluid='glycerol', method='no-hold'):
     
     np.savetxt(_ball_folder(ball, fluid, method) / 'swelling_data.txt', data)
     
-def plot_swelling(balls, fluid='glycerol', method='hold', redo=False):
+def plot_swelling(balls, fluid='glycerol', method='no-hold', redo=False):
     fig, ax = plt.subplots(1, 2, figsize=(12, 5))
     for ball in balls:
         file_path = _ball_folder(ball, fluid, method) / 'swelling_data.txt'
@@ -174,12 +174,10 @@ def plot_swelling(balls, fluid='glycerol', method='hold', redo=False):
         axes.set_xlim(10000, 60000)
         axes.set_xlabel('Pressure (Pa)')
         axes.legend(framealpha=0)
-    plt.savefig(MASTER_FOLDER / fluid / method / 'tube_swelling_comparison.png', dpi=300)
+    plt.savefig(MASTER_FOLDER /'PLOTS' / f'{fluid}_{method}_swelling.png', dpi=300)
 if __name__ == '__main__':
     balls = [f'ball{i+1}' for i in range(5)]
-    balls[2] +='_repeat'
     balls.append('ball3_stretched')
-    
     #colour map
     cmap = plt.get_cmap('cmc.hawaii', len(balls))
     # generate reversed list of colours from the colormap

@@ -11,10 +11,9 @@ from get_folderpaths import _ball_folder, MASTER_FOLDER
 from get_fit_params import _errorbar, true_power_law, power_law, _log_linear_data, get_fit_params
 from constants import BALL_DIAMETERS
 from value_to_string import value_to_string
-from fit_power_law_odr import fit_power_law_odr
 import matplotlib.colors as mcolors
 from itertools import cycle
-import scicomap
+import cmcrameri.cm as cmc
 
 balls = [
     {'name': 'ball1',
@@ -38,20 +37,20 @@ balls = [
      'fluid': 'oil',}
 ]
 
-crop_speed = (0, 0.0003)
+crop_speed = (0, 1)
 
 log_scale = True
 dimensionless = True
 linear = True
 
-SAVE_FIG = False
-NEW_FIT = True
-save_file = 'oil_no_hold.jpg'
+SAVE_FIG = True
+NEW_FIT = False
+save_file = 'oil_no-hold.jpg'
 
 
 #==============================================================================
 # pick a colormap
-cmap = plt.get_cmap('cmc.hawaii', 2*len(balls))
+cmap = cmc.hawaii.resampled(2*len(balls))
 
 
 # generate reversed list of colours from the colormap
@@ -124,16 +123,13 @@ def comparison_plot():
         ball_folder = _ball_folder(ball=ball['name'], fluid=ball['fluid'],
                                    method=ball['method'])
         
-        if NEW_FIT:
-            beta, sd_beta = fit_power_law_odr(data)
+        if NEW_FIT or not (ball_folder / 'fit_params.txt').exists():
+            get_fit_params(ball_folder)
+        if dimensionless:
+            params = np.genfromtxt(ball_folder / 'fit_params.txt')[1]
         else:
-            if not (ball_folder / 'fit_params.txt').exists():
-                get_fit_params(ball_folder)
-            if dimensionless:
-                params = np.genfromtxt(ball_folder / 'fit_params.txt')[1]
-            else:
-                params = np.genfromtxt(ball_folder / 'fit_params.txt')[0]
-            beta, sd_beta = params[:3], params[3:]
+            params = np.genfromtxt(ball_folder / 'fit_params.txt')[0]
+        beta, sd_beta = params[:3], params[3:]
         
         if linear:
             data = _log_linear_data(data, beta)
