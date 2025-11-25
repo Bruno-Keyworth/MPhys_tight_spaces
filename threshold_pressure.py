@@ -8,7 +8,7 @@ Created on Tue Nov 18 18:27:02 2025
 Threshold Pressure
 """
 from constants import BALL_DIAMETERS
-from get_folderpaths import MASTER_FOLDER
+from get_folderpaths import MASTER_FOLDER, PLOTS_FOLDER
 from value_to_string import value_to_string
 import numpy as  np
 import matplotlib.pyplot as plt
@@ -22,6 +22,8 @@ pressure_err = 10  # mbar uncertainty
 
 pressure_pattern = re.compile(r"(\d+)\s*mbar", re.IGNORECASE)
 ball_base_pattern = re.compile(r"(ball\d+)")  # captures ball1 from ball1_repeat
+
+threshold_path = MASTER_FOLDER / "threshold_data.pkl"
 
 def _level4():
     return dict()
@@ -62,7 +64,7 @@ def save_results(results):
             save_dict[fluid][method]['observed']['dimensional'] = data
             save_dict[fluid][method]['observed']['non-dimensional'] = dimless_data
 
-    with open(MASTER_FOLDER / "threshold_data.pkl", "wb") as f:
+    with open(threshold_path, "wb") as f:
         pickle.dump(save_dict, f)
 
 def get_thresholds():
@@ -181,7 +183,7 @@ def plot_threshold(results):
     ax[1].grid(True, linestyle="--", alpha=0.3)
     plt.tight_layout()
     if SAVE_FIG:
-        plt.savefig(MASTER_FOLDER/'PLOTS'/"thresholds.png", dpi=300)
+        plt.savefig(PLOTS_FOLDER/"thresholds.png", dpi=300)
     plt.show()
 
 
@@ -191,9 +193,9 @@ if __name__ == '__main__':
     PLOT = True
     SAVE_FIG = True
     REDO = True
-    if (not (MASTER_FOLDER / "threshold_data.pkl").exists()) or REDO:
+    if (not threshold_path.exists()) or REDO:
         get_thresholds()
-    with open(MASTER_FOLDER / "threshold_data.pkl", "rb") as f:
+    with open(threshold_path, "rb") as f:
         results = pickle.load(f)
     if PLOT:
         plot_threshold(results)

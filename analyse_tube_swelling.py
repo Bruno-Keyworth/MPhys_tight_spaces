@@ -9,7 +9,7 @@ Created on Thu Nov 13 14:35:41 2025
 import numpy as np
 from constants import FRAME_SIZE
 import cv2
-from get_folderpaths import get_folderpaths, _ball_folder, MASTER_FOLDER
+from get_folderpaths import get_folderpaths, _ball_folder, PLOTS_FOLDER
 import matplotlib.pyplot as plt
 from make_dimensionless import _get_delta
 import matplotlib.colors as mcolors
@@ -174,7 +174,7 @@ def plot_swelling(balls, fluid='glycerol', method='no-hold', redo=False):
         axes.set_xlim(10000, 60000)
         axes.set_xlabel('Pressure (Pa)')
         axes.legend(framealpha=0)
-    plt.savefig(MASTER_FOLDER /'PLOTS' / f'{fluid}_{method}_swelling.png', dpi=300)
+    plt.savefig(PLOTS_FOLDER / f'{fluid}_{method}_swelling.png', dpi=300)
 if __name__ == '__main__':
     balls = [f'ball{i+1}' for i in range(5)]
     balls.append('ball3_stretched')

@@ -21,6 +21,8 @@ if socket.gethostname() == "Brunos-MacBook-Air-2.local":
 else:
     MASTER_FOLDER = Path(r"D:\2025-26 MPhys Project") / 'new_camera' 
     
+PLOTS_FOLDER = MASTER_FOLDER / 'PLOTS'
+    
 def _hydrostatic_err(fluid):
     if fluid is None: 
         fluid = 'oil'

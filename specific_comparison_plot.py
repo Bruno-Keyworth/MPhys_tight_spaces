@@ -6,7 +6,7 @@ Created on Thu Nov 13 20:36:19 2025
 """
 import matplotlib.pyplot as plt
 import numpy as np
-from get_folderpaths import _ball_folder, MASTER_FOLDER
+from get_folderpaths import _ball_folder, PLOTS_FOLDER
 from get_fit_params import _errorbar, true_power_law, power_law, _log_linear_data, get_fit_params
 from constants import BALL_DIAMETERS
 from value_to_string import value_to_string
@@ -144,7 +144,7 @@ def comparison_plot():
     ax.set_xlabel(xlabel, fontsize = 16)
     fig.tight_layout()
     if SAVE_FIG:
-        plt.savefig(MASTER_FOLDER/('PLOTS')/(save_file), dpi=300)
+        plt.savefig(PLOTS_FOLDER/(save_file), dpi=300)
     plt.show()
 
 
