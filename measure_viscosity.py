@@ -14,24 +14,25 @@ import matplotlib.pyplot as plt
 viscosity_folder = MASTER_FOLDER / 'viscosity'
 
 file_names = {
-    "oil": "oil2.txt",
-    "glycerol": "glycerol1.txt",
+    "oil": "oil3.txt",
+    "glycerol": "glycerol4.txt",
     "fresh glycerol": "glycerol2.txt"
     }
 
 def get_viscosities(fluid):
     
-    data = np.genfromtxt(viscosity_folder / file_names[fluid])[:, :]
+    data = np.genfromtxt(viscosity_folder / file_names[fluid])[4:, :]
     
-    parameters, cov = np.polyfit(data[:, 0], data[:, 1], 1, cov=True)
+    parameters, cov = np.polyfit(data[:, 1], data[:, 0], 1, cov=True)
+    print(fluid + ': ', parameters[1] )
     
-    x =np.linspace(min(data[:, 0]), max(data[:, 0]), 100)
-    y = np.polyval(parameters, x)
+    y =np.linspace(min(data[:, 1]), max(data[:, 1]), 100)
+    x = np.polyval(parameters, y)
     
     viscosity, _ = parameters
     err = np.sqrt(cov[0][0])
     
-    viscosity2 = np.mean(data[:, 2])
+    viscosity2 = np.mean(data[:,2])
     err2 = np.std(data[:, 2])
     
     plt.scatter(data[:, 0], data[:, 1], s=5)
@@ -42,7 +43,7 @@ def get_viscosities(fluid):
 
 for fluid in file_names.keys():
     
-    print(get_viscosities(fluid))
+    get_viscosities(fluid)
 
 #plt.xscale('log')
 plt.legend()
