@@ -19,9 +19,9 @@ FLUID_PARAMS = {
         'density': [907, 45],# kg/m^3
         'viscosity': [0.0729, 0.0028] #Pas
     },
-    'glycerol': { #from google
-        'density': [1261, 2],
-        'viscosity': [1.49, 0.01]
+    'glycerol': { 
+        'density': [1252, 8], #measured by us
+        'viscosity': [1.49, 0.01] #from google
     }
 }
 
