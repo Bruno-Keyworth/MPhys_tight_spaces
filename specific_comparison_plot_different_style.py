@@ -141,7 +141,7 @@ def comparison_plot():
         mk = next(markers)
         _errorbar(data, label = fr"Diameter = {ball_size * 1000} mm", ax=ax, marker=mk)
 
-        x_fit = np.linspace(np.min(data[:, 1]), np.max(data[:, 1]), len(data[:,0]))
+        x_fit = data[:,1]
         
         if linear:
             y_fit = true_power_law(beta, x_fit)
@@ -157,7 +157,8 @@ def comparison_plot():
 
         table_rows.append([fr"{ball_size * 1000} mm",
                            fr"{value_to_string(beta[0],sd_beta[0])}",
-                           fr"{value_to_string(beta[1], sd_beta[1])}"])
+                           fr"{value_to_string(beta[1], sd_beta[1])}", 
+                           f"{chi_2:.2f}"])
         
         results.append((label, beta, sd_beta))
 
@@ -173,7 +174,7 @@ def comparison_plot():
     
     table = ax_table.table(
         cellText=table_rows,
-        colLabels=["Ball Diameter", r"$\alpha$", r"$\beta$"],
+        colLabels=["Ball Diameter", r"$\alpha$", r"$\beta$", r"$\chi_R^2$"],
         loc="center",
         cellLoc="center",
         )
