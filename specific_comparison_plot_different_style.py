@@ -15,27 +15,62 @@ import matplotlib.colors as mcolors
 from itertools import cycle
 import cmcrameri.cm as cmc
 
-balls = [
-    {'name': 'ball1',
-     'method': 'no-hold',
-     'fluid': 'oil',},
+from get_preset import *
 
-    {'name': 'ball2',
-     'method': 'no-hold',
-     'fluid': 'oil',},
+# ============================================================
+# LIST OF ALL PRESET NAMES 
+# ============================================================
 
-    {'name': 'ball3',
-     'method': 'no-hold',
-     'fluid': 'oil',},
+# ALL BALLS (with repeats)
+# all_balls_<method>_<fluid>
+# Methods: no_hold, hold
+# Fluids: oil, glycerol
+
+# ALL BALLS NO REPEATS
+# all_balls_no_repeat_<method>_<fluid>
+# Methods: no_hold, hold
+# Fluids: oil, glycerol
+
+# INDIVIDUAL BALL PRESETS (ballX, ballX_repeat, ballX_stretched_1.5)
+# all_ball1_<method>_<fluid>
+# all_ball2_<method>_<fluid>
+# all_ball3_<method>_<fluid>
+# all_ball4_<method>_<fluid>
+# all_ball5_<method>_<fluid>
+# Methods: no_hold, hold
+# Fluids: oil, glycerol
+
+# ALL STRETCHED
+# all_stretched_<method>_<fluid>
+# Methods: no_hold, hold
+# Fluids: oil, glycerol
+
+
+
+balls = all_ball3_no_hold_glycerol
+
+# OR CUSTOM PRESET
+# balls = [
+#     {'name': 'ball1',
+#      'method': 'no-hold',
+#      'fluid': 'oil',},
+
+#     {'name': 'ball2',
+#      'method': 'no-hold',
+#      'fluid': 'oil',},
+
+#     {'name': 'ball3',
+#      'method': 'no-hold',
+#      'fluid': 'oil',},
     
-    {'name': 'ball3_repeat',
-     'method': 'no-hold',
-     'fluid': 'oil',},
+#     {'name': 'ball3_repeat',
+#      'method': 'no-hold',
+#      'fluid': 'oil',},
     
-    {'name': 'ball4',
-     'method': 'no-hold',
-     'fluid': 'oil',}
-]
+#     {'name': 'ball4',
+#      'method': 'no-hold',
+#      'fluid': 'oil',}
+# ]
 
 crop_speed = (0, 1)
 
@@ -43,7 +78,7 @@ log_scale = True
 dimensionless = True
 linear = True
 
-SAVE_FIG = True
+SAVE_FIG = False
 NEW_FIT = False
 save_file = 'oil_no-hold.jpg'
 
@@ -116,7 +151,10 @@ def comparison_plot():
     results = []
 
     for ball in balls:
-        data = load_data(ball)
+        try:
+            data = load_data(ball)
+        except:
+            continue
         data = crop_data(data, ball)
         if len(data) < 10: 
             continue
@@ -134,12 +172,19 @@ def comparison_plot():
         if linear:
             data = _log_linear_data(data, beta)
 
-        label = f"{ball['name']} {ball['method']} {ball['fluid']}"
+        #label = f"{ball['name']} {ball['method']} {ball['fluid']}"
+        
+        try:
+            label = f"{ball['name'].split("_")[1]}"
+        except: 
+            label = ""
+            
+        print(label)
         ball_size = BALL_DIAMETERS[ball['name'].split('_')[0]][0]
 
         ls = next(linestyles)
         mk = next(markers)
-        _errorbar(data, label = fr"Diameter = {ball_size * 1000} mm", ax=ax, marker=mk)
+        _errorbar(data, label = fr"Diameter = {ball_size * 1000} mm, "+label, ax=ax, marker=mk)
 
         x_fit = data[:,1]
         

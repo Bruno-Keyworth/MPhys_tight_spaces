@@ -13,6 +13,41 @@ from value_to_string import value_to_string
 import matplotlib.colors as mcolors
 from itertools import cycle
 
+from get_preset import *
+
+
+# ============================================================
+# LIST OF ALL PRESET NAMES 
+# ============================================================
+
+# ALL BALLS (with repeats)
+# all_balls_<method>_<fluid>
+# Methods: no_hold, hold
+# Fluids: oil, glycerol
+
+# ALL BALLS NO REPEATS
+# all_balls_no_repeat_<method>_<fluid>
+# Methods: no_hold, hold
+# Fluids: oil, glycerol
+
+# INDIVIDUAL BALL PRESETS (ballX, ballX_repeat, ballX_stretched_1.5)
+# all_ball1_<method>_<fluid>
+# all_ball2_<method>_<fluid>
+# all_ball3_<method>_<fluid>
+# all_ball4_<method>_<fluid>
+# all_ball5_<method>_<fluid>
+# Methods: no_hold, hold
+# Fluids: oil, glycerol
+
+# ALL STRETCHED
+# all_stretched_<method>_<fluid>
+# Methods: no_hold, hold
+# Fluids: oil, glycerol
+
+#balls = all_stretched_hold_glycerol
+
+
+# CUSTOM preset
 balls = [
     {'name': 'ball1',
      'method': 'no-hold',
