@@ -49,6 +49,7 @@ from get_preset import *
 
 balls = all_ball3_no_hold_glycerol
 
+
 # OR CUSTOM PRESET
 # balls = [
 #     {'name': 'ball1',
@@ -127,7 +128,7 @@ def reduced_chi_squared(y_fit, y, yerr):
 def effective_err(y_err, x_err, grad):
     return np.sqrt(y_err**2 + (grad * x_err)**2)
     
-def comparison_plot():
+def table_comparison_plot():
     
     fig = plt.figure(figsize=(10, 8))
     gs = GridSpec(2, 1, height_ratios=[3, 1.2], hspace=0.25)
@@ -202,7 +203,6 @@ def comparison_plot():
 
         table_rows.append([fr"{ball_size * 1000} mm",
                            fr"{value_to_string(beta[0],sd_beta[0])}",
-                           fr"{value_to_string(beta[1], sd_beta[1])}", 
                            f"{chi_2:.2f}"])
         
         results.append((label, beta, sd_beta))
@@ -219,7 +219,7 @@ def comparison_plot():
     
     table = ax_table.table(
         cellText=table_rows,
-        colLabels=["Ball Diameter", r"$\alpha$", r"$\beta$", r"$\chi_R^2$"],
+        colLabels=["Ball Diameter", r"$\alpha$", r"$\chi_R^2$"],
         loc="center",
         cellLoc="center",
         )
@@ -231,6 +231,89 @@ def comparison_plot():
         plt.savefig(MASTER_FOLDER/('PLOTS')/(save_file), dpi=300)
     plt.show()
 
+
+def comparison_plot():
+    
+    fig, ax = plt.subplots(figsize=(8, 7), dpi=300)
+    ax.scatter(0.0001, 0.001,
+    label=r"$P(Z) = P_{th} + \beta \lambda^{\alpha}$",
+    linestyle="", color="white")
+    
+    if dimensionless:
+        if linear:
+            xlabel = r"$\lambda$, [-]"
+            ylabel = r"P(Z) - $P_{th}$, [-]"
+        else:
+            xlabel = r"$\lambda$, [-]"
+            ylabel = r"P(Z), [-]"
+    else:
+        xlabel = "Velocity, [m/s]"
+        ylabel = "Pressure, [Pa]"
+
+    for ball in balls:
+        try:
+            data = load_data(ball)
+        except:
+            continue
+        data = crop_data(data, ball)
+        if len(data) < 8: 
+            continue
+        ball_folder = _ball_folder(ball=ball['name'], fluid=ball['fluid'],
+                                   method=ball['method'])
+        
+        if NEW_FIT or not (ball_folder / 'fit_params.txt').exists():
+            get_fit_params(ball_folder)
+        if dimensionless:
+            params = np.genfromtxt(ball_folder / 'fit_params.txt')[1]
+        else:
+            params = np.genfromtxt(ball_folder / 'fit_params.txt')[0]
+        beta, sd_beta = params[:3], params[3:]
+        
+        if linear:
+            data = _log_linear_data(data, beta)
+
+        #label = f"{ball['name']} {ball['method']} {ball['fluid']}"
+        
+        try:
+            label = f"{ball['name'].split("_")[1]}"
+        except: 
+            label = ""
+            
+        ball_size = BALL_DIAMETERS[ball['name'].split('_')[0]][0]
+
+        ls = next(linestyles)
+        mk = next(markers)
+        _errorbar(data, label = fr"{ball_size * 1000} mm, $\alpha = {value_to_string(beta[0],sd_beta[0])}$", ax=ax, marker=mk)
+
+        x_fit = data[:,1]
+        
+        if linear:
+            y_fit = true_power_law(beta, x_fit)
+        else:
+            y_fit = power_law(beta, x_fit)
+            
+        
+        y_err_eff = effective_err(data[:, 3], data[:, 2], beta[0])
+        chi_2 = reduced_chi_squared(y_fit, data[:, 0], y_err_eff)
+        print(f"reduced chi squared = {chi_2:.2f}")
+        
+        ax.plot(x_fit, y_fit, linestyle=ls)
+
+
+    
+    ax.legend(fontsize = 16, loc = "upper center", ncols=2,bbox_to_anchor=(0.5, -0.14))
+    ax.set_ylabel(ylabel, fontsize=14)
+    ax.set_xlabel(xlabel, fontsize = 14)
+    ax.set_ylim(0.01, )
+    plt.tight_layout()
+    if log_scale:
+        ax.set_xscale('log')
+        ax.set_yscale('log')
+        
+    
+    if SAVE_FIG:
+        plt.savefig(MASTER_FOLDER/('PLOTS')/(save_file), dpi=300)
+    plt.show()
 
 if __name__ == '__main__':
     comparison_plot()
