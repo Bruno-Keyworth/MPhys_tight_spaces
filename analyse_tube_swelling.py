@@ -127,18 +127,25 @@ def average_swelling(pressure_folder, plot=False, n=10):
 
     return strain_av, strain_err, ratio_av, ratio_err, r_av, r_err, r_0_av, r_0_err
 
+def _get_lambda(P, folder_path):
+    lamb_data = np.genfromtxt(folder_path / 'dimensionless_data.txt', usecols=(1,2))
+    data = np.genfromtxt(folder_path / 'speed_pressure.txt', usecols=(0))
+    index = data == P
+    return lamb_data[index, 0][0], lamb_data[index, 1][0]
+
 def analyse_swelling(ball, fluid='glycerol', method='no-hold'):
     
     folders = get_folderpaths(ball, fluid=fluid, method=method)
 
-    data = np.empty((len(folders), 10))
+    data = np.empty((len(folders), 12))
     count = 0
     
     for folder, P, P_err in folders:
         strain, strain_err, ratio, ratio_err, r_av, r_err, r_0_av, r_0_err = average_swelling(folder)
         if strain is None:
             continue
-        data[count] = [P, P_err, strain, strain_err, ratio, ratio_err, r_av, r_err, r_0_av, r_0_err]
+        lamb, lamb_err = _get_lambda(P, folder.parent)
+        data[count] = [P, P_err, strain, strain_err, lamb, lamb_err, ratio, ratio_err, r_av, r_err, r_0_av, r_0_err]
         count += 1
         
     data = data[:count] 
@@ -152,30 +159,33 @@ def plot_swelling(balls, fluid='glycerol', method='no-hold', redo=False):
         if (not file_path.exists()) or redo:
             analyse_swelling(ball, fluid, method)
             
-        if ball[-1] == '0':
-            data = np.genfromtxt(file_path, usecols=(0, 1, 6, 7))
-        else: 
-            data = np.genfromtxt(file_path, usecols=(0, 1, 2, 3))
+        data = np.genfromtxt(file_path, usecols=(0, 1, 2, 3, 4, 5))
+        
+    
         if len(data) == 0:
             continue
         mk = next(markers)
         ax[0].errorbar(data[:, 0], data[:, 2], xerr=data[:, 1], yerr=data[:, 3], 
                        linestyle='', markeredgecolor='black', marker =mk,
                        markersize=4, elinewidth=0.8, markeredgewidth=0.5,label=ball)
-    ax[0].set_ylim(1, 1.4)
-    ax[1].set_ylim(0, 0.15)
-    ax[0].set_ylabel(r'$r/r_0$')
-    ax[1].set_ylabel(r'$(r-r_0)/r_0$')
+        ax[1].errorbar(data[:,4], data[:, 2], xerr=data[:, 5], yerr=data[:, 3], 
+                       linestyle='', markeredgecolor='black', marker =mk,
+                       markersize=4, elinewidth=0.8, markeredgewidth=0.5,label=ball)
+    ax[0].set_ylim(-0.2, 0.4)
+    ax[0].set_ylabel(r'$(r-r_0)/r_0$')
     fig.suptitle(f'Tube Swelling Comparison for {method} method in {fluid}', fontsize=20)
+    ax[0].set_xlim(10000, 60000)
+    ax[1].set_xscale('log')
     for axes in ax:
-        axes.set_xlim(10000, 60000)
+        axes.set_ylim(-0.05, 0.4)
         axes.set_xlabel('Pressure (Pa)')
         axes.legend(framealpha=0)
     plt.savefig(PLOTS_FOLDER / f'{fluid}_{method}_swelling.png', dpi=300)
 if __name__ == '__main__':
     
-    balls = [f'ball{i}' for i in range(6)]
+    balls = [f'ball{i+3}' for i in range(3)]
     balls.append('ball3_stretched')
+    #balls.append('ball1_repeat')
     #colour map
     cmap = cmc.hawaii.resampled(2*len(balls))
     # generate reversed list of colours from the colormap
@@ -183,4 +193,4 @@ if __name__ == '__main__':
     # set as the default color cycle
     plt.rcParams['axes.prop_cycle'] = plt.cycler(color=colors)
 
-    plot_swelling(balls, redo=True)
+    plot_swelling(balls, redo=False)

@@ -7,6 +7,7 @@ Created on Tue Oct 28 14:29:03 2025
 """
 
 import numpy as np
+from constants import FLUID_DEPTH_ERROR, FLUID_PARAMS, g
 
 def read_pressure_data(folder_path):
     
@@ -35,7 +36,7 @@ def read_pressure_data(folder_path):
     data_dict = {}
     for p in cleaned_parts:
         key = int(p[0, 0])
-        value = (np.mean(p[:, 1]), np.std(p[:, 1])) 
+        value = (np.mean(p[5:, 1]), np.std(p[5:, 1])) 
         data_dict[key] = value
 
     return data_dict
