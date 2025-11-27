@@ -15,13 +15,13 @@ FLUID_DEPTH_ERROR = 0.01 #m
 
 
 FLUID_PARAMS = {
-    'oil': {# from Thomas Sigsworth's report
-        'density': [907, 45],# kg/m^3
-        'viscosity': [0.0729, 0.0028] #Pas
+    'oil': {
+        'density': [907, 45],# kg/m^3 from Thomas Sigsworth's report
+        'viscosity': [0.069, 0.007] #Pas # measured by us
     },
-    'glycerol': { 
-        'density': [1252, 8], #measured by us
-        'viscosity': [1.49, 0.01] #from google
+    'glycerol': { #measured by us
+        'density': [1252, 8], 
+        'viscosity': [0.484, 0.005] #from google
     }
 }
 
