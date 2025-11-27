@@ -21,7 +21,7 @@ FLUID_PARAMS = {
     },
     'glycerol': { #measured by us
         'density': [1252, 8], 
-        'viscosity': [0.484, 0.005] #from google
+        'viscosity': [0.484, 0.005]
     }
 }
 

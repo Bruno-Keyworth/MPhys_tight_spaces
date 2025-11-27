@@ -176,7 +176,7 @@ def table_comparison_plot():
         #label = f"{ball['name']} {ball['method']} {ball['fluid']}"
         
         try:
-            label = f"{ball['name'].split("_")[1]}"
+            label = f"{ball['name'].split('_')[1]}"
         except: 
             label = ""
             
