@@ -192,7 +192,7 @@ def plot_threshold(results):
             _add_to_plot(data, ax[1], label=f'{fluid} - {method} - fitted', 
                          fmt = markers[method], colour=fitted_cmap[fluid])
     ax[0].set_xlabel("Ball diameter (m)")
-    ax[0].set_ylabel("Threshold pressure (mbar)")
+    ax[0].set_ylabel("Threshold pressure (Pa)")
     ax[0].set_title("Threshold pressure vs. ball diameter")
     
     ax[1].set_xlabel("Ball diameter (m)")
