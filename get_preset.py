@@ -66,6 +66,8 @@ all_balls_hold_glycerol = [
     {'name': 'ball5_repeat', 'method': 'hold', 'fluid': 'glycerol'}
 ]
 
+all_balls = all_balls_no_hold_oil + all_balls_hold_oil + all_balls_no_hold_glycerol + all_balls_hold_glycerol
+
 # -----------------------------------------
 # 2. ALL BALLS — NO REPEATS
 # -----------------------------------------

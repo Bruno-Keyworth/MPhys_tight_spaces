@@ -52,7 +52,7 @@ def find_ball_speed(folder, disp=False, savefig=False):
     data = odr.RealData(time, position, sx=t_err, sy=p_err)
     
     # Create the ODR object
-    odr_instance = odr.ODR(data, model, beta0=[100, 0])  # initial guess
+    odr_instance = odr.ODR(data, model, beta0=[100, 0], iprint=0)  # initial guess
     
     # Run the regression
     output = odr_instance.run()

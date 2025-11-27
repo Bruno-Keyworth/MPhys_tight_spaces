@@ -73,7 +73,7 @@ def fit_power_law_odr(data, xscale=None, beta0=None, verbose=True):
     # create ODR objects
     model = odr.Model(_safe_power_law)
     odr_data = odr.RealData(x_scaled, y, sx=sx_scaled, sy=sy)
-    odr_instance = odr.ODR(odr_data, model, beta0=beta0)
+    odr_instance = odr.ODR(odr_data, model, beta0=beta0, iprint=0)
 
     # run
     output = odr_instance.run()

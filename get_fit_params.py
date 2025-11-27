@@ -80,18 +80,16 @@ def plot_ball_data(ball_folder):
 
 def get_fit_params(ball_folder, plot=False):
     save_params = ball_folder / 'fit_params.txt'
+    dim_data = np.genfromtxt(ball_folder / 'speed_pressure.txt')
+    beta, sd_beta = fit_power_law_odr(dim_data)
+    dim_params = np.append(beta, sd_beta)
     
-    if not save_params.exists():
-        dim_data = np.genfromtxt(ball_folder / 'speed_pressure.txt')
-        beta, sd_beta = fit_power_law_odr(dim_data)
-        dim_params = np.append(beta, sd_beta)
-        
-        dimless_data = np.genfromtxt(ball_folder / 'dimensionless_data.txt')
-        beta, sd_beta = fit_power_law_odr(dimless_data)
-        dimless_params = np.append(beta, sd_beta)
-        
-        params = np.vstack((dim_params, dimless_params))
-        np.savetxt(save_params, params)
+    dimless_data = np.genfromtxt(ball_folder / 'dimensionless_data.txt')
+    beta, sd_beta = fit_power_law_odr(dimless_data)
+    dimless_params = np.append(beta, sd_beta)
+    
+    params = np.vstack((dim_params, dimless_params))
+    np.savetxt(save_params, params)
         
     
         

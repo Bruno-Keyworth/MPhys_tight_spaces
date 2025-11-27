@@ -44,27 +44,27 @@ from get_preset import *
 # Methods: no_hold, hold
 # Fluids: oil, glycerol
 
-#balls = all_stretched_hold_glycerol
+balls = all_balls
 
 
-# CUSTOM preset
-balls = [
-    {'name': 'ball1',
-     'method': 'no-hold',
-     'fluid': 'oil',},
+# # CUSTOM preset
+# balls = [
+#     {'name': 'ball1',
+#      'method': 'no-hold',
+#      'fluid': 'oil',},
 
-    {'name': 'ball2',
-     'method': 'no-hold',
-     'fluid': 'oil',},
+#     {'name': 'ball2',
+#      'method': 'no-hold',
+#      'fluid': 'oil',},
 
-    {'name': 'ball3',
-     'method': 'no-hold',
-     'fluid': 'oil',},
+#     {'name': 'ball3',
+#      'method': 'no-hold',
+#      'fluid': 'oil',},
     
-    {'name': 'ball4',
-     'method': 'no-hold',
-     'fluid': 'oil',}
-]
+#     {'name': 'ball4',
+#      'method': 'no-hold',
+#      'fluid': 'oil',}
+# ]
 
 crop_speed = (0, 0.1)
 
@@ -98,11 +98,13 @@ def load_data(ball_info):
     """Load data for a single ball."""
     ball_folder = _ball_folder(ball=ball_info['name'], fluid=ball_info['fluid'],
                                method=ball_info['method'])
-
-    if dimensionless:
-        return np.genfromtxt(ball_folder / "dimensionless_data.txt")
-    else:
-        return np.genfromtxt(ball_folder / "speed_pressure.txt")
+    try:
+        if dimensionless:
+            return np.genfromtxt(ball_folder / "dimensionless_data.txt")
+        else:
+            return np.genfromtxt(ball_folder / "speed_pressure.txt")
+    except FileNotFoundError:
+        return None
 
 def crop_data(data, ball_info):
     if 'cropping' in ball_info.keys():
@@ -126,6 +128,8 @@ def comparison_plot():
 
     for ball in balls:
         data = load_data(ball)
+        if data is None:
+            continue
         data = crop_data(data, ball)
         if len(data) < 10: 
             continue

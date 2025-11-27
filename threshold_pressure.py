@@ -8,8 +8,9 @@ Created on Tue Nov 18 18:27:02 2025
 Threshold Pressure
 """
 from constants import BALL_DIAMETERS
-from get_folderpaths import MASTER_FOLDER, PLOTS_FOLDER
+from get_folderpaths import MASTER_FOLDER, PLOTS_FOLDER, _ball_folder
 from value_to_string import value_to_string
+from get_fit_params import get_fit_params
 import numpy as  np
 import matplotlib.pyplot as plt
 import pickle
@@ -42,6 +43,8 @@ def save_results(results):
             balls = []
             diameters = []
             pressures = []
+            fitted_P = []
+            dimless_fitted_P = []
     
             for ball, p in ball_data.items():
                 if ball not in BALL_DIAMETERS:
@@ -50,7 +53,16 @@ def save_results(results):
                 diam = BALL_DIAMETERS[ball]
                 balls.append(ball)
                 diameters.append(diam)
-                pressures.append(p)
+                pressures.append(np.array(p)*100)
+                
+                param_file = _ball_folder(ball, fluid, method) / 'fit_params.txt'
+                if not param_file.exists():
+                    get_fit_params(_ball_folder(ball, fluid, method))
+                
+                params = np.genfromtxt(param_file, usecols=(2, 5))
+                
+                fitted_P.append(params[0, :])
+                dimless_fitted_P.append(params[1, :])
     
             if not balls:
                 continue
@@ -63,6 +75,11 @@ def save_results(results):
             dimless_data = np.column_stack((diameters, dimless_P, err))
             save_dict[fluid][method]['observed']['dimensional'] = data
             save_dict[fluid][method]['observed']['non-dimensional'] = dimless_data
+            
+            fitted_data = np.column_stack((diameters, fitted_P, err))
+            dimless_fitted_data = np.column_stack((diameters, dimless_fitted_P, err))
+            save_dict[fluid][method]['fitted']['dimensional'] = fitted_data
+            save_dict[fluid][method]['fitted']['non-dimensional'] = dimless_fitted_data
 
     with open(threshold_path, "wb") as f:
         pickle.dump(save_dict, f)
@@ -163,11 +180,17 @@ def plot_threshold(results):
         for method, ball_data in method_data.items():
             
             data = results[fluid][method]['observed']['dimensional']
-            _add_to_plot(data, ax[0], label=f'{fluid} - {method}', 
+            _add_to_plot(data, ax[0], label=f'{fluid} - {method} - observed', 
                          fmt = markers[method], colour=colours[fluid])
+            data = results[fluid][method]['fitted']['dimensional']
+            _add_to_plot(data, ax[0], label=f'{fluid} - {method} - fitted', 
+                         fmt = markers[method], colour=fitted_cmap[fluid])
             data = results[fluid][method]['observed']['non-dimensional']
-            _add_to_plot(data, ax[1], label=f'{fluid} - {method}', 
+            _add_to_plot(data, ax[1], label=f'{fluid} - {method} - observed', 
                          fmt = markers[method], colour=colours[fluid])
+            data = results[fluid][method]['fitted']['non-dimensional']
+            _add_to_plot(data, ax[1], label=f'{fluid} - {method} - fitted', 
+                         fmt = markers[method], colour=fitted_cmap[fluid])
     ax[0].set_xlabel("Ball diameter (m)")
     ax[0].set_ylabel("Threshold pressure (mbar)")
     ax[0].set_title("Threshold pressure vs. ball diameter")
@@ -176,8 +199,8 @@ def plot_threshold(results):
     
     handles, labels = plt.gca().get_legend_handles_labels()
     unique = dict(zip(labels, handles))
-    ax[0].legend(unique.values(), unique.keys())
-    ax[1].legend(unique.values(), unique.keys())
+    ax[0].legend(unique.values(), unique.keys(), framealpha=0)
+    ax[1].legend(unique.values(), unique.keys(), framealpha=0)
     
     ax[0].grid(True, linestyle="--", alpha=0.3)
     ax[1].grid(True, linestyle="--", alpha=0.3)
