@@ -4,6 +4,8 @@
 Created on Thu Nov 13 14:35:41 2025
 
 @author: brunokeyworth
+
+Note that what are called r and r_0 in the code are actually diameters, not radii. 
 """
 
 import numpy as np
@@ -13,7 +15,7 @@ from get_folderpaths import get_folderpaths, _ball_folder, PLOTS_FOLDER
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from itertools import cycle
-
+import cmcrameri.cm as cmc
 
 # Define linestyles and markers
 linestyles = cycle(['-', '--', '-.', ':'])
@@ -27,7 +29,7 @@ def _get_radius(ROI, label, plot=False):
     
     average = np.mean(profile)
     minimum = np.min(profile)
-    mask = profile > minimum + 0.05 * (average - minimum)
+    mask = profile > minimum + 0.25 * (average - minimum)
     # Find the indices where mask is False
     false_indices = np.where(~mask)[0]
     
@@ -42,9 +44,9 @@ def _get_radius(ROI, label, plot=False):
     
     radius = 0.5 * (np.mean(groups[1]) - np.mean(groups[0]))
     if plot: 
-        color = next(colors)
-        plt.axvline(np.mean(groups[0]), ls='dashed', color=color)
-        plt.axvline(np.mean(groups[1]), ls='dashed', color=color)
+        #color = next(colors)
+        plt.axvline(np.mean(groups[0]), ls='dashed')
+        plt.axvline(np.mean(groups[1]), ls='dashed')
         plt.scatter(np.arange(len(profile)), profile, label=label, s=5)
     
     return radius
@@ -67,17 +69,17 @@ def _get_swelling(img_path, x, plot=False):
     ROI_low_pressure = img[upper_edge:, int(0.3*width):int(0.7*width)]
     r_0 = _get_radius(ROI_low_pressure, label='Low Pressure', plot=plot)
     r = _get_radius(ROI_high_pressure, label='High Pressure', plot=plot)
-    if (r_0 is None) or (r is None) or (r < r_0):
-        return None, None
     if plot:
-        plt.title(_plot_title(img_path) + f': Swelling = {r/r_0:.2g}')
+        plt.title(_plot_title(img_path) + f': Swelling = {1:.2g}')
         plt.xlabel('width (pixels)')
         plt.ylabel('relative intensity')
         plt.legend()
         plt.savefig(img_path.parent / 'swelling_plot.png', dpi=300)
         plt.show()
-    return (r - r_0)/r_0, r/r_0
-    
+    if (r_0 is None) or (r is None):
+        return None, None, None, None
+    return (r - r_0)/r_0, r/r_0, r, r_0
+
 def _sample_paths(paths, positions, n=10):
     """Return up to n evenly spaced Path objects from a list."""
     if len(paths) <= n:
@@ -88,12 +90,11 @@ def _sample_paths(paths, positions, n=10):
 def average_swelling(pressure_folder, plot=False, n=10):
     positions = np.genfromtxt(pressure_folder / 'position_time.txt', usecols=(1))
     paths = sorted([
-        f for f in pressure_folder.glob("*.tif") 
+        f for f in pressure_folder.rglob("*.tif") 
         if "empty" not in f.name.lower() 
         and not f.name.startswith("._")
     ])
     mask = (positions < 0.05) | ((FRAME_SIZE - positions) < 0.05)
-
     positions = positions[~mask]
     paths = np.array(paths)[~mask]
     
@@ -101,35 +102,43 @@ def average_swelling(pressure_folder, plot=False, n=10):
     
     ratios = []
     strains = []
+    rs = []
+    r_0s = []
     
     for photo, position in photos:
-        strain, ratio = _get_swelling(photo, position, plot=plot)
+        strain, ratio, r, r_0 = _get_swelling(photo, position, plot=plot)
         if strain is None:
             continue
         ratios.append(ratio)
         strains.append(strain)
+        rs.append(r)
+        r_0s.append(r_0)
     if not strains:
-        return None, None, None, None
+        return None, None, None, None, None, None, None, None
     
     ratio_av= np.mean(ratios)
     ratio_err = np.std(ratios)
     strain_av= np.mean(strains)
     strain_err = np.std(strains)
+    r_av = np.mean(rs)
+    r_err = np.std(rs)
+    r_0_av = np.mean(r_0s)
+    r_0_err = np.std(r_0s)
 
-    return strain_av, strain_err, ratio_av, ratio_err
+    return strain_av, strain_err, ratio_av, ratio_err, r_av, r_err, r_0_av, r_0_err
 
 def analyse_swelling(ball, fluid='glycerol', method='no-hold'):
     
     folders = get_folderpaths(ball, fluid=fluid, method=method)
 
-    data = np.empty((len(folders), 6))
+    data = np.empty((len(folders), 10))
     count = 0
     
     for folder, P, P_err in folders:
-        strain, strain_err, ratio, ratio_err = average_swelling(folder)
+        strain, strain_err, ratio, ratio_err, r_av, r_err, r_0_av, r_0_err = average_swelling(folder)
         if strain is None:
             continue
-        data[count] = [P, P_err, strain, strain_err, ratio, ratio_err]
+        data[count] = [P, P_err, strain, strain_err, ratio, ratio_err, r_av, r_err, r_0_av, r_0_err]
         count += 1
         
     data = data[:count] 
@@ -142,17 +151,17 @@ def plot_swelling(balls, fluid='glycerol', method='no-hold', redo=False):
         file_path = _ball_folder(ball, fluid, method) / 'swelling_data.txt'
         if (not file_path.exists()) or redo:
             analyse_swelling(ball, fluid, method)
-
-        data = np.genfromtxt(file_path)
+            
+        if ball[-1] == '0':
+            data = np.genfromtxt(file_path, usecols=(0, 1, 6, 7))
+        else: 
+            data = np.genfromtxt(file_path, usecols=(0, 1, 2, 3))
         if len(data) == 0:
             continue
         mk = next(markers)
-        ax[0].errorbar(data[:, 0], data[:, 4], xerr=data[:, 1], yerr=data[:, 5], 
+        ax[0].errorbar(data[:, 0], data[:, 2], xerr=data[:, 1], yerr=data[:, 3], 
                        linestyle='', markeredgecolor='black', marker =mk,
                        markersize=4, elinewidth=0.8, markeredgewidth=0.5,label=ball)
-        ax[1].errorbar(data[:, 0], data[:, 2], xerr=data[:, 1], yerr=data[:, 3], 
-                       linestyle='', markeredgecolor='black', marker =mk,
-                       markersize=4, elinewidth=0.8, markeredgewidth=0.5, label=ball)
     ax[0].set_ylim(1, 1.4)
     ax[1].set_ylim(0, 0.15)
     ax[0].set_ylabel(r'$r/r_0$')
@@ -164,10 +173,11 @@ def plot_swelling(balls, fluid='glycerol', method='no-hold', redo=False):
         axes.legend(framealpha=0)
     plt.savefig(PLOTS_FOLDER / f'{fluid}_{method}_swelling.png', dpi=300)
 if __name__ == '__main__':
-    balls = [f'ball{i+1}' for i in range(5)]
+    
+    balls = [f'ball{i}' for i in range(6)]
     balls.append('ball3_stretched')
     #colour map
-    cmap = plt.get_cmap('cmc.hawaii', len(balls))
+    cmap = cmc.hawaii.resampled(2*len(balls))
     # generate reversed list of colours from the colormap
     colors = [mcolors.to_hex(cmap(i)) for i in range(cmap.N)][::-1]
     # set as the default color cycle
