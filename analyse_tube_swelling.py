@@ -11,7 +11,6 @@ from constants import FRAME_SIZE
 import cv2
 from get_folderpaths import get_folderpaths, _ball_folder, PLOTS_FOLDER
 import matplotlib.pyplot as plt
-from make_dimensionless import _get_delta
 import matplotlib.colors as mcolors
 from itertools import cycle
 
@@ -77,7 +76,7 @@ def _get_swelling(img_path, x, plot=False):
         plt.legend()
         plt.savefig(img_path.parent / 'swelling_plot.png', dpi=300)
         plt.show()
-    return (r - r_0)/m_to_pixel, r/r_0
+    return (r - r_0)/r_0, r/r_0
     
 def _sample_paths(paths, positions, n=10):
     """Return up to n evenly spaced Path objects from a list."""
@@ -100,35 +99,24 @@ def average_swelling(pressure_folder, plot=False, n=10):
     
     photos = _sample_paths(paths, positions, n=n)
     
-    swelling_ratio = []
-    swelling_diff = []
+    ratios = []
+    strains = []
     
     for photo, position in photos:
-        diff, ratio = _get_swelling(photo, position, plot=plot)
-        if diff is None:
+        strain, ratio = _get_swelling(photo, position, plot=plot)
+        if strain is None:
             continue
-        swelling_ratio.append(ratio)
-        swelling_diff.append(diff)
-    if not swelling_diff:
+        ratios.append(ratio)
+        strains.append(strain)
+    if not strains:
         return None, None, None, None
     
-    ratio_av= np.mean(swelling_ratio)
-    ratio_err = np.std(swelling_ratio)
-    diff_av= np.mean(swelling_diff)
-    diff_err = np.std(swelling_diff)
-    
-    delta, delta_err = _get_delta(pressure_folder.parent.name.split('_')[0])
-    
-    dimless_diff = diff_av/(2 * delta)
-        
-    valid = (diff_av != 0) & (delta != 0) & ~np.isnan(diff_av) & ~np.isnan(delta)
-    dimless_err = np.full_like(dimless_diff, np.nan)
-    dimless_err[valid] = (
-    dimless_diff[valid] *
-    np.sqrt((diff_err[valid]/diff_av[valid])**2 + (delta_err[valid]/delta[valid])**2)
-    )
+    ratio_av= np.mean(ratios)
+    ratio_err = np.std(ratios)
+    strain_av= np.mean(strains)
+    strain_err = np.std(strains)
 
-    return dimless_diff, dimless_err, ratio_av, ratio_err
+    return strain_av, strain_err, ratio_av, ratio_err
 
 def analyse_swelling(ball, fluid='glycerol', method='no-hold'):
     
@@ -138,10 +126,10 @@ def analyse_swelling(ball, fluid='glycerol', method='no-hold'):
     count = 0
     
     for folder, P, P_err in folders:
-        diff, diff_err, ratio, ratio_err = average_swelling(folder)
-        if diff is None:
+        strain, strain_err, ratio, ratio_err = average_swelling(folder)
+        if strain is None:
             continue
-        data[count] = [P, P_err, diff, diff_err, ratio, ratio_err]
+        data[count] = [P, P_err, strain, strain_err, ratio, ratio_err]
         count += 1
         
     data = data[:count] 
@@ -168,7 +156,7 @@ def plot_swelling(balls, fluid='glycerol', method='no-hold', redo=False):
     ax[0].set_ylim(1, 1.4)
     ax[1].set_ylim(0, 0.15)
     ax[0].set_ylabel(r'$r/r_0$')
-    ax[1].set_ylabel(r'$(r-r_0)/\delta$')
+    ax[1].set_ylabel(r'$(r-r_0)/r_0$')
     fig.suptitle(f'Tube Swelling Comparison for {method} method in {fluid}', fontsize=20)
     for axes in ax:
         axes.set_xlim(10000, 60000)
@@ -185,4 +173,4 @@ if __name__ == '__main__':
     # set as the default color cycle
     plt.rcParams['axes.prop_cycle'] = plt.cycler(color=colors)
 
-    plot_swelling(balls)
+    plot_swelling(balls, redo=True)

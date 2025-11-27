@@ -25,7 +25,7 @@ def order_of_magnitude(value):
 
     return int(np.floor(np.log10(np.absolute(value))))
 
-def value_to_string(value, error, significant_figures = 3):
+def value_to_string(value, error, sig_figs = 3, std_form=True):
     """
     Converts a value and its error to a formatted string with the specified
     number of significant figures. The result includes the measured value,
@@ -34,24 +34,24 @@ def value_to_string(value, error, significant_figures = 3):
     Parameters:
     - value (float): The value
     - error (float): The uncertainty associated with the value.
-    - significant_figures (int): The desired number of significant figures.
+    - sig_figs (int): The desired number of significant figures.
     Default is 3.
 
     Returns:
     str: A formatted string representing the value and its error.
     """
 
-    if not isinstance(significant_figures, int):
+    if not isinstance(sig_figs, int):
 
         print('Please set the number of significant figures to be an integer.')
 
-        significant_figures = 3
+        sig_figs = 3
 
     magnitude = order_of_magnitude(value)
 
-    precision = significant_figures - 1
+    precision = sig_figs - 1
 
-    if np.absolute(magnitude) < 2:
+    if np.absolute(magnitude) < 2 or not std_form:
 
         return f'{value:.{precision}f} ± {error:.{precision}f}'
 
