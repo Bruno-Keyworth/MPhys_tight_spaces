@@ -172,13 +172,14 @@ def plot_swelling(balls, fluid='glycerol', method='no-hold', redo=False):
                        linestyle='', markeredgecolor='black', marker =mk,
                        markersize=4, elinewidth=0.8, markeredgewidth=0.5,label=ball)
     ax[0].set_ylim(-0.2, 0.4)
-    ax[0].set_ylabel(r'$(r-r_0)/r_0$')
+    ax[0].set_xlabel('Pressure (Pa)')
+    ax[1].set_xlabel(r'$\lambda$')
     fig.suptitle(f'Tube Swelling Comparison for {method} method in {fluid}', fontsize=20)
     ax[0].set_xlim(10000, 60000)
     ax[1].set_xscale('log')
     for axes in ax:
         axes.set_ylim(-0.05, 0.4)
-        axes.set_xlabel('Pressure (Pa)')
+        axes.set_ylabel(r'$(r-r_0)/r_0$')
         axes.legend(framealpha=0)
     plt.savefig(PLOTS_FOLDER / f'{fluid}_{method}_swelling.png', dpi=300)
 if __name__ == '__main__':
