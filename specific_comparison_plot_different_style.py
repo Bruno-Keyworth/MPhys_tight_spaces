@@ -103,8 +103,7 @@ markers = cycle(['o', 's', 'x', '^', 'v', '*', 'D', 'P'])
 
 def load_data(ball_info):
     """Load data for a single ball."""
-    ball_folder = _ball_folder(ball=ball_info['name'], fluid=ball_info['fluid'],
-                               method=ball_info['method'])
+    ball_folder = _ball_folder(ball_dict=ball_info)
 
     if dimensionless:
         return np.genfromtxt(ball_folder / "dimensionless_data.txt")
@@ -159,8 +158,7 @@ def table_comparison_plot():
         data = crop_data(data, ball)
         if len(data) < 10: 
             continue
-        ball_folder = _ball_folder(ball=ball['name'], fluid=ball['fluid'],
-                                   method=ball['method'])
+        ball_folder = _ball_folder(ball_dict=ball)
         
         if NEW_FIT or not (ball_folder / 'fit_params.txt').exists():
             get_fit_params(ball_folder)
@@ -258,8 +256,7 @@ def comparison_plot():
         data = crop_data(data, ball)
         if len(data) < 8: 
             continue
-        ball_folder = _ball_folder(ball=ball['name'], fluid=ball['fluid'],
-                                   method=ball['method'])
+        ball_folder = _ball_folder(ball_dict=ball)
         
         if NEW_FIT or not (ball_folder / 'fit_params.txt').exists():
             get_fit_params(ball_folder)

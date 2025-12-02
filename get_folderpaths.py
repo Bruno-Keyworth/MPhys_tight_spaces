@@ -28,19 +28,22 @@ def _hydrostatic_err(fluid):
         fluid = 'oil'
     return g * FLUID_DEPTH_ERROR * FLUID_PARAMS[fluid]['density'][0]
 
-def _ball_folder(ball, fluid, method):
+def _ball_folder(ball=None, fluid=None, method=None, ball_dict=None):
+    if ball_dict is not None:
+        return MASTER_FOLDER / ball_dict['fluid'] / ball_dict['method'] / ball_dict['name']
+    
     return MASTER_FOLDER / fluid / method / ball
 
-def get_folder(ball, pressure, fluid=None, method=None):
-    folder = MASTER_FOLDER / (fluid or "") / (method or "") / ball / f'{int(pressure/100)}mbar'
+def get_folder(ball, pressure_pa, fluid=None, method=None):
+    folder = MASTER_FOLDER / (fluid or "") / (method or "") / ball / f'{int(pressure_pa/100)}mbar'
     data_dict = read_pressure_data(MASTER_FOLDER / ball)
     if data_dict is not None:
-        values = data_dict[pressure]
+        values = data_dict[pressure_pa]
     else:
-        values = [pressure, 0]
+        values = [pressure_pa, 0]
     return [(folder, values[0], np.sqrt(values[1]**2 + _hydrostatic_err(fluid)**2))]
 
-def get_folderpaths(ball, version=None, fluid=None, method=None):
+def get_folderpaths(ball, fluid=None, method=None):
     # Determine master folder
     if isinstance(ball, Path):
         base_path = ball
@@ -68,17 +71,6 @@ def get_folderpaths(ball, version=None, fluid=None, method=None):
 
     # Sort by pressure number (optional)
     subdirs.sort(key=lambda x: x[1])
-
-    # If version is provided, attempt to substitute folders
-    if version is not None:
-        updated_subdirs = []
-        for p, number in subdirs:
-            new_path = base_path / f"{number}mbar_{version}"
-            if new_path.is_dir() and any(new_path.iterdir()):
-                updated_subdirs.append((new_path, number))
-            else:
-                updated_subdirs.append((p, number))
-        return updated_subdirs
 
     return subdirs
 
