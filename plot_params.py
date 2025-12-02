@@ -43,10 +43,10 @@ def create_data(balls, save_as):
 def _add_to_plot(data, ax):
     ax.errorbar(data[:, 0], data[:, 2], xerr=data[:, 1], yerr=data[:, 3], ls='')
 
-def plot_params(balls, redo=False):
+def plot_params(balls, redo=False, stretched=None):
     fig, ax = plt.subplots(1, 2, figsize=(12, 5))
     
-    file_path = MASTER_FOLDER / balls[0]['fluid'] / balls[0]['method'] / 'params_data.txt'
+    file_path = MASTER_FOLDER / balls[0]['fluid'] / balls[0]['method'] / f'{stretched or ""}_params_data.txt'
     if (not file_path.exists()) or redo:
         create_data(balls, save_as=file_path)
     alpha_data = np.genfromtxt(file_path, usecols=(0,1,2,3))
@@ -60,7 +60,12 @@ def plot_params(balls, redo=False):
     for power in [4/5, 2/3, 1/2]:
         ax[0].axhline(power, c='k', ls='dashed')
     ax[1].set_title(r'$\beta$', fontsize=18)
+    ax[0].set_ylabel(r'$\alpha$', fontsize=14)
+    ax[1].set_ylabel(r'$\beta$', fontsize=14)
+    for axes in ax:
+        axes.set_xlabel('Ball Diameter (m)')
     plt.tight_layout()
-    plt.savefig(PLOTS_FOLDER / f"{balls[0]['method']}_{balls[0]['fluid']}_parameters.png", dpi=300)
+    save_as = PLOTS_FOLDER /f"{balls[0]['method']}_{balls[0]['fluid']}_{stretched or ''}_parameters.png"
+    plt.savefig(save_as, dpi=300)
     
-plot_params(all_balls_no_hold_glycerol)
+plot_params(all_balls_no_hold_glycerol + all_balls_hold_glycerol)
