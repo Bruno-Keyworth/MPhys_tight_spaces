@@ -69,26 +69,23 @@ def parse_arguments():
     )
     return parser.parse_args()
 
-def redo_pressure(ball, pressure, version=None, fluid=FLUID, method=METHOD):
+def redo_pressure(ball, pressure_mbar, fluid=FLUID, method=METHOD):
     """
     Reruns the code to find position for images at a given pressure (in mbar), 
     then fits to find the speed. Updates the cached value for this pressure and
     repeats power law fitting. 
     """
     ball_folder = _ball_folder(ball, fluid=fluid, method=method)
-    if version is None:
-        speed_path = ball_folder / f'{pressure}mbar' / 'position_time.txt'
-    else:
-        speed_path = ball_folder / f'{pressure}mbar_{version}' / 'position_time{version}.txt'
-    pressure *= 100
-    folder = get_folder(ball, pressure, fluid=fluid, method=METHOD)
+    speed_path = ball_folder / f'{pressure_mbar}mbar' / 'position_time.txt'
+    pressure_pa = pressure_mbar * 100
+    folder = get_folder(ball, pressure_pa, fluid=fluid, method=method)
     if speed_path.exists():
         os.remove(speed_path)
 
     file_path = ball_folder / 'speed_pressure.txt'
     
     _update_data(folder, file_path)
-    get_fit_params(ball_folder, plot=True)
+    get_fit_params(ball_folder, plot=False)
 
 def _ensure_file_initialized(file_path, folders):
     if not file_path.exists():
@@ -101,14 +98,15 @@ def _ensure_file_initialized(file_path, folders):
         return False
     return True
 
-def analyse_ball(ball, redo=False, version=None, redo_fit=False, plot=True, fluid=FLUID, method=METHOD):
+def analyse_ball(ball, redo=False, redo_fit=False, plot=True, fluid=FLUID, method=METHOD):
     ball_folder = _ball_folder(ball, fluid=fluid, method=method)
     if not ball_folder.exists():
+        print(f'Folder Not Found: {ball_folder}')
         return 0
         #raise FileNotFoundError(f"Ball folder does not exist: {ball_folder}")
     sort_folder(ball_folder)
-    folders = get_folderpaths(ball, version, fluid=fluid, method=method)
-    file_path = ball_folder / f'speed_pressure{version or ""}.txt'
+    folders = get_folderpaths(ball, fluid=fluid, method=method)
+    file_path = ball_folder / 'speed_pressure.txt'
     data_exists = _ensure_file_initialized(file_path, folders)
     if redo:
         for folder, _, _ in folders:
@@ -128,12 +126,13 @@ def _update_data(folders, file_path):
     """
     data = np.genfromtxt(file_path)
     
-    for folder, pressure, error in reversed(folders):
+    for folder, pressure, _ in folders:
         print(folder)
         speed, error = find_ball_speed(folder, True, True)
+        mask = np.isclose(data[:, 0], pressure)
 
-        data[data[:, 0]==pressure, 1] = speed
-        data[data[:, 0]==pressure, 2] = error
+        data[mask, 1] = speed
+        data[mask, 2] = error
 
     dimensionless_data = make_dimensionless(data, file_path)
     np.savetxt(file_path, data)
@@ -141,30 +140,27 @@ def _update_data(folders, file_path):
 
     return data, dimensionless_data 
 
-def _delete_data_file(ball, version, fluid, method):
-    if version is not None:
-        fname = f"speed_pressure_{version}.txt"
-    else:
-        fname = "speed_pressure.txt"
+def _delete_data_file(ball, fluid, method):
+    fname = "speed_pressure.txt"
 
     path = _ball_folder(ball, fluid, method) / fname
     if os.path.exists(path):
         os.remove(path)
 
-def redo(ball, version=None, fluid=FLUID, method=METHOD, plot=True):
+def redo(ball, fluid=FLUID, method=METHOD, plot=True):
     """ 
     Refits to distance time graphs but uses the data cached for ball position in each photo.
     """
-    _delete_data_file(ball, version, fluid, method)
-    analyse_ball(ball, version=version, plot=plot, redo_fit=True)
+    _delete_data_file(ball, fluid, method)
+    analyse_ball(ball, plot=plot, redo_fit=True)
 
 
-def redo_all(ball, version=None, fluid=FLUID, method=METHOD, plot=True):
+def redo_all(ball, fluid=FLUID, method=METHOD, plot=True):
     """
     Completely reruns the code including finding the position of the ball in each image.
     """
-    _delete_data_file(ball, version, fluid, method)
-    analyse_ball(ball, redo=True, version=version, plot=plot, redo_fit=True)
+    _delete_data_file(ball, fluid, method)
+    analyse_ball(ball, redo=True, plot=plot, redo_fit=True)
     
 def delete_empty(ball=BALL, fluid=FLUID, method=METHOD):
     """
@@ -183,7 +179,7 @@ if __name__ == '__main__':
     args = parse_arguments()
     if args.all_balls:
         for ball in all_balls:
-            analyse_ball(ball['name'], fluid=ball['fluid'], method=ball['method'], redo_fit=True)
+            analyse_ball(ball['name'], fluid=ball['fluid'], method=ball['method'])
     elif args.redo_all:
         redo_all(args.ball, fluid=args.fluid, method=args.method)
     elif args.redo:

@@ -29,7 +29,7 @@ FLUID_PARAMS = {
 TUBE_PARAMS = { # value, error
     'radius': [0.00488, 0.00014], #
     'thickness': [0.00048, 0.00007],
-    'young_modulus': [1.99e6, 1.36e5] #Pa
+    'young_modulus': [1.26e6, 6e4] #Pa
     }
 
 ball_size_err = 0.0001

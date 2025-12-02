@@ -47,7 +47,7 @@ from get_preset import *
 
 
 
-balls = all_ball3_no_hold_glycerol
+balls = all_balls_no_hold_glycerol
 
 
 # OR CUSTOM PRESET
@@ -76,7 +76,7 @@ balls = all_ball3_no_hold_glycerol
 crop_speed = (0, 1)
 
 log_scale = True
-dimensionless = True
+dimensionless = False
 linear = True
 
 SAVE_FIG = False
@@ -271,13 +271,6 @@ def comparison_plot():
         
         if linear:
             data = _log_linear_data(data, beta)
-
-        #label = f"{ball['name']} {ball['method']} {ball['fluid']}"
-        
-        try:
-            label = f"{ball['name'].split("_")[1]}"
-        except: 
-            label = ""
             
         ball_size = BALL_DIAMETERS[ball['name'].split('_')[0]][0]
 
