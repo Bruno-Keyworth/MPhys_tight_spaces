@@ -16,7 +16,7 @@ FLUID_DEPTH_ERROR = 0.01 #m
 
 FLUID_PARAMS = {
     'oil': {
-        'density': [907, 45],# kg/m^3 from Thomas Sigsworth's report
+        'density': [898, 5],# kg/m^3 from Thomas Sigsworth's report
         'viscosity': [0.069, 0.007] #Pas # measured by us
     },
     'glycerol': { #measured by us
@@ -29,7 +29,7 @@ FLUID_PARAMS = {
 TUBE_PARAMS = { # value, error
     'radius': [0.00488, 0.00014], #
     'thickness': [0.00048, 0.00007],
-    'young_modulus': [1.26e6, 6e4] #Pa
+    'young_modulus': [1.99e6, 1.4e5] #Pa
     }
 
 ball_size_err = 0.0001
