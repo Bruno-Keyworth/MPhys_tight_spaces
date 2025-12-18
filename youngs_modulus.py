@@ -25,8 +25,7 @@ ahmed_values = np.array([2.07, 2.07, 2.07, 1.91, 1.91, 1.91]) * 1e6
 def get_E(file, value_1, value_2):
     data = np.genfromtxt(file, comments='%', usecols=(2, 3))
     plt.scatter(data[:, 0], data[:, 1])
-    mask = data[:, 0] > 50
-    data = data[mask, :]
+    data = data[int(len(data)*0.4):, :]
     parameters, cov = np.polyfit(data[:, 0], data[:, 1], 1, cov=True)
     x = np.linspace(data[0, 0], data[-1, 0], 2)
     y = np.polyval(parameters, x)
@@ -37,6 +36,7 @@ def get_E(file, value_1, value_2):
     plt.ylabel('Force (N)')
     plt.title(f"{file.name.split('.')[0]}, Sigsworth: {value_1 *1e-6} MPa, Ahmed: {value_2 *1e-6} MPa")
     plt.legend()
+    plt.savefig(folder / f"{file.name.split('.')[0]}.png", dpi=300)
     plt.show()
     print(parameters)
     print(value_1/(parameters[0]*1000))

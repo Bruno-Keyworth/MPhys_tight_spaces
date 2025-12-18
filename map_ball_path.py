@@ -31,16 +31,18 @@ def frame_edge_correction(position_arr):
     
     return position_arr
 
-def map_ball_path(ball_folder, disp=False):   
+def map_ball_path(pressure_folder, disp=True):   
+
+
     positions = []
     
     for ext in ("*.tiff", "*.bmp", "*.tif"):
-        if (ball_folder/"photos").exists():
-            for img_path in (ball_folder/"photos").glob(ext):
+        if (pressure_folder/"photos").exists():
+            for img_path in (pressure_folder/"photos").glob(ext):
                 position = find_ball_position(img_path, disp)
                 if position is not None:
                     positions.append(position)
-        for img_path in ball_folder.glob(ext):
+        for img_path in pressure_folder.glob(ext):
             position = find_ball_position(img_path, disp)
             if position is not None:
                 positions.append(position)
@@ -55,4 +57,4 @@ def map_ball_path(ball_folder, disp=False):
     
     data = np.column_stack((position_arr[:, 0], position_arr[:, 2], t_err, p_err))
     
-    np.savetxt(ball_folder / 'position_time.txt', data)
+    np.savetxt(pressure_folder / 'position_time.txt', data)

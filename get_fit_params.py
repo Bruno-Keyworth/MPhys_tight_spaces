@@ -79,6 +79,8 @@ def plot_ball_data(ball_folder):
     dimensional_plot(ball_folder)
 
 def get_fit_params(ball_folder, plot=False):
+    if not ball_folder.exists():
+        return None
     save_params = ball_folder / 'fit_params.txt'
     dim_data = np.genfromtxt(ball_folder / 'speed_pressure.txt')
     beta, sd_beta = fit_power_law_odr(dim_data)

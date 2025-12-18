@@ -144,13 +144,13 @@ def print_results(results):
                 for ball, p in ball_data.items():
                     print(f" {ball}: lowest averaged pressure = {value_to_string(p[0], p[1])} mbar")
 
-def _add_to_plot(data, ax, label, fmt, colour):
+def _add_to_plot(data, ax, label, fmt, colour, scale=1):
     # Plot with distinct colour + marker
     ax.errorbar(
-        data[:, 0],
-        data[:, 2],
-        xerr=data[:, 1],
-        yerr=data[:, 3],
+        data[:, 0]*1000,
+        data[:, 2]/scale,
+        xerr=data[:, 1]*1000,
+        yerr=data[:, 3]/scale,
         fmt=fmt,
         color=colour,
         ecolor='black',
@@ -166,44 +166,49 @@ def plot_threshold(results):
     }
     
     fitted_cmap = {
-        'oil': 'tab:green',
-        'glycerol': 'tab:purple'}
+        'oil': 'r',
+        'glycerol': 'b'}
     
     markers = {
         'hold': 'o',
         'no-hold': 'x'
     }
     
-    fig, ax = plt.subplots(1, 2, figsize=(12, 6))
+    fig, ax = plt.subplots(1, 2, figsize=(16, 6))
     
     for fluid, method_data in results.items():
         for method, ball_data in method_data.items():
             
-            data = results[fluid][method]['observed']['dimensional']
-            _add_to_plot(data, ax[0], label=f'{fluid} - {method} - observed', 
-                         fmt = markers[method], colour=colours[fluid])
+            # data = results[fluid][method]['observed']['dimensional']
+            # _add_to_plot(data, ax[0], label=f'{fluid} - {method} - observed', 
+            #              fmt = markers[method], colour=colours[fluid])
             data = results[fluid][method]['fitted']['dimensional']
-            _add_to_plot(data, ax[0], label=f'{fluid} - {method} - fitted', 
-                         fmt = markers[method], colour=fitted_cmap[fluid])
-            data = results[fluid][method]['observed']['non-dimensional']
-            _add_to_plot(data, ax[1], label=f'{fluid} - {method} - observed', 
-                         fmt = markers[method], colour=colours[fluid])
+            _add_to_plot(data, ax[0], label=f'{fluid} - {method}', 
+                         fmt = markers[method], colour=fitted_cmap[fluid], scale=100)
+            # data = results[fluid][method]['observed']['non-dimensional']
+            # _add_to_plot(data, ax[1], label=f'{fluid} - {method} - observed', 
+            #              fmt = markers[method], colour=colours[fluid])
             data = results[fluid][method]['fitted']['non-dimensional']
-            _add_to_plot(data, ax[1], label=f'{fluid} - {method} - fitted', 
+            _add_to_plot(data, ax[1], label=f'{fluid} - {method}', 
                          fmt = markers[method], colour=fitted_cmap[fluid])
-    ax[0].set_xlabel("Ball diameter (m)")
-    ax[0].set_ylabel("Threshold pressure (Pa)")
-    ax[0].set_title("Threshold pressure vs. ball diameter")
+    ax[0].set_ylabel(r"$P_{th}$ (mbar)", fontsize=20)
+    ax[1].set_ylabel(r"$P^*_{th}$", fontsize=20)
+    #ax[0].set_title("Threshold pressure vs. ball diameter")
     
     ax[1].set_xlabel("Ball diameter (m)")
     
     handles, labels = plt.gca().get_legend_handles_labels()
     unique = dict(zip(labels, handles))
-    ax[0].legend(unique.values(), unique.keys(), framealpha=0)
-    ax[1].legend(unique.values(), unique.keys(), framealpha=0)
+    ax[0].legend(unique.values(), unique.keys(), framealpha=0, fontsize=20)
+    ax[1].legend(unique.values(), unique.keys(), framealpha=0, fontsize=20)
     
     ax[0].grid(True, linestyle="--", alpha=0.3)
     ax[1].grid(True, linestyle="--", alpha=0.3)
+    for axes in ax:
+        axes.set_xlim(10, 19)
+        axes.set_xlabel("Ball Diameter (mm)", fontsize=20)
+        axes.set_xticks([11, 12, 14, 16, 18])
+        axes.tick_params(labelsize=16)
     plt.tight_layout()
     if SAVE_FIG:
         plt.savefig(PLOTS_FOLDER/"thresholds.png", dpi=300)
@@ -215,7 +220,7 @@ if __name__ == '__main__':
     PRINT = True
     PLOT = True
     SAVE_FIG = True
-    REDO = True
+    REDO = False
     if (not threshold_path.exists()) or REDO:
         get_thresholds()
     with open(threshold_path, "rb") as f:

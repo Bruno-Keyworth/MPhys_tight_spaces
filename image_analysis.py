@@ -9,6 +9,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 from get_tube_ROI import calc_tube_left_right
+import matplotlib.transforms as mtransforms
 
 #parameters
 min_radius = 10
@@ -51,7 +52,8 @@ def find_rectangle(threshold, ROI, tube_left):
     centre = (int(x), int(y))
     print(f"Centre = {centre}, height = {h:.2f}, Rectangularity = {rectangularity:.2f}\n")
     
-    rect = plt.Rectangle((col+tube_left, row), w, h, color=cmap(threshold), fill=False, linewidth=0.5, linestyle='dashed')
+    rect = plt.Rectangle((col+tube_left, row), w, h, color=cmap(threshold),
+    fill=False, linewidth=0.5, linestyle='dashed', label = f'Threshold = {threshold}')
 
     return np.array([x, y, h]), rect
 
@@ -62,6 +64,7 @@ def get_rect_with_errors(ROI, tube_left):
     
     thresh_levels = range(30, 100, 10)
     for level in thresh_levels:
+        print(level)
         coords, rect = find_rectangle(level, ROI, tube_left)
         if rect is None:
             continue
@@ -99,19 +102,27 @@ def find_ball_position(img_path, disp=False):
         #plots image with rectangle on it
         fig, ax = plt.subplots()
         ax.imshow(img, cmap='gray')
-        ax.axvline(tube_left)                       
-        ax.axvline(tube_right)
+        ax.axis('off')
+        height = len(img)
+        cm = 1/14.9 * height
+        ax.plot([80, 80], [150, 150+cm], c='b', linewidth=0.5)
+        # ax.axvline(tube_left)                       
+        # ax.axvline(tube_right)
     if rect is None:
         img_path.rename(img_path.with_name('empty_'+filename))
-        plt.title(img_path.parent.name +'\n'+ filename + '\nempty')
+        #plt.title(img_path.parent.name +'\n'+ filename + '\nempty')
         return None
     mean_rect = np.array(rect[0]) / len(img)
     rect_err = np.array(rect[1]) / len(img)
     rects = rect[2]
     if disp:
-        for r in rects:
-            ax.add_patch(r)
-        plt.title(img_path.parent.name +'\n'+ filename)
+        ax.add_patch(rects[0])
+        ax.add_patch(rects[-1])
+        # leg = plt.legend(labelspacing=1.2, frameon=True)
+        # trans = mtransforms.Affine2D().rotate_deg(90) + ax.transAxes
+        # leg.set_transform(trans)
+        plt.savefig(img_path.parent / (img_path.name.split('.')[0] + 'png'), dpi=500)
+        #plt.title(img_path.parent.name +'\n'+ filename)
         plt.show() 
         
     file_name = img_path.name

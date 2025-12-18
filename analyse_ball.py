@@ -11,7 +11,7 @@ from find_ball_speed import find_ball_speed
 from get_fit_params import get_fit_params, plot_ball_data
 from read_ASCII_timestamp import sort_folder
 from make_dimensionless import make_dimensionless
-from get_preset import all_balls
+from get_preset import*
 import numpy as np
 import os
 import argparse
@@ -179,11 +179,13 @@ if __name__ == '__main__':
     args = parse_arguments()
     if args.all_balls:
         for ball in all_balls:
+            redo(ball['name'], fluid=ball['fluid'], method=ball['method'])
             analyse_ball(ball['name'], fluid=ball['fluid'], method=ball['method'])
     elif args.redo_all:
         redo_all(args.ball, fluid=args.fluid, method=args.method)
     elif args.redo:
         redo(args.ball, fluid=args.fluid, method=args.method)
+        analyse_ball(ball=args.ball, fluid=args.fluid, method=args.method)
     else:
         analyse_ball(ball=args.ball, fluid=args.fluid, method=args.method)
     if args.delete_empty:

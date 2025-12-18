@@ -10,6 +10,7 @@ from map_ball_path import map_ball_path
 import matplotlib.pyplot as plt
 from scipy import odr
 import numpy as np
+from value_to_string import value_to_string
 
 def linear_func(beta, x):
     m, c = beta
@@ -37,8 +38,9 @@ def plot_errors(time, position, t_err, p_err, gradient):
     error = _get_effective_error(gradient, t_err, p_err)
     upper_bound = position + error
     lower_bound = position - error
-    
-    ax.fill_between(time, lower_bound, upper_bound, alpha=0.4)
+    ax.fill_between(time, lower_bound, upper_bound, alpha=0.6, label='Within 1 error bar', color='lightblue')
+    ax.plot(time, upper_bound, c='b', ls='dashed', alpha=0.7, linewidth=0.4)
+    ax.plot(time, lower_bound, c='b', ls='dashed', alpha=0.7, linewidth=0.4)
 
 def find_ball_speed(folder, disp=False, savefig=False):
     
@@ -64,17 +66,22 @@ def find_ball_speed(folder, disp=False, savefig=False):
         x_fit = np.linspace(0, np.max(time), 2)
         y_fit = output.beta[0] * x_fit + output.beta[1]
 
-        fig, ax1 = plt.subplots()
+        fig, ax1 = plt.subplots(figsize=(12, 6))
         plot_errors(time, position, t_err, p_err, output.beta[0])
-        ax1.scatter(time, position, s=2)
-        ax1.plot(x_fit, y_fit, color = "blue", linewidth = 2, label = f"gradient = ({output.beta[0]:.2f} ± {output.sd_beta[0]:.2f})\n intercept = {output.beta[1]:.2f} ± {output.sd_beta[1]:.2f}")
-        ax1.set_ylabel("distance (m)")
-        ax1.set_xlabel("time (s)")
-        ax1.set_title(folder.name)
-        ax1.legend()
-        ax1.grid()
-        ax1.minorticks_on()
+        ax1.scatter(time, position, s=30, marker='x', c='b', label='Image Data')
+        print(output.sd_beta)
+        ax1.plot(x_fit, y_fit, color = "red", linewidth = 1, 
+   label = rf"Fitted $V$ = {value_to_string(output.beta[0], output.sd_beta[0], sig_figs=4)} m$\,$s$^{{-1}}$")
+        ax1.set_ylabel("Fitted Centre Position (m)", fontsize=20)
+        ax1.set_xlabel("Time (s)", fontsize=20)
+        #ax1.set_title(folder.name)
+        ax1.legend(framealpha=0, fontsize=20)
+        ax1.set_yticks([0, 0.05, 0.1, 0.15])
+        plt.tick_params(labelsize=14)
+        #ax1.grid()
+        #ax1.minorticks_on()
         if savefig:
+            plt.tight_layout()
             plt.savefig(folder / 'position_time.png' , dpi=300)
         #plt.show()
     plt.close('all')

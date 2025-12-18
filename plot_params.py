@@ -68,4 +68,4 @@ def plot_params(balls, redo=False, stretched=None):
     save_as = PLOTS_FOLDER /f"{balls[0]['method']}_{balls[0]['fluid']}_{stretched or ''}_parameters.png"
     plt.savefig(save_as, dpi=300)
     
-plot_params(all_balls_no_hold_glycerol + all_balls_hold_glycerol)
+plot_params(all_balls_no_hold_oil + all_balls_hold_oil)

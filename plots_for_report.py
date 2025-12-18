@@ -70,14 +70,14 @@ balls = [
      'fluid': 'oil',}
 ]
 
-crop_speed = (0, 0.1)
+crop_speed = (0, 1000)
 
 log_scale = True
 dimensionless = True
 linear = True
 
 SAVE_FIG = False
-NEW_FIT = True
+NEW_FIT = False
 save_file = 'test_image.png'
 
 
@@ -165,14 +165,13 @@ def comparison_plot():
             f"{label}:\n"
             + fr"$\alpha$={value_to_string(beta[0], sd_beta[0])}" + "\n"
             + fr"$\beta$={value_to_string(beta[1], sd_beta[1])}" + "\n"
-            + fr"Diametre = {ball_size * 1000} mm"
+            + fr"Diameter = {ball_size * 1000} mm"
         ))
 
         results.append((label, beta, sd_beta))
 
-    if log_scale:
-        ax.set_xscale('log')
-        ax.set_yscale('log')
+    ax.set_xscale('log')
+    ax.set_yscale('log')
     ax.legend(
         framealpha=0,
         loc='upper center',
@@ -184,7 +183,113 @@ def comparison_plot():
     if SAVE_FIG:
         plt.savefig(PLOTS_FOLDER/(save_file), dpi=300)
     plt.show()
+    
+def plot_balls(balls, ax, ax2=None):
+    for ball in balls:
+        data = load_data(ball)
+        if data is None:
+            continue
+        data = crop_data(data, ball)
+        if len(data) < 10: 
+            continue
+        ball_folder = _ball_folder(ball_dict = ball)
 
+        #get_fit_params(ball_folder)
+        params = np.genfromtxt(ball_folder / 'fit_params.txt')[1]
+        beta, sd_beta = params[:3], params[3:]
+        
+        data = _log_linear_data(data, beta)
+
+        ball_size = BALL_DIAMETERS[ball['name'].split('_')[0]][0]
+
+        ls = next(linestyles)
+        mk = next(markers)
+        _errorbar(data, legend=False, marker=mk, ax=ax, label=f'{ball_size*1000:.0f} mm Data')
+        ax.set_ylim(0.005, 6)
+
+        x_fit = np.linspace(np.min(data[:, 1]), np.max(data[:, 1]), 50)
+        y_fit = true_power_law(beta, x_fit)
+            
+        ax.set_xscale('log')
+        ax.set_yscale('log')
+        ax.plot(x_fit, y_fit, linestyle=ls, label=f"{ball_size*1000:.0f} mm Fit")
+    ax.legend(framealpha=0, fontsize=20)
+    ax.tick_params(labelsize=16)
+    ax.set_xlabel(r"$\lambda$", fontsize=20)
+    ax.set_ylabel(r"$P^*-P^*_{th}$", fontsize=20)
+    ax.set_ylim(6e-3, 6)
+    ax.set_xlim(3e-6, 1.5e-3)
+
+oil_balls = {
+    'no-hold': [
+            {'name': 'ball1',
+             'method': 'no-hold',
+             'fluid': 'oil',},
+            
+            {'name': 'ball4',
+             'method': 'no-hold',
+             'fluid': 'oil',}
+        ], 
+    'hold': [
+                {'name': 'ball1',
+                 'method': 'hold',
+                 'fluid': 'oil',},
+                
+                {'name': 'ball4',
+                 'method': 'hold',
+                 'fluid': 'oil',}
+            ]
+    }
+
+glycerol_balls = {
+    'no-hold': [
+            {'name': 'ball1',
+             'method': 'no-hold',
+             'fluid': 'glycerol',},
+            
+            {'name': 'ball4',
+             'method': 'no-hold',
+             'fluid': 'glycerol',}
+        ], 
+    'hold': [
+                {'name': 'ball1',
+                 'method': 'hold',
+                 'fluid': 'glycerol',},
+                
+                {'name': 'ball4',
+                 'method': 'hold',
+                 'fluid': 'glycerol',}
+            ]
+    }
+
+def oil_results():
+    fig, axes = plt.subplots(1, 2, figsize=(16, 6))
+    axes = {
+        'no-hold': axes[0],
+        'hold': axes[1],
+        }
+    for method, balls in oil_balls.items():
+        plot_balls(balls, axes[method])
+    axes['hold'].set_title('Hold Method', fontsize=20)
+    axes['no-hold'].set_title('No-Hold Method', fontsize=20)
+    plt.tight_layout()
+    plt.savefig(PLOTS_FOLDER / 'oil_results.png', dpi=300)
+    plt.show()
+    
+def glycerol_results():
+    fig, axes = plt.subplots(1, 2, figsize=(16, 6))
+    axes = {
+        'no-hold': axes[0],
+        'hold': axes[1],
+        }
+    for method, balls in glycerol_balls.items():
+        plot_balls(balls, axes[method])
+    axes['hold'].set_title('Hold Method', fontsize=20)
+    axes['no-hold'].set_title('No-Hold Method', fontsize=20)
+    plt.tight_layout()
+    plt.savefig(PLOTS_FOLDER / 'glycerol_results.png', dpi=300)
 
 if __name__ == '__main__':
-    comparison_plot()
+    #comparison_plot()
+    #oil_results()
+    glycerol_results()

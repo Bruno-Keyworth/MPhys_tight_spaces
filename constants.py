@@ -14,22 +14,22 @@ TIME_ERROR = 0.01 #s (timestamp)
 FLUID_DEPTH_ERROR = 0.01 #m
 
 
-FLUID_PARAMS = {
+FLUID_PARAMS = { # measured by us
     'oil': {
-        'density': [898, 5],# kg/m^3 from Thomas Sigsworth's report
-        'viscosity': [0.069, 0.007] #Pas # measured by us
+        'density': [898, 5],# kg/m^3 
+        'viscosity': [0.069, 0.007] #Pas 
     },
-    'glycerol': { #measured by us
+    'glycerol': {
         'density': [1252, 8], 
         'viscosity': [0.484, 0.005]
     }
 }
 
-# From Thomas Sigsworth's MPhys report
+# 
 TUBE_PARAMS = { # value, error
-    'radius': [0.00488, 0.00014], #
+    'radius': [0.00488, 0.00014], # from A. Heap PhD Thesis
     'thickness': [0.00048, 0.00007],
-    'young_modulus': [1.99e6, 1.4e5] #Pa
+    'young_modulus': [1.99e6, 1.4e5] #Pa # from Sajid Ahmed's MPhys report
     }
 
 ball_size_err = 0.0001
