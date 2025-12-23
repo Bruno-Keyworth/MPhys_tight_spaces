@@ -7,7 +7,7 @@ Created on Tue Nov 18 18:27:02 2025
 
 Threshold Pressure
 """
-from constants import BALL_DIAMETERS
+from constants import BALL_DIAMETERS, TUBE_PARAMS
 from get_folderpaths import MASTER_FOLDER, PLOTS_FOLDER, _ball_folder
 from value_to_string import value_to_string
 from get_fit_params import get_fit_params
@@ -18,7 +18,18 @@ import os
 import re
 from collections import defaultdict
 from make_dimensionless import _get_dimless_pressure
+from matplotlib import rcParams
 
+rcParams.update({
+    "text.usetex": True,
+    "font.family": "serif",
+    "font.serif": ["Computer Modern Roman"],
+    "axes.labelsize": 10,
+    "font.size": 10,
+    "legend.fontsize": 9,
+    "xtick.labelsize": 9,
+    "ytick.labelsize": 9,
+})
 pressure_err = 10  # mbar uncertainty
 
 pressure_pattern = re.compile(r"(\d+)\s*mbar", re.IGNORECASE)
@@ -158,6 +169,19 @@ def _add_to_plot(data, ax, label, fmt, colour, scale=1):
         capsize=3,
         label=label,
     )
+    
+def change_delta_data(data):
+    a = TUBE_PARAMS['radius']      # a = [value, error]
+
+    R = data[:, 0] / 2
+    err = data[:, 1] / 2
+
+    delta = R - a[0]
+    delta_err = np.sqrt(err**2 + a[1]**2)
+
+    data[:, 0] = delta *1000
+    data[:, 1] = delta_err *1000
+    return data
 
 def plot_threshold(results):
     colours = {
@@ -169,47 +193,85 @@ def plot_threshold(results):
         'oil': 'r',
         'glycerol': 'b'}
     
-    markers = {
-        'hold': 'o',
-        'no-hold': 'x'
+    fill = {
+        'glycerol': 'none',
+        'oil': 'k'
     }
+    label = {
+        'glycerol': 'Glycerol Data',
+        'oil': 'Oil Data'
+        }
+    markers = {
+        'glycerol': 'D',
+        'oil': 's'
+        }
+    zorder = {
+        'glycerol': 2,
+        'oil': 1
+        }
+    colour = {
+        'glycerol': '0.5',
+        'oil': 'k'
+        }
     
-    fig, ax = plt.subplots(1, 2, figsize=(16, 6))
+    fig = plt.figure(figsize=(16,5.5))  
+    gs = fig.add_gridspec(nrows=2, ncols=2, width_ratios=[1, 1], height_ratios=[1,  0.2], 
+                          wspace=0.05, hspace=0.1)
+    ax = [fig.add_subplot(gs[0, 0]), fig.add_subplot(gs[0, 1])]
+    ax[1].tick_params(axis='y', labelleft=False)
     
     for fluid, method_data in results.items():
         for method, ball_data in method_data.items():
+            if method == 'hold':
+                continue
             
-            # data = results[fluid][method]['observed']['dimensional']
-            # _add_to_plot(data, ax[0], label=f'{fluid} - {method} - observed', 
-            #              fmt = markers[method], colour=colours[fluid])
+            data = results[fluid][method]['observed']['dimensional']
+            data[:, 2:4]/=100
+            data[:, 2]-=5
+            data= change_delta_data(data)
+            ax[0].errorbar(data[:, 0], data[:, 2], xerr=data[:, 1], yerr=data[:, 3], ls='',
+                label=label[fluid], fmt=markers[fluid], color=colour[fluid], zorder=zorder[fluid])
             data = results[fluid][method]['fitted']['dimensional']
-            _add_to_plot(data, ax[0], label=f'{fluid} - {method}', 
-                         fmt = markers[method], colour=fitted_cmap[fluid], scale=100)
+            data[:, 2:4]/=100
+            data[:, 2]-=5
+            data= change_delta_data(data)
+            ax[1].errorbar(data[:, 0], data[:, 2], xerr=data[:, 1], yerr=data[:, 3], ls='',
+                label=label[fluid],  fmt=markers[fluid], color=colour[fluid], zorder=zorder[fluid])
+
             # data = results[fluid][method]['observed']['non-dimensional']
             # _add_to_plot(data, ax[1], label=f'{fluid} - {method} - observed', 
             #              fmt = markers[method], colour=colours[fluid])
-            data = results[fluid][method]['fitted']['non-dimensional']
-            _add_to_plot(data, ax[1], label=f'{fluid} - {method}', 
-                         fmt = markers[method], colour=fitted_cmap[fluid])
-    ax[0].set_ylabel(r"$P_{th}$ (mbar)", fontsize=20)
-    ax[1].set_ylabel(r"$P^*_{th}$", fontsize=20)
+            # data = results[fluid][method]['fitted']['non-dimensional']
+            # _add_to_plot(data, ax[1], label=f'{fluid} - {method}', 
+            #              fmt = markers[method], colour=fitted_cmap[fluid])
+    ax[0].set_ylabel(r"$\Delta P_{th}$ (mbar)", fontsize=20)
+    ax[0].set_ylabel(r"$\Delta P_{th}$ (mbar)", fontsize=20)
     #ax[0].set_title("Threshold pressure vs. ball diameter")
-    
-    ax[1].set_xlabel("Ball diameter (m)")
+    for axes in ax:
+        axes.set_xlabel(r"$\delta_m$ (mm)", fontsize=20)
+        axes.set_xticks([0.62, 1.12, 2.12, 3.12, 4.12])
+        axes.tick_params(labelsize=14)
+        axes.set_xlim(0.4, 4.4)
     
     handles, labels = plt.gca().get_legend_handles_labels()
     unique = dict(zip(labels, handles))
-    ax[0].legend(unique.values(), unique.keys(), framealpha=0, fontsize=20)
-    ax[1].legend(unique.values(), unique.keys(), framealpha=0, fontsize=20)
+    fig.legend(unique.values(), unique.keys(), framealpha=1, edgecolor='k', fontsize=20, loc = 'lower center', bbox_to_anchor=(0.51, 0), ncol=1)
     
-    ax[0].grid(True, linestyle="--", alpha=0.3)
-    ax[1].grid(True, linestyle="--", alpha=0.3)
-    for axes in ax:
-        axes.set_xlim(10, 19)
-        axes.set_xlabel("Ball Diameter (mm)", fontsize=20)
-        axes.set_xticks([11, 12, 14, 16, 18])
-        axes.tick_params(labelsize=16)
-    plt.tight_layout()
+    # ax[0].grid(True, linestyle="--", alpha=0.3)
+    # ax[1].grid(True, linestyle="--", alpha=0.3)
+    # for axes in ax:
+    #     axes.set_xlim(10, 19)
+    #     axes.set_xlabel("Ball Diameter (mm)", fontsize=20)
+    #     axes.set_xticks([11, 12, 14, 16, 18])
+    #     axes.tick_params(labelsize=16)
+    for i, label in enumerate([r'\textbf{(a) Observed}', r'\textbf{(b) Fitted}']):
+        ax[i].text(
+                0.02, 0.97, label,
+                transform=ax[i].transAxes,
+                fontsize=20,
+                fontweight='bold',
+                va='top', ha='left'
+            )
     if SAVE_FIG:
         plt.savefig(PLOTS_FOLDER/"thresholds.png", dpi=300)
     plt.show()

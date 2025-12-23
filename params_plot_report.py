@@ -12,10 +12,37 @@ import matplotlib.pyplot as plt
 from get_folderpaths import _ball_folder, MASTER_FOLDER, PLOTS_FOLDER
 from constants import BALL_DIAMETERS, TUBE_PARAMS
 from fit_power_law_odr_params import fit_power_law_odr
-from get_fit_params import power_law
+from get_fit_params import power_law, true_power_law
 from fit_power_law_beta import fit_power_law_simple
 from value_to_string import value_to_string
+from matplotlib import rcParams
+from scipy import odr
+from matplotlib.gridspec import GridSpec
+from matplotlib.lines import Line2D
+import matplotlib.ticker as mticker
+rcParams.update({
+    "text.usetex": True,
+    "font.family": "serif",
+    "font.serif": ["Computer Modern Roman"],
+    "axes.labelsize": 10,
+    "font.size": 10,
+    "legend.fontsize": 9,
+    "xtick.labelsize": 9,
+    "ytick.labelsize": 9,
+})
 
+colours = {
+    'Hold': 'tab:orange',
+    'No-Hold': 'black'
+    }
+marker = {
+    'Hold': 'o',
+    'No-Hold': 's',
+    }
+labels = {
+    'Hold': 'Derived Trend',
+    'No-Hold': 'Weighted Average',
+    }
 def _fetch_params(ball):
     #get_fit_params(_ball_folder(ball_dict=ball))
     params_file = _ball_folder(ball_dict=ball) / 'fit_params.txt'
@@ -43,10 +70,28 @@ def create_data(balls, save_as):
     data = np.column_stack((ball_sizes, dimless_params_list))
     np.savetxt(save_as, data)
     
-def _add_to_plot(data, ax, c, label):
+def _plot(data, ax, method):
     ax.errorbar(data[:, 0], data[:, 2], xerr=data[:, 1], yerr=data[:, 3], ls='',
-                color=c, marker='.', label=label)
-
+                    color=colours[method], label='Data', zorder=2, fmt=marker[method], markersize=4)
+    
+def _add_to_plot(hold_data, no_hold_data, ax):
+    
+    for i in range(2):
+        data_dict = {
+            'Hold': np.column_stack((hold_data[:, 0+i*4], hold_data[:, 1+i*4], hold_data[:, 2+i*4], hold_data[:, 3+i*4])),
+            'No-Hold': np.column_stack((no_hold_data[:, 0+i*4], no_hold_data[:, 1+i*4], no_hold_data[:, 2+i*4], no_hold_data[:, 3+i*4])),
+            }
+        for method, data in data_dict.items():
+            if len(ax) == 3 and i==1:
+                mask = data[:, 2] > 1e5
+                bottom_data = data[~mask]
+                bottom_data[:, 2:]/=1e3
+                top_data = data #[mask]
+                top_data[:, 2:]/=1e6
+                _plot(top_data, ax[1], method)
+                _plot(bottom_data, ax[2], method)
+            else:
+                _plot(data, ax[i], method)
 def change_beta_data(data):
     a = TUBE_PARAMS['radius']      # a = [value, error]
 
@@ -62,15 +107,18 @@ def change_beta_data(data):
         ((-2 * a[0] / np.sqrt(R**2 - a[0]**2)) * a[1])**2
     )
 
-    y = delta / l
-    yerr = np.abs(y)**2 * 2 * np.sqrt(
+    y = (delta / l)
+    yerr = np.abs(y) * np.sqrt(
         (delta_err / delta)**2 +
         (lerr / l)**2
     )
+    data[:, 0] = delta *1000
+    data[:, 1] = delta_err *1000
+    return np.column_stack((data[:, :4], y, yerr, data[:, 4:]))
 
-    data[:, 0] = y**2
-    data[:, 1] = yerr
-    return data
+def read_data(filename):
+    data = np.genfromtxt(MASTER_FOLDER / filename, usecols=(0,1,2,3,4,5))
+    return change_beta_data(data)
 
 def weighted_average(values, errors):
     weights = 1/errors**2
@@ -86,91 +134,196 @@ def weighted_average(values, errors):
     
     return average, np.sqrt(s_w**2 + std**2)
 
+def quadratic_func(params, x):
+    return params[2]+params[0]*x**2
+
+def linear_func(params, x):
+    return params[0]*x + params[1]
+
+def linear_fit(data, ax, method, usecols=(0,1,2,3)):
+    data = data[:, usecols]
+    mask = data[:, 2]>1.4
+    if len(data[~mask])!=0:
+        data=data[~mask]
+    
+    model = odr.Model(linear_func)
+    odr_data = odr.RealData(x=data[:, 0], y=data[:, 2], sx=data[:, 1], sy=data[:, 3])
+    odr_instance = odr.ODR(odr_data, model, beta0=[-1, 1], iprint=0)  # initial guess
+    output = odr_instance.run()
+    x = np.linspace(min(data[:, 0]), max(data[:, 0]), 100)
+    y = np.polyval(output.beta, x)
+    print(output.beta)
+    print(output.sd_beta)
+    ax.plot(x, y, c=colours[method], label='Linear Fit')
+    return 0
+
+def beta_fit(data, ax, method, scale=1, beta0=[-1, 0, 10], ymax=True):
+    if ymax:
+        mask = data[:, 2] > 1
+        data = data[~mask]
+    model = odr.Model(quadratic_func)
+    odr_data = odr.RealData(x=data[:, 4], y=data[:, 6], sx=data[:, 5], sy=data[:, 7])
+    odr_instance = odr.ODR(odr_data, model, beta0=beta0, iprint=0)  # initial guess
+    output = odr_instance.run()
+    x = np.linspace(0.1, 0.28, 100)
+    y = np.polyval(output.beta, x)
+    print(output.beta)
+    print(output.sd_beta)
+    ax.plot(x, y/scale, c=colours[method], label='Derived Trend')
+    
+def label_axes(ax):
+    ax[-1].set_ylabel(r'$\beta$', fontsize=20)
+    ax[0].set_ylabel(r'$\alpha$', fontsize=20)
+    ax[0].set_xlabel('$\delta_m$ (mm)', fontsize=20)
+    ax[-1].set_xlabel(r'$\delta_m/l$', fontsize=20)
+    
+def legend(fig, ax):
+    header_nohold = Line2D([], [], linestyle='none', label=r'\textbf{No-Hold}')
+    header_hold   = Line2D([], [], linestyle='none', label=r'\textbf{Hold}')
+    handles, labels = ax[0].get_legend_handles_labels()
+    order = [3, 1, 2, 0]
+    handles, labels = [handles[i] for i in order], [labels[i] for i in order]
+    handles = [
+    header_nohold, handles[0],     handles[1],  # data
+    header_hold, handles[2],    handles[3],   # derived trends
+    ]
+    
+    labels = [
+        r'\textbf{No-Hold}', labels[0], labels[1],
+        r'\textbf{Hold}', labels[2], labels[3],
+    ]
+
+    fig.legend(handles, labels, framealpha=1, edgecolor='k', fontsize=20, loc = 'lower center', bbox_to_anchor=(0.51, 0), ncol=2)
+    
+def set_xticks(ax, data):
+    ax[0].set_xticks(data[:, 0])
+    ax[-1].set_xticks(data[:, 4])
+    ax[0].xaxis.set_major_formatter(
+    mticker.FormatStrFormatter('%.2f')
+    )
+    ax[-1].xaxis.set_major_formatter(
+    mticker.FormatStrFormatter('%.2f')
+    )
 def oil_plot():
     no_hold = all_balls_no_hold_oil
     hold = all_balls_hold_oil
     
     create_data(no_hold, MASTER_FOLDER / 'no_hold_oil.txt')
     create_data(hold, MASTER_FOLDER / 'hold_oil.txt')
-    
-    alpha_hold = np.genfromtxt(MASTER_FOLDER / 'hold_oil.txt', usecols=(0,1,2,3))
-    alpha_no_hold = np.genfromtxt(MASTER_FOLDER / 'no_hold_oil.txt', usecols=(0,1,2,3))
-    beta_hold = np.genfromtxt(MASTER_FOLDER / 'hold_oil.txt', usecols=(0,1,4,5))
-    beta_no_hold = np.genfromtxt(MASTER_FOLDER / 'no_hold_oil.txt', usecols=(0,1,4,5))
-    beta_hold = change_beta_data(beta_hold)
-    beta_no_hold = change_beta_data(beta_no_hold)
-    
-    fig, ax = plt.subplots(1, 2, figsize=(16, 7))
-    
-    alpha_no_hold_av, alpha_no_hold_std = weighted_average(alpha_no_hold[:, 2], alpha_no_hold[:, 3])
-    alpha_hold_av, alpha_hold_std = weighted_average(alpha_hold[:, 2], alpha_hold[:, 3])
-    beta_no_hold_av, beta_no_hold_std = weighted_average(beta_no_hold[:, 2], beta_no_hold[:, 3])
-    beta_hold_av, beta_hold_std = weighted_average(beta_hold[:, 2], beta_hold[:, 3])
-    
-    _add_to_plot(alpha_hold, ax[0], 'r', 'Hold Weighted Average:'+
-                 '\n'+fr'    $\alpha=${value_to_string(alpha_hold_av, alpha_hold_std)}'+
-                 '\n'+fr'    $\beta=${value_to_string(beta_hold_av, beta_hold_std)}')
-    _add_to_plot(alpha_no_hold, ax[0], 'b', 'No-Hold Weighted Average:'+
-                 '\n'+fr'    $\alpha=${value_to_string(alpha_no_hold_av, alpha_no_hold_std)}'+
-                 '\n'+fr'    $\beta=${value_to_string(beta_no_hold_av, beta_no_hold_std)}')
-    _add_to_plot(beta_hold, ax[1], 'r', label=None)
-    _add_to_plot(beta_no_hold, ax[1], 'b', label=None)
-    ax[1].set_ylabel(r'$\beta$', fontsize=20)
-    ax[0].set_ylabel(r'$\alpha$', fontsize=20)
-    ax[1].set_yscale('log')
-    ax[0].axhline(alpha_no_hold_av, color='b', ls='dashed')
-    ax[0].axhline(alpha_hold_av, color='r', ls='dashed')
-    ax[1].axhline(beta_no_hold_av, color='b', ls='dashed')
-    ax[1].axhline(beta_hold_av, color='r', ls='dashed')
-    ax[0].set_xlabel('Intruder Diamter (m)', fontsize=20)
-    ax[1].set_xlabel(r'$(\delta_m/l)^2$', fontsize=20)
+    hold_data = read_data('hold_oil.txt')
+    no_hold_data = read_data('no_hold_oil.txt')
+
+    fig = plt.figure(figsize=(16, 7))  
+    gs = fig.add_gridspec(nrows=3, ncols=2, width_ratios=[1, 1], height_ratios=[1, 1, 0.5], wspace=0.15, hspace=0.1)
+    ax = [fig.add_subplot(gs[:2, 0]), fig.add_subplot(gs[0, 1]), fig.add_subplot(gs[1, 1])]
+    alpha_av= weighted_average(no_hold_data[:, 2], no_hold_data[:, 3])
+    print(alpha_av)
+    print(weighted_average(hold_data[:, 2], hold_data[:, 3]))
+
+    #beta_fit(no_hold_data, ax[1], 'No-Hold', 1e6, [0.1, 0, 1], False)
+    beta_fit(hold_data, ax[2], 'Hold', 1e3, [-10, 0, 10], False)
+    linear_fit(hold_data, ax[0], 'Hold')
+    label_axes(ax)
+    ax[1].tick_params(labelbottom=False)
+    ax[1].set_yticks([0, 2, 4])
+    ax[2].set_yticks([0,2, 6, 10])
+    set_xticks(ax, hold_data)
+    ax[1].set_ylabel(r'$\beta\ (\times 10^{6})$', fontsize=20)
+    ax[2].set_ylabel(r'$\beta\ (\times 10^{3})$', fontsize=20)
+    _add_to_plot(hold_data, no_hold_data, ax)
+    ax[0].axhline(alpha_av[0], color=colours['No-Hold'], label='Weighted Average')
     for axes in ax:
         axes.tick_params(labelsize=14)
-    plt.tight_layout(rect=[0, 0.18, 1, 1])
-    fig.legend(framealpha=1, edgecolor='k', fontsize=20, loc = 'lower center', bbox_to_anchor=(0.5, 0), ncol=2)
+    legend(fig, ax)
+    ax[0].set_ylim(1, 2)
+    ax[1].set_ylim(-0.2, 3)
+    ax[2].set_ylim(2, 11)
+    for i, label in enumerate([r'\textbf{(a)}', r'\textbf{(b)}', r'\textbf{(c)}']):
+        ax[i].text(
+                0.02, 0.97, label,
+                transform=ax[i].transAxes,
+                fontsize=20,
+                fontweight='bold',
+                va='top', ha='left'
+            )
     plt.savefig(PLOTS_FOLDER / 'oil_params.png', dpi=300)
     plt.show()
     
 def glycerol_plot():
     no_hold = all_balls_no_hold_glycerol
     hold = all_balls_hold_glycerol
-    
+
     create_data(no_hold, MASTER_FOLDER / 'no_hold_glycerol.txt')
     create_data(hold, MASTER_FOLDER / 'hold_glycerol.txt')
-    
-    alpha_hold = np.genfromtxt(MASTER_FOLDER / 'hold_glycerol.txt', usecols=(0,1,2,3))
-    alpha_no_hold = np.genfromtxt(MASTER_FOLDER / 'no_hold_glycerol.txt', usecols=(0,1,2,3))
-    beta_hold = np.genfromtxt(MASTER_FOLDER / 'hold_glycerol.txt', usecols=(0,1,4,5))
-    beta_no_hold = np.genfromtxt(MASTER_FOLDER / 'no_hold_glycerol.txt', usecols=(0,1,4,5))
-    beta_hold = change_beta_data(beta_hold)
-    beta_no_hold = change_beta_data(beta_no_hold)
-    fig, ax = plt.subplots(1, 2, figsize=(16, 6))
-    
-    params, _ = fit_power_law_odr(beta_no_hold)
-    print(params)
-    x = np.linspace(0.01, 0.08, 100)
-    y = power_law(params, x)
-    
-    ax[1].plot(x, y, c='b')
-    _add_to_plot(alpha_hold, ax[0], 'r', 'Hold Method')
-    _add_to_plot(alpha_no_hold, ax[0], 'b', 'No-Hold Method')
-    ax[0].legend(framealpha=0.5, fontsize=18)
-    _add_to_plot(beta_hold, ax[1], 'r', 'Hold Method')
-    _add_to_plot(beta_no_hold, ax[1], 'b', 'No-Hold Method')
-    ax[1].legend(framealpha=0.5, fontsize=18)
-    ax[1].set_ylabel(r'$\beta$', fontsize=20)
-    ax[0].set_ylabel(r'$\alpha$', fontsize=20)
-    ax[1].set_yscale('log')
+
+    hold_data = read_data('hold_glycerol.txt')
+    no_hold_data = read_data('no_hold_glycerol.txt')
+
+    fig = plt.figure(figsize=(16, 7))  
+    gs = fig.add_gridspec(nrows=2, ncols=2, width_ratios=[1, 1], height_ratios=[1,  0.2], wspace=0.15, hspace=0.1)
+    ax = [fig.add_subplot(gs[0, 0]), fig.add_subplot(gs[0, 1])]
+
+    #beta_fit(hold_data, ax[1], 'Hold')
+    #beta_fit(no_hold_data, ax[1], 'No-Hold')
+    linear_fit(hold_data, ax[0], 'Hold')
+    linear_fit(no_hold_data, ax[0], 'No-Hold')
+    _add_to_plot(hold_data, no_hold_data, ax)
+    label_axes(ax)
+    set_xticks(ax, hold_data)
+    ax[1].set_ylim(0, 1200)
+    ax[0].set_xlim(0.2, 4.4)
     for power in [4/5, 2/3, 1/2]:
-        ax[0].axhline(power, c='k', ls='dashed')
-    ax[0].set_xlabel('Intruder Diamter (m)', fontsize=20)
-    ax[1].set_xlabel(r'$(\delta_m/l)^2$', fontsize=20)
+        ax[0].axhline(power, color='0.4', ls='dotted', zorder=0)
     for axes in ax:
         axes.tick_params(labelsize=14)
-    
-    plt.tight_layout()
+
+    legend(fig, ax)
+    for i, label in enumerate([r'\textbf{(a)}', r'\textbf{(b)}']):
+        ax[i].text(
+                0.02, 0.97, label,
+                transform=ax[i].transAxes,
+                fontsize=20,
+                fontweight='bold',
+                va='top', ha='left'
+            )
     plt.savefig(PLOTS_FOLDER / 'glycerol_params.png', dpi=300)
+    
+def stretched_plot():
+    no_hold = all_stretched_no_hold_glycerol
+    hold = all_stretched_hold_glycerol
+
+    create_data(no_hold, MASTER_FOLDER / 'no_hold_stretched.txt')
+    create_data(hold, MASTER_FOLDER / 'hold_stretched.txt')
+
+    hold_data = read_data('hold_stretched.txt')
+    no_hold_data = read_data('no_hold_stretched.txt')
+
+    fig = plt.figure(figsize=(16, 7))
+    gs = fig.add_gridspec(nrows=2, ncols=2, width_ratios=[1, 1], height_ratios=[1,  0.2], wspace=0.15, hspace=0.1)
+    ax = [fig.add_subplot(gs[0, 0]), fig.add_subplot(gs[0, 1])]
+
+    #beta_fit(hold_data, ax[1], 'Hold')
+    #beta_fit(no_hold_data, ax[1], 'No-Hold')
+    average= weighted_average(np.append(no_hold_data[:, 2], hold_data[:, 2]), np.append(no_hold_data[:, 3], hold_data[:, 3]))
+    print('stretch', average)
+    _add_to_plot(hold_data, no_hold_data, ax)
+    ax[0].axhline(average[0], color='tab:green', label='weighted_average')
+    label_axes(ax)
+    set_xticks(ax, no_hold_data)
+    ax[1].set_ylim(0, 300)
+    for power in [4/5, 2/3, 1/2]:
+        ax[0].axhline(power, color='0.4', ls='dotted', zorder=0)
+    for axes in ax:
+        axes.tick_params(labelsize=14)
+    handles, labels = ax[0].get_legend_handles_labels()
+    labels = [rf'Weighted Average $\alpha=$ {value_to_string(average[0], average[1])}', 'Hold Data', 'No-Hold Data']
+    handles.reverse()
+    labels.reverse()
+    fig.legend(handles, labels, framealpha=1, edgecolor='k', fontsize=20, loc = 'lower center', bbox_to_anchor=(0.51, 0), ncol=1)
+    #legend(fig, ax)
+    plt.savefig(PLOTS_FOLDER / 'stretched_params.png', dpi=300)
 
     
-oil_plot()
+#oil_plot()
 #glycerol_plot()
+stretched_plot()

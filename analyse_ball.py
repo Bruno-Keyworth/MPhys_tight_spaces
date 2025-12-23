@@ -180,7 +180,7 @@ if __name__ == '__main__':
     if args.all_balls:
         for ball in all_balls:
             redo(ball['name'], fluid=ball['fluid'], method=ball['method'])
-            analyse_ball(ball['name'], fluid=ball['fluid'], method=ball['method'])
+            analyse_ball(ball['name'], fluid=ball['fluid'], method=ball['method'], redo_fit=True)
     elif args.redo_all:
         redo_all(args.ball, fluid=args.fluid, method=args.method)
     elif args.redo:

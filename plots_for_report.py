@@ -7,69 +7,23 @@ Created on Thu Nov 13 20:36:19 2025
 import matplotlib.pyplot as plt
 import numpy as np
 from get_folderpaths import _ball_folder, PLOTS_FOLDER
-from get_fit_params import _errorbar, true_power_law, power_law, _log_linear_data, get_fit_params
+from get_fit_params import true_power_law, _log_linear_data, get_fit_params
 from constants import BALL_DIAMETERS
 from value_to_string import value_to_string
-import matplotlib.colors as mcolors
-from itertools import cycle
-
 from get_preset import *
-
-
-# ============================================================
-# LIST OF ALL PRESET NAMES 
-# ============================================================
-
-# ALL BALLS (with repeats)
-# all_balls_<method>_<fluid>
-# Methods: no_hold, hold
-# Fluids: oil, glycerol
-
-# ALL BALLS NO REPEATS
-# all_balls_no_repeat_<method>_<fluid>
-# Methods: no_hold, hold
-# Fluids: oil, glycerol
-
-# INDIVIDUAL BALL PRESETS (ballX, ballX_repeat, ballX_stretched_1.5)
-# all_ball1_<method>_<fluid>
-# all_ball2_<method>_<fluid>
-# all_ball3_<method>_<fluid>
-# all_ball4_<method>_<fluid>
-# all_ball5_<method>_<fluid>
-# Methods: no_hold, hold
-# Fluids: oil, glycerol
-
-# ALL STRETCHED
-# all_stretched_<method>_<fluid>
-# Methods: no_hold, hold
-# Fluids: oil, glycerol
-
-#balls = all_balls
-
-
-# CUSTOM preset
-balls = [
-    {'name': 'ball1',
-     'method': 'no-hold',
-     'fluid': 'oil',},
-
-    # {'name': 'ball2',
-    #  'method': 'no-hold',
-    #  'fluid': 'oil',},
-
-    # {'name': 'ball3',
-    #  'method': 'no-hold',
-    #  'fluid': 'oil',},
-    
-    # {'name': 'ball4',
-    #  'method': 'no-hold',
-    #  'fluid': 'oil',},
-    
-    {'name': 'ball5',
-     'method': 'no-hold',
-     'fluid': 'oil',}
-]
-
+from matplotlib import rcParams
+from matplotlib.lines import Line2D
+rcParams.update({
+    "text.usetex": True,
+    "font.family": "serif",
+    "font.serif": ["Computer Modern Roman"],
+    "axes.labelsize": 10,
+    "font.size": 10,
+    "legend.fontsize": 9,
+    "xtick.labelsize": 9,
+    "ytick.labelsize": 9,
+})
+rcParams['text.latex.preamble'] = r'\usepackage{amsmath}'
 crop_speed = (0, 1000)
 
 log_scale = True
@@ -79,22 +33,6 @@ linear = True
 SAVE_FIG = False
 NEW_FIT = False
 save_file = 'test_image.png'
-
-
-#==============================================================================
-# pick a colormap
-cmap = plt.get_cmap('cividis', 2*len(balls))
-
-
-# generate reversed list of colours from the colormap
-colors = [mcolors.to_hex(cmap(i)) for i in range(cmap.N)][::-1]
-
-# set as the default color cycle
-plt.rcParams['axes.prop_cycle'] = plt.cycler(color=colors)
-
-# Define linestyles and markers
-linestyles = cycle(['-', '--', '-.', ':'])
-markers = cycle(['o', 's', 'x', '^', 'v', '*', 'D', 'P'])
 
 #==============================================================================
 
@@ -113,78 +51,19 @@ def crop_data(data, ball_info):
         crop = crop_speed
     data = data[(crop[0]<data[:, 1]) & (data[:, 1]<crop[1]), :]
     return data
+    
+def _errorbar(data, label=None, ax=None, marker=None, legend=True, colour=None):
+    if ax is None:
+        ax = plt.gca()
+    ax.errorbar(data[:, 1], data[:, 0], xerr=data[:, 2], yerr=data[:, 3],
+    linestyle='', markeredgecolor='black', marker =marker,
+    markersize=4, elinewidth=0.8, markeredgewidth=0.5, label=label, c=colour)
 
-def comparison_plot():
-    fig, ax = plt.subplots(figsize=(8, 8), dpi=150)
-
-    if dimensionless:
-        xlabel = r"$\lambda$"
-        ylabel = r"P(Z)"
-    else:
-        xlabel = "Velocity, m/s"
-        ylabel = "Pressure, Pa"
-
-    results = []
-
-    for ball in balls:
-        data = load_data(ball)
-        if data is None:
-            continue
-        data = crop_data(data, ball)
-        if len(data) < 10: 
-            continue
-        ball_folder = _ball_folder(ball_dict = ball)
-
-        if NEW_FIT or not (ball_folder / 'fit_params.txt').exists():
-            get_fit_params(ball_folder)
-        if dimensionless:
-            params = np.genfromtxt(ball_folder / 'fit_params.txt')[1]
-        else:
-            params = np.genfromtxt(ball_folder / 'fit_params.txt')[0]
-        beta, sd_beta = params[:3], params[3:]
-        
-        if linear:
-            data = _log_linear_data(data, beta)
-
-        label = f"{ball['name']} {ball['method']} {ball['fluid']}"
-        ball_size = BALL_DIAMETERS[ball['name'].split('_')[0]][0]
-
-        ls = next(linestyles)
-        mk = next(markers)
-        _errorbar(data, legend=False, marker=mk)
-
-        x_fit = np.linspace(np.min(data[:, 1]), np.max(data[:, 1]), 50)
-        
-        if linear:
-            y_fit = true_power_law(beta, x_fit)
-        else:
-            y_fit = power_law(beta, x_fit)
-            
-        
-        ax.plot(x_fit, y_fit, linestyle=ls, label=(
-            f"{label}:\n"
-            + fr"$\alpha$={value_to_string(beta[0], sd_beta[0])}" + "\n"
-            + fr"$\beta$={value_to_string(beta[1], sd_beta[1])}" + "\n"
-            + fr"Diameter = {ball_size * 1000} mm"
-        ))
-
-        results.append((label, beta, sd_beta))
-
-    ax.set_xscale('log')
-    ax.set_yscale('log')
-    ax.legend(
-        framealpha=0,
-        loc='upper center',
-        bbox_to_anchor=(0.5, -0.12),  # position below each subplot
-        ncol=2, fontsize = 16)
-    ax.set_ylabel(ylabel, fontsize=16)
-    ax.set_xlabel(xlabel, fontsize = 16)
-    fig.tight_layout()
-    if SAVE_FIG:
-        plt.savefig(PLOTS_FOLDER/(save_file), dpi=300)
-    plt.show()
+    if legend:
+        ax.legend(framealpha=0)
     
 def plot_balls(balls, ax, ax2=None):
+    
     for ball in balls:
         data = load_data(ball)
         if data is None:
@@ -202,9 +81,8 @@ def plot_balls(balls, ax, ax2=None):
 
         ball_size = BALL_DIAMETERS[ball['name'].split('_')[0]][0]
 
-        ls = next(linestyles)
-        mk = next(markers)
-        _errorbar(data, legend=False, marker=mk, ax=ax, label=f'{ball_size*1000:.0f} mm Data')
+        _errorbar(data, legend=False, marker=markers[ball['name']], ax=ax, label='Data', 
+                  colour=colours[ball['name']])
         ax.set_ylim(0.005, 6)
 
         x_fit = np.linspace(np.min(data[:, 1]), np.max(data[:, 1]), 50)
@@ -212,13 +90,19 @@ def plot_balls(balls, ax, ax2=None):
             
         ax.set_xscale('log')
         ax.set_yscale('log')
-        ax.plot(x_fit, y_fit, linestyle=ls, label=f"{ball_size*1000:.0f} mm Fit")
-    ax.legend(framealpha=0, fontsize=20)
+        ax.plot(x_fit, y_fit, label="Fit", c=colours[ball['name']])
     ax.tick_params(labelsize=16)
     ax.set_xlabel(r"$\lambda$", fontsize=20)
     ax.set_ylabel(r"$P^*-P^*_{th}$", fontsize=20)
-    ax.set_ylim(6e-3, 6)
-    ax.set_xlim(3e-6, 1.5e-3)
+    
+colours = {
+    'ball1': 'black',
+    'ball4': 'tab:blue',
+    }
+markers = {
+    'ball1': 'p',
+    'ball4': 'D'
+    }
 
 oil_balls = {
     'no-hold': [
@@ -261,35 +145,77 @@ glycerol_balls = {
                  'fluid': 'glycerol',}
             ]
     }
+def legend(fig, ax):
+    header_nohold = Line2D([], [], linestyle='none')
+    header_hold   = Line2D([], [], linestyle='none')
+    handles, labels = ax['hold'].get_legend_handles_labels()
+    order = [3, 1, 2, 0]
+    handles, labels = [handles[i] for i in order], [labels[i] for i in order]
+    handles = [
+    header_nohold, handles[0],     handles[1],  # data
+    header_hold, handles[2],    handles[3],   # derived trends
+    ]
+    
+    labels = [
+        r'$\delta_m = 0.62\,\mathrm{mm}$', labels[2], labels[3],
+        r'$\delta_m = 3.12\,\mathrm{mm}$', labels[0], labels[1],
+    ]
 
+    leg = fig.legend(handles, labels, framealpha=1, edgecolor='k', fontsize=20, loc = 'lower center', bbox_to_anchor=(0.51, 0), ncol=2)
+    for i, text in enumerate(leg.get_texts()):
+        if i in (0, 2):  # header rows
+            text.set_fontweight('bold')
 def oil_results():
-    fig, axes = plt.subplots(1, 2, figsize=(16, 6))
+    fig = plt.figure(figsize=(8,16))  
+    gs = fig.add_gridspec(nrows=3, ncols=1, height_ratios=[1, 1,   0.2], 
+                          wspace=0.18, hspace=0.1)
     axes = {
-        'no-hold': axes[0],
-        'hold': axes[1],
+        'no-hold': fig.add_subplot(gs[0]),
+        'hold': fig.add_subplot(gs[1]),
         }
     for method, balls in oil_balls.items():
         plot_balls(balls, axes[method])
-    axes['hold'].set_title('Hold Method', fontsize=20)
-    axes['no-hold'].set_title('No-Hold Method', fontsize=20)
-    plt.tight_layout()
+    legend(fig, axes)
+    for _, ax in axes.items():
+        ax.set_ylim(6e-3, 6)
+        ax.set_xlim(1e-5, 2.01e-3)
+        
+    for method, label in {'no-hold': r'\textbf{(a) No-Hold}', 'hold': r'\textbf{(b) Hold}'}.items():
+        axes[method].text(
+                0.02, 0.97, label,
+                transform=axes[method].transAxes,
+                fontsize=20,
+                fontweight='bold',
+                va='top', ha='left'
+            )
     plt.savefig(PLOTS_FOLDER / 'oil_results.png', dpi=300)
     plt.show()
     
 def glycerol_results():
-    fig, axes = plt.subplots(1, 2, figsize=(16, 6))
+    fig = plt.figure(figsize=(16, 6))  
+    gs = fig.add_gridspec(nrows=2, ncols=2, width_ratios=[1, 1], height_ratios=[1,  0.24], 
+                          wspace=0.18, hspace=0.1)
     axes = {
-        'no-hold': axes[0],
-        'hold': axes[1],
+        'no-hold': fig.add_subplot(gs[0, 0]),
+        'hold': fig.add_subplot(gs[0, 1]),
         }
     for method, balls in glycerol_balls.items():
         plot_balls(balls, axes[method])
-    axes['hold'].set_title('Hold Method', fontsize=20)
-    axes['no-hold'].set_title('No-Hold Method', fontsize=20)
-    plt.tight_layout()
+    legend(fig, axes)
+    for _, ax in axes.items():
+        ax.set_ylim(1e-2, 6)
+        ax.set_xlim(3e-6, 1.5e-3)
+    for method, label in {'no-hold': r'\textbf{(a) No-Hold}', 'hold': r'\textbf{(b) Hold}'}.items():
+        axes[method].text(
+                0.02, 0.97, label,
+                transform=axes[method].transAxes,
+                fontsize=20,
+                fontweight='bold',
+                va='top', ha='left'
+            )
     plt.savefig(PLOTS_FOLDER / 'glycerol_results.png', dpi=300)
 
 if __name__ == '__main__':
-    #comparison_plot()
-    #oil_results()
+    oil_results()
     glycerol_results()
+    

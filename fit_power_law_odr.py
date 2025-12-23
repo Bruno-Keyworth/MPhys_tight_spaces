@@ -89,5 +89,7 @@ def fit_power_law_odr(data, xscale=None, beta0=None, verbose=True, yscale=None):
     c_hat = c_hat_scaled * yscale
     sd_b = sd_b_scaled * (yscale / (xscale ** a_hat))
     sd_c = sd_c_scaled * yscale
+    
+    reduced_chi_squared = output.sum_square/(len(y)-3)
 
-    return (float(a_hat), float(b_hat), float(c_hat)), (float(sd_a), float(sd_b), float(sd_c))
+    return (float(a_hat), float(b_hat), float(c_hat)), (float(sd_a), float(sd_b), float(sd_c)), reduced_chi_squared

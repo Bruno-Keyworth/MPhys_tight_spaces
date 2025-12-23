@@ -11,6 +11,17 @@ import matplotlib.pyplot as plt
 from scipy import odr
 import numpy as np
 from value_to_string import value_to_string
+from matplotlib import rcParams
+rcParams.update({
+    "text.usetex": True,
+    "font.family": "serif",
+    "font.serif": ["Computer Modern Roman"],
+    "axes.labelsize": 10,
+    "font.size": 10,
+    "legend.fontsize": 9,
+    "xtick.labelsize": 9,
+    "ytick.labelsize": 9,
+})
 
 def linear_func(beta, x):
     m, c = beta
@@ -67,10 +78,10 @@ def find_ball_speed(folder, disp=False, savefig=False):
         y_fit = output.beta[0] * x_fit + output.beta[1]
 
         fig, ax1 = plt.subplots(figsize=(12, 6))
-        plot_errors(time, position, t_err, p_err, output.beta[0])
-        ax1.scatter(time, position, s=30, marker='x', c='b', label='Image Data')
+        #plot_errors(time, position, t_err, p_err, output.beta[0])
+        ax1.errorbar(time, position, xerr=t_err, yerr=p_err, marker='o', c='k', label='Image Data')
         print(output.sd_beta)
-        ax1.plot(x_fit, y_fit, color = "red", linewidth = 1, 
+        ax1.plot(x_fit, y_fit, color = "k", linewidth = 1, 
    label = rf"Fitted $V$ = {value_to_string(output.beta[0], output.sd_beta[0], sig_figs=4)} m$\,$s$^{{-1}}$")
         ax1.set_ylabel("Fitted Centre Position (m)", fontsize=20)
         ax1.set_xlabel("Time (s)", fontsize=20)

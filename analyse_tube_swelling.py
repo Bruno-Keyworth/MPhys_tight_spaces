@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from itertools import cycle
 import cmcrameri.cm as cmc
+from get_preset import all_stretched_hold_glycerol, all_stretched_no_hold_glycerol
 
 # Define linestyles and markers
 linestyles = cycle(['-', '--', '-.', ':'])
@@ -135,6 +136,9 @@ def _get_lambda(P, folder_path):
 
 def analyse_swelling(ball, fluid='glycerol', method='no-hold'):
     
+    if not _ball_folder(ball, fluid, method).exists():
+        return None
+    
     folders = get_folderpaths(ball, fluid=fluid, method=method)
 
     data = np.empty((len(folders), 12))
@@ -159,7 +163,10 @@ def plot_swelling(balls, fluid='glycerol', method='no-hold', redo=False):
         if (not file_path.exists()) or redo:
             analyse_swelling(ball, fluid, method)
             
-        data = np.genfromtxt(file_path, usecols=(0, 1, 2, 3, 4, 5))
+        try:
+            data = np.genfromtxt(file_path, usecols=(0, 1, 2, 3, 4, 5))
+        except FileNotFoundError:
+            continue
         
     
         if len(data) == 0:
@@ -184,8 +191,8 @@ def plot_swelling(balls, fluid='glycerol', method='no-hold', redo=False):
     plt.savefig(PLOTS_FOLDER / f'{fluid}_{method}_swelling.png', dpi=300)
 if __name__ == '__main__':
     
-    balls = [f'ball{i+3}' for i in range(3)]
-    balls.append('ball3_stretched')
+    balls = [ball['name'] for ball in all_stretched_hold_glycerol]
+    print(balls)
     #balls.append('ball1_repeat')
     #colour map
     cmap = cmc.hawaii.resampled(2*len(balls))
@@ -194,4 +201,4 @@ if __name__ == '__main__':
     # set as the default color cycle
     plt.rcParams['axes.prop_cycle'] = plt.cycler(color=colors)
 
-    plot_swelling(balls, redo=False)
+    plot_swelling(balls, redo=True)
